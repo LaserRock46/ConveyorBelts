@@ -96,6 +96,7 @@ public class Bezier
   
     public void DebugView()
     {
+        if (orientedPoints.position.Length == 0) return;
         if (debugControlPoints)
         {
             for (int i = 1; i < controlPointTransform.Length; i++)

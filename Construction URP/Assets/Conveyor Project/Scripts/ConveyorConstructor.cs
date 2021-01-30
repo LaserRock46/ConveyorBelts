@@ -90,6 +90,7 @@ public class ConveyorConstructor : MonoBehaviour
     public void EnableConveyorConstructor(bool enable)
     {
         isConveyorConstructorEnabled = enable;
+        StartCoroutine(ChangeBuildingStage(BuildingStage.None));
     }
     void BuildingStageUpdate()
     {
@@ -109,13 +110,14 @@ public class ConveyorConstructor : MonoBehaviour
         if (_conditions.CanAbort())
         {
             StartCoroutine(ChangeBuildingStage(BuildingStage.None));
+            EnableConveyorConstructor(false);
         }
     }
     IEnumerator ChangeBuildingStage(BuildingStage buildingStage)
     {
         yield return new WaitForEndOfFrame();
         this.buildingStage = buildingStage;
-        Debug.Log(buildingStage);
+        //Debug.Log(buildingStage);
         yield return null;
     }
     void RotationUpdate()
@@ -148,7 +150,12 @@ public class ConveyorConstructor : MonoBehaviour
             _conveyorEndTransform.localPosition = _conveyorEndResetPosition;
             _conveyorEndTransform.forward = _conveyorStartTransform.forward;
             previewTransform.position = GetPreviewPositionForGrounded();
-         
+
+            //UpdatePreviewPrototypeAndBezierLocation();
+            //_bezier.Compute();
+            //_conveyorMesh.MeshUpdate(false);
+
+          
         }
         if (_conditions.CanHidePreview())
         {
@@ -182,14 +189,19 @@ public class ConveyorConstructor : MonoBehaviour
         }
     }
     void BezierAndMeshUpdate()
-    {
-       
-        if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation()|| _conditions.CanResetPreview())
+    {      
+        if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation() || _conditions.CanResetPreview())
         {
             UpdatePreviewPrototypeAndBezierLocation();
-            _bezier.Compute();        
-            _conveyorMesh.MeshUpdate(false);
-            
+            if (_conditions.CanUpdateBezier() || _conditions.CanResetPreview())
+            {
+                _bezier.Compute();
+                _conveyorMesh.MeshUpdate(false);
+            }
+            if (_conditions.CanResetPreview())
+            {
+                Debug.Log("Reset");
+            }
         }
     } 
     void UpdatePreviewPrototypeAndBezierLocation()

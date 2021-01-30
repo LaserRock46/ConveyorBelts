@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 [System.Serializable]
 public class ConveyorConstructorConditions
 {
@@ -21,6 +22,10 @@ public class ConveyorConstructorConditions
     #endregion
 
     #region Functions
+    public bool IsPointerOverUI()
+    {
+        return EventSystem.current.IsPointerOverGameObject();
+    }
     private Vector3 _prevHitPoint = new Vector3();
     public bool NeedUpdateAfterMove()
     {
@@ -39,6 +44,14 @@ public class ConveyorConstructorConditions
         {
             _prevRotationStep = _conveyorConstructor.rotationStep;
             //Debug.Log("NeedUpdateAfterRotation()");
+            return true;
+        }
+        return false;
+    }
+    public bool CanUpdateBezier()
+    {
+        if(_conveyorConstructor.buildingStage != ConveyorConstructor.BuildingStage.None)
+        {
             return true;
         }
         return false;
@@ -105,6 +118,11 @@ public class ConveyorConstructorConditions
     public bool CanResetPreview()
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && _conveyorConstructor.previewGameObject.activeSelf)
+        {
+            Debug.Log("CanResetPreview()");
+            return true;
+        }
+        if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && !_conveyorConstructor.previewGameObject.activeSelf && _conveyorConstructor.isConveyorConstructorEnabled)
         {
             Debug.Log("CanResetPreview()");
             return true;
