@@ -6,8 +6,7 @@ public class PlayerCamera : MonoBehaviour
 {
     #region Temp
     [Header("Temporary Things", order = 0)]
-    public float pitchTest;
-    public Vector3 inputDirTest;
+  
     #endregion
 
     #region Fields
@@ -24,6 +23,7 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField]private Rigidbody _rigidbody;
     [SerializeField] private SphereCollider _cameraCollider;
     [SerializeField] private Transform _cameraCenter;
+    private bool _isPivotBlocked;
     #endregion
 
     #region Functions
@@ -71,6 +71,15 @@ public class PlayerCamera : MonoBehaviour
         }
         return inputDirection;
     }
+    private Vector3 _obstacleCheckBox = new Vector3(3f,0.5f,3f);
+    bool IsStoppedByObstacle()
+    {       
+        if (Physics.CheckBox(yawAndPosition.position,_obstacleCheckBox,yawAndPosition.rotation))
+        {
+            return true;
+        }
+        return false;
+    }
 
     #endregion
 
@@ -102,8 +111,6 @@ public class PlayerCamera : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.Confined;
         }
-      
-        pitchTest = pitch.localEulerAngles.x;
         if (_pitchAccumulatedAmount > pitchElevationUp)
         {
             pitch.localEulerAngles = new Vector3(pitchElevationUp, 0, 0);
@@ -117,30 +124,57 @@ public class PlayerCamera : MonoBehaviour
     }
     void Movement()
     {
-        /*
-        if(GetInputDirectionHorizontal() != Vector3.zero)
-        {
-            yawAndPosition.Translate(GetInputDirectionHorizontal() * speedHorizontal * Time.deltaTime,Space.Self);
-            
-        }
-        if (GetInputDirectionVertical() != Vector3.zero)
-        {
-            yawAndPosition.Translate(GetInputDirectionVertical()* speedVertical * Time.deltaTime);
-        }
-        */
+        _isPivotBlocked = IsStoppedByObstacle();
+
         if (GetInputDirectionHorizontal() != Vector3.zero || GetInputDirectionVertical() != Vector3.zero)
         {
           
-            Vector3 targetVelocity = GetInputDirectionHorizontal();
-            targetVelocity.y = GetInputDirectionVertical().y;
-            _rigidbody.velocity = yawAndPosition.TransformDirection(targetVelocity) * speedHorizontal * Time.deltaTime;
+            Vector3 targetDirection = GetInputDirectionHorizontal();
+            if (!_isPivotBlocked)
+            {
+                targetDirection.y = GetInputDirectionVertical().y;
+            }
+            else
+            {
+                targetDirection.y = 1;
+            }
+            _rigidbody.velocity = yawAndPosition.TransformDirection(targetDirection) * speedHorizontal * Time.deltaTime;
         }
         if (GetInputDirectionHorizontal() == Vector3.zero && GetInputDirectionVertical() == Vector3.zero && _rigidbody.velocity != Vector3.zero)
         {
-            _rigidbody.velocity = Vector3.zero;
+            if (!_isPivotBlocked)
+            {
+                _rigidbody.velocity = Vector3.zero;
+            }
+            else
+            {
+                _rigidbody.velocity = new Vector3(0, speedHorizontal * Time.deltaTime, 0);
+            }
         }
+          
+    }
+    private void OnCollisionStay(Collision collision)
+    {
       
-        inputDirTest = GetInputDirectionHorizontal();
+        List<ContactPoint> contactsPoints = new List<ContactPoint>(); 
+        collision.GetContacts(contactsPoints);
+        for (int i = 0; i < contactsPoints.Count; i++)
+        {
+            if(Mathf.Approximately(contactsPoints[i].point.y,yawAndPosition.position.y))
+            {
+                //_rigidbody.velocity = new Vector3(_rigidbody.velocity.x,speedHorizontal * Time.deltaTime,_rigidbody.velocity.z);
+                //_isPivotColliding = true;
+                break;
+            }
+        }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        //_isPivotColliding = true;
+    }
+    private void OnCollisionExit(Collision collision)
+    {
+        //_isPivotColliding = false;
     }
     #endregion
 
