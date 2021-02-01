@@ -37,6 +37,17 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
+    private Vector3 _prevCameraPosition = new Vector3();
+    public bool NeedUpdateAfterCameraMove()
+    {
+        if (_conveyorConstructor.playerCameraTransform.position != _prevCameraPosition)
+        {
+            _prevCameraPosition = _conveyorConstructor.playerCameraTransform.position;
+            //Debug.Log("NeedUpdateAfterCameraMove()");
+            return true;
+        }
+        return false;
+    }
     private int _prevRotationStep = 0;
     public bool NeedUpdateAfterRotation()
     {
@@ -119,12 +130,12 @@ public class ConveyorConstructorConditions
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && _conveyorConstructor.previewGameObject.activeSelf)
         {
-            Debug.Log("CanResetPreview()");
+            //Debug.Log("CanResetPreview()");
             return true;
         }
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && !_conveyorConstructor.previewGameObject.activeSelf && _conveyorConstructor.isConveyorConstructorEnabled)
         {
-            Debug.Log("CanResetPreview()");
+            //Debug.Log("CanResetPreview()");
             return true;
         }
         return false;
@@ -181,7 +192,7 @@ public class ConveyorConstructorConditions
     private const int GROUND_LAYER_INDEX = 6;
     public bool CanAlignToGround()
     {
-        if(_conveyorConstructor.previewGameObject != null && _conveyorConstructor.raycastGameObject.layer == GROUND_LAYER_INDEX)
+        if (_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.layer == GROUND_LAYER_INDEX)
         {
             return true;
         }
@@ -189,7 +200,7 @@ public class ConveyorConstructorConditions
     }
     public bool CanAlignToPillar()
     {
-        if(_conveyorConstructor.previewGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
+        if(_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
             if(pillar.isOccupied == false)
             {

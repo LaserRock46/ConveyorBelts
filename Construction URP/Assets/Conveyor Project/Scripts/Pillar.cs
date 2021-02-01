@@ -13,6 +13,7 @@ public class Pillar : MonoBehaviour
     public bool isOccupied;
     public Transform self;
     public Transform tipAnchor;
+    public int indexInPillarStack = 1;
     #endregion
 
     #region Functions
@@ -22,14 +23,7 @@ public class Pillar : MonoBehaviour
     
 
     #region Methods
-    void Start()
-    {
-        
-    }
-   void Update()
-    {
-        
-    }
+   
     #endregion
 
 }

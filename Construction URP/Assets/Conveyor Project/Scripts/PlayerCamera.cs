@@ -107,7 +107,7 @@ public class PlayerCamera : MonoBehaviour
             _pitchAccumulatedAmount -= GetPitchAmount();
             _cameraCollider.center = yawAndPosition.InverseTransformPoint(_cameraCenter.position);
         }
-        if (Input.GetKeyUp(KeyCode.Mouse1))
+        if (Input.GetKeyDown(KeyCode.Mouse1))
         {
             Cursor.lockState = CursorLockMode.Confined;
         }
@@ -152,29 +152,6 @@ public class PlayerCamera : MonoBehaviour
             }
         }
           
-    }
-    private void OnCollisionStay(Collision collision)
-    {
-      
-        List<ContactPoint> contactsPoints = new List<ContactPoint>(); 
-        collision.GetContacts(contactsPoints);
-        for (int i = 0; i < contactsPoints.Count; i++)
-        {
-            if(Mathf.Approximately(contactsPoints[i].point.y,yawAndPosition.position.y))
-            {
-                //_rigidbody.velocity = new Vector3(_rigidbody.velocity.x,speedHorizontal * Time.deltaTime,_rigidbody.velocity.z);
-                //_isPivotColliding = true;
-                break;
-            }
-        }
-    }
-    private void OnCollisionEnter(Collision collision)
-    {
-        //_isPivotColliding = true;
-    }
-    private void OnCollisionExit(Collision collision)
-    {
-        //_isPivotColliding = false;
     }
     #endregion
 

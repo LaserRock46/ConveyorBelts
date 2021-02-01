@@ -22,19 +22,21 @@ public class ConveyorConstructor : MonoBehaviour
     [SerializeField] private Transform _conveyorStartTransform = null;
     [SerializeField] private Transform _conveyorEndTransform = null;
 
-    public enum BuildingStage { None,InitializedPreview, SetStart, SetEnd}
+    public enum BuildingStage { None, InitializedPreview, SetStart, SetEnd }
     public BuildingStage buildingStage = BuildingStage.None;
 
-    public Vector3 raycastPosition;
+    [HideInInspector] public Vector3 raycastPosition;
     [HideInInspector] public GameObject raycastGameObject;
 
+    public Transform playerCameraTransform;
+
     [SerializeField] private Vector3 pillarHeight = new Vector3();
-    [SerializeField] private Vector3 pillarToGroundOffset = new Vector3(0, -0.1f,0);
+    [SerializeField] private Vector3 pillarToGroundOffset = new Vector3(0, -0.1f, 0);
     [SerializeField] private Vector3 conveyorTipToPillarOffset = new Vector3();
     public int pillarStackCount = 1;
     public int pillarStackCountMax = 5;
 
-    public int rotationStep;
+    [HideInInspector] public int rotationStep;
     [SerializeField] private int _rotationStepAngle = 10;
     [SerializeField] private int _rotationStepCount = 35;
     public bool rotationIsAuto;
@@ -63,8 +65,8 @@ public class ConveyorConstructor : MonoBehaviour
         return (startPosition - endPosition).normalized;
     }
     Vector3 GetPreviewTransformManualRotation()
-    {       
-        return new Vector3(0,rotationStep * _rotationStepAngle);
+    {
+        return new Vector3(0, rotationStep * _rotationStepAngle, 0);
     }
     #endregion
 
@@ -76,16 +78,20 @@ public class ConveyorConstructor : MonoBehaviour
         _conditions = new ConveyorConstructorConditions(_bezier, this);
         _conveyorMesh.AssignBezier(_bezier);
     }
-   void Update()
+    void Update()
     {
         PreviewStateUpdate();
         BuildingStageUpdate();
         RotationUpdate();
-        RaycastUpdate();
         BezierAndMeshUpdate();
         FinishAndCreateUpdate();
-   
+
         _bezier.DebugView();
+    }
+    private void FixedUpdate()
+    {
+        RaycastUpdate();
+        
     }
     public void EnableConveyorConstructor(bool enable)
     {
@@ -96,8 +102,8 @@ public class ConveyorConstructor : MonoBehaviour
     {
         if (_conditions.CanInitializeBuildingProcess())
         {
-           StartCoroutine(ChangeBuildingStage(BuildingStage.InitializedPreview));
-         
+            StartCoroutine(ChangeBuildingStage(BuildingStage.InitializedPreview));
+
         }
         if (_conditions.CanSetStart())
         {
@@ -129,7 +135,7 @@ public class ConveyorConstructor : MonoBehaviour
         if (_conditions.CanRotateOneStepLeft())
         {
             rotationStep--;
-            if(rotationStep < 0)
+            if (rotationStep < 0)
             {
                 rotationStep = _rotationStepCount;
             }
@@ -150,12 +156,6 @@ public class ConveyorConstructor : MonoBehaviour
             _conveyorEndTransform.localPosition = _conveyorEndResetPosition;
             _conveyorEndTransform.forward = _conveyorStartTransform.forward;
             previewTransform.position = GetPreviewPositionForGrounded();
-
-            //UpdatePreviewPrototypeAndBezierLocation();
-            //_bezier.Compute();
-            //_conveyorMesh.MeshUpdate(false);
-
-          
         }
         if (_conditions.CanHidePreview())
         {
@@ -175,33 +175,29 @@ public class ConveyorConstructor : MonoBehaviour
             {
                 raycastPosition = hit.point;
             }
-            if(hit.collider.gameObject != raycastGameObject)
+            if (hit.collider.gameObject != raycastGameObject)
             {
                 raycastGameObject = hit.collider.gameObject;
-            }
+            }         
         }
         else
         {
-            if(raycastGameObject != null)
+            if (raycastGameObject != null)
             {
                 raycastGameObject = null;
             }
         }
     }
     void BezierAndMeshUpdate()
-    {      
-        if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation() || _conditions.CanResetPreview())
+    {
+        if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation()|| _conditions.NeedUpdateAfterCameraMove() || _conditions.CanResetPreview())
         {
             UpdatePreviewPrototypeAndBezierLocation();
             if (_conditions.CanUpdateBezier() || _conditions.CanResetPreview())
             {
                 _bezier.Compute();
                 _conveyorMesh.MeshUpdate(false);
-            }
-            if (_conditions.CanResetPreview())
-            {
-                Debug.Log("Reset");
-            }
+            }      
         }
     } 
     void UpdatePreviewPrototypeAndBezierLocation()
@@ -220,7 +216,7 @@ public class ConveyorConstructor : MonoBehaviour
         if (_conditions.CanMoveBeltStart())
         {
             previewTransform.position = GetPreviewPositionForGrounded();
-         
+            previewTransform.eulerAngles = GetPreviewTransformManualRotation();
         }
         if (_conditions.CanMoveBeltEnd())
         {
@@ -232,7 +228,7 @@ public class ConveyorConstructor : MonoBehaviour
             }
             else
             {
-
+                _conveyorEndTransform.eulerAngles = GetPreviewTransformManualRotation();
             }
         }
     }
