@@ -14,6 +14,7 @@ public class BuildingManager : MonoBehaviour
     [Header("Fields", order = 1)]
     public ConveyorConstructor conveyorConstructor;
     public Toggle conveyorConstructorToggle;
+    public Toggle[] toggleGroup;
     #endregion
 
     #region Functions
@@ -38,9 +39,20 @@ public class BuildingManager : MonoBehaviour
             conveyorConstructorToggle.SetIsOnWithoutNotify(false); 
         }
     }
+    void DisableAnyOtherToggle(Toggle except)
+    {
+        for (int i = 0; i < toggleGroup.Length; i++)
+        {
+            if(toggleGroup[i].isOn && toggleGroup[i] != except)
+            {
+                toggleGroup[i].isOn = false;
+            }
+        }   
+    }
     public void ToggleConveyorConstructor(bool isOn)
     {
         conveyorConstructor.EnableConveyorConstructor(isOn);
+        DisableAnyOtherToggle(conveyorConstructorToggle);
     }
     #endregion
 

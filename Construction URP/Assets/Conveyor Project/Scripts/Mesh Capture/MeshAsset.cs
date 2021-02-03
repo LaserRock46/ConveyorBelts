@@ -12,9 +12,13 @@ public class MeshAsset : ScriptableObject
     [Space]
     [SerializeField] public bool generateCollider;
     [Space]
-    [SerializeField] public Vector3[] vertices;
+    [SerializeField] public int loopCount = 128;
     [Space]
-    [SerializeField] public Vector2[] uv;
+    [SerializeField] public Vector3[] ogVertices;
+    [Space]
+    [SerializeField] public Vector2[] ogUvs;
+    [Space]
+    [SerializeField] public Color32[] ogVertexColors;
     [Space]
     [SerializeField] public int subMeshCount;
     [Space]

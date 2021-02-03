@@ -14,22 +14,22 @@ public class MeshCapture : MonoBehaviour
     {
         if (mesh == null)
         {
-            Debug.Log("mesh == null");
+            Debug.LogError("mesh == null");
             return;
         }
         if (meshAsset == null)
         {
-            Debug.Log("meshAsset == null");
+            Debug.LogError("meshAsset == null");
             return;
         }
         if(mesh.name != meshAsset.meshName)
         {
-            Debug.Log("mesh.name != meshAsset.name");
+            Debug.LogError("mesh.name != meshAsset.name");
             return;
         }
 
-        meshAsset.vertices = mesh.vertices;
-        meshAsset.uv = mesh.uv;
+        meshAsset.ogVertices = mesh.vertices;
+        meshAsset.ogUvs = mesh.uv;
         _triangles = mesh.triangles;
        
         meshAsset.subMeshCount = mesh.subMeshCount;
@@ -48,9 +48,10 @@ public class MeshCapture : MonoBehaviour
         for (int i = 0; i < meshAsset.subMeshCount; i++)
         {
             trianglesSubmesh.Add(new NestedArrayInt());
-            trianglesSubmesh[i].value = new int[_trianglesSubMesh[i].value.Length * 128];
+            trianglesSubmesh[i].value = new int[_trianglesSubMesh[i].value.Length * meshAsset.loopCount];
         }
-        for (int i0 = 0; i0 < 128; i0++)
+
+        for (int i0 = 0; i0 < meshAsset.loopCount; i0++)
         {
             for (int i1 = 0; i1 < meshAsset.subMeshCount; i1++)
             {
@@ -69,7 +70,7 @@ public class MeshCapture : MonoBehaviour
                     {
                         baseValue = _trianglesSubMesh[i1].value[i2];
 
-                        previousMaxValue = meshAsset.vertices.Length * i0;
+                        previousMaxValue = meshAsset.ogVertices.Length * i0;
                     }
 
                     int triangleValue = baseValue + previousMaxValue;                   
@@ -87,13 +88,13 @@ public class MeshCapture : MonoBehaviour
         {
             for (int i1 = 0; i1 < _triangles.Length; i1++)
             {
-                if (meshAsset.vertices[_triangles[i0]].z < 0)
+                if (meshAsset.ogVertices[_triangles[i0]].z < 0)
                 {
-                    if (meshAsset.vertices[_triangles[i1]].z > 0)
+                    if (meshAsset.ogVertices[_triangles[i1]].z > 0)
                     {
-                        if (meshAsset.vertices[_triangles[i0]].x == meshAsset.vertices[_triangles[i1]].x)
+                        if (meshAsset.ogVertices[_triangles[i0]].x == meshAsset.ogVertices[_triangles[i1]].x)
                         {
-                            if (meshAsset.vertices[_triangles[i0]].y == meshAsset.vertices[_triangles[i1]].y)
+                            if (meshAsset.ogVertices[_triangles[i0]].y == meshAsset.ogVertices[_triangles[i1]].y)
                             {
                                 if (_triangles[i0] != _triangles[i1])
                                 {
