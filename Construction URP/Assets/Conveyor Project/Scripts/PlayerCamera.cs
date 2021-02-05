@@ -17,9 +17,10 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] private float pitchElevationDown = 250;
     [SerializeField] private float _initialPitch = -35;
     private float _pitchAccumulatedAmount;
-    public float sensitivity = 150;
-    public float speedHorizontal = 10;
-    public float speedVertical = 5;
+    public float sensitivityPitch = 0.4f;
+    public float sensitivityYaw = 200;
+    public float speed = 10;
+  
     [SerializeField]private Rigidbody _rigidbody;
     [SerializeField] private SphereCollider _cameraCollider;
     [SerializeField] private Transform _cameraCenter;
@@ -29,12 +30,12 @@ public class PlayerCamera : MonoBehaviour
     #region Functions
     public float GetYawAmount()
     {
-        float amount = Input.GetAxis("Mouse X") * sensitivity;
+        float amount = Input.GetAxis("Mouse X") * sensitivityYaw;
         return amount * Time.deltaTime;
     }
     public float GetPitchAmount()
     {     
-        float amount = Input.GetAxis("Mouse Y") * sensitivity;      
+        float amount = Input.GetAxis("Mouse Y") * sensitivityPitch;      
         return -amount * Time.deltaTime;
     }
     Vector3 GetInputDirectionHorizontal()
@@ -88,7 +89,7 @@ public class PlayerCamera : MonoBehaviour
     #region Methods
     void Start()
     {
-        _pitchAccumulatedAmount = _initialPitch;
+        InitializeRotation();
     }
     void Update()
     {
@@ -98,19 +99,30 @@ public class PlayerCamera : MonoBehaviour
     {
         Movement();
     }
+    void InitializeRotation()
+    {
+        float linearPitch = Mathf.InverseLerp(pitchElevationDown, pitchElevationUp, _initialPitch);
+        _pitchAccumulatedAmount = linearPitch;
+        float angle = Mathf.LerpAngle(pitchElevationDown, pitchElevationUp, _pitchAccumulatedAmount);
+        pitch.localEulerAngles = new Vector3(angle, 0, 0);
+    }
     void Rotation()
     {
         if (Input.GetKey(KeyCode.Mouse1))
         {
             yawAndPosition.Rotate(Vector3.up, GetYawAmount());
-            pitch.Rotate(Vector3.right, GetPitchAmount());
+            //pitch.Rotate(Vector3.right, GetPitchAmount());
             _pitchAccumulatedAmount -= GetPitchAmount();
+            _pitchAccumulatedAmount = Mathf.Clamp(_pitchAccumulatedAmount,0, 1);
+            float angle = Mathf.LerpAngle(pitchElevationDown,pitchElevationUp,_pitchAccumulatedAmount);
+            pitch.localEulerAngles = new Vector3(angle,0,0);
             _cameraCollider.center = yawAndPosition.InverseTransformPoint(_cameraCenter.position);
         }
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
             Cursor.lockState = CursorLockMode.Confined;
         }
+        /*
         if (_pitchAccumulatedAmount > pitchElevationUp)
         {
             pitch.localEulerAngles = new Vector3(pitchElevationUp, 0, 0);
@@ -121,6 +133,7 @@ public class PlayerCamera : MonoBehaviour
             pitch.localEulerAngles = new Vector3(Mathf.Abs(pitchElevationDown), 0, 0);
             _pitchAccumulatedAmount = pitchElevationDown;
         }
+        */
     }
     void Movement()
     {
@@ -138,7 +151,7 @@ public class PlayerCamera : MonoBehaviour
             {
                 targetDirection.y = 1;
             }
-            _rigidbody.velocity = yawAndPosition.TransformDirection(targetDirection) * speedHorizontal * Time.deltaTime;
+            _rigidbody.velocity = yawAndPosition.TransformDirection(targetDirection) * speed * Time.deltaTime;
         }
         if (GetInputDirectionHorizontal() == Vector3.zero && GetInputDirectionVertical() == Vector3.zero && _rigidbody.velocity != Vector3.zero)
         {
@@ -148,7 +161,7 @@ public class PlayerCamera : MonoBehaviour
             }
             else
             {
-                _rigidbody.velocity = new Vector3(0, speedHorizontal * Time.deltaTime, 0);
+                _rigidbody.velocity = new Vector3(0, speed * Time.deltaTime, 0);
             }
         }
           

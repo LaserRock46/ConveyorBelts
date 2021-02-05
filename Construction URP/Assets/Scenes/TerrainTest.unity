@@ -362,7 +362,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &262035342
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,7 +399,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9ed4b0cf80d79514ea2a8985394b986c, type: 2}
+  - {fileID: 2100000, guid: ebbb2df0695d2fc4b84586181252baf6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -437,7 +437,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 262035341}
   m_LocalRotation: {x: 0.00000008146034, y: 0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.196683, y: 2.831, z: -5.85}
+  m_LocalPosition: {x: 21.732105, y: 1.531, z: -25.757711}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1856171124}
@@ -1212,11 +1212,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1ac3781307f72824ea61e80e6a48e3f3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.9309874
+      value: -2.93
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1ac3781307f72824ea61e80e6a48e3f3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.68468666
+      value: -5.38
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 1ac3781307f72824ea61e80e6a48e3f3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1669,11 +1669,11 @@ MonoBehaviour:
   yawAndPosition: {fileID: 1619626833}
   pitch: {fileID: 195437563}
   pitchElevationUp: 0
-  pitchElevationDown: -70
-  _initialPitch: -35
-  sensitivity: 200
-  speedHorizontal: 1000
-  speedVertical: 10
+  pitchElevationDown: 70
+  _initialPitch: 35
+  sensitivityPitch: 1.5
+  sensitivityYaw: 200
+  speed: 2000
   _rigidbody: {fileID: 1619626835}
   _cameraCollider: {fileID: 1619626836}
   _cameraCenter: {fileID: 654464669}
@@ -1732,7 +1732,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 4
+  m_Radius: 2
   m_Center: {x: 0, y: 0, z: -20}
 --- !u!1 &1623636233
 GameObject:
