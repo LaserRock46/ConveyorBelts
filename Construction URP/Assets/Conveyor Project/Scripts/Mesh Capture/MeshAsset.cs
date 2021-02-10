@@ -13,6 +13,8 @@ public class MeshAsset : ScriptableObject
     [Space]
     [SerializeField] public Vector3[] ogVertices;
     [Space]
+    [SerializeField] public int[] ogTriangles;
+    [Space]
     [SerializeField] public Vector2[] ogUvs;
     [Space]
     [SerializeField] public Color32[] ogVertexColors;
@@ -21,7 +23,7 @@ public class MeshAsset : ScriptableObject
     [Space]
     [SerializeField] public NestedArrayInt[] trianglesSubMesh;
     [Space]
-    [SerializeField] public NestedArrayInt[] segmentUV;
+    [SerializeField] public UvSegment[] uvSegments;
     [Space]
     [SerializeField] public Material[] materials;
     #endregion

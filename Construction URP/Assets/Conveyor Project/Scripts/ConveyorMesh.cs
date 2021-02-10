@@ -11,21 +11,22 @@ public class ConveyorMesh
 
     #region Fields
     [Header("Fields", order = 1)]
-    private MeshAsset[] _meshAssets;
+    [SerializeField] private MeshAsset[] _meshAssets;
     public int currentMeshAssetIndex;
-    private Bezier _bezier;
+    private OrientedPoint _orientedPoints;
+    [SerializeField] private Transform _previewTransform;
     [SerializeField] private MeshFilter _previewMeshFilter;
     [SerializeField] private MeshRenderer _previewMeshRenderer;
     [Range(0,255)] public byte conveyorSpeed = 50;
-    public Mesh mesh;
+    //public Mesh mesh;
 
 
     #endregion
 
     #region Functions
-    public Mesh GetMeshSubmesh0(Vector3[] vertices, Vector2[] uvs, int[] triangles, Color32[] vertexColors)
+    public Mesh GetMeshSubmesh0(Mesh newMesh, Vector3[] vertices, Vector2[] uvs, int[] triangles, Color32[] vertexColors)
     {
-        Mesh newMesh = new Mesh();
+      
         newMesh.SetVertices(vertices);
         newMesh.SetUVs(0, uvs);
         newMesh.SetTriangles(triangles, 0);
@@ -33,7 +34,7 @@ public class ConveyorMesh
         newMesh.RecalculateBounds();
         newMesh.RecalculateNormals();
         newMesh.RecalculateTangents();
-        newMesh.RecalculateUVDistributionMetric(0);
+        //newMesh.RecalculateUVDistributionMetric(0);
         return newMesh;
     }
     bool IsOriginalVertexInFront(Vector3 originalVertex)
@@ -50,7 +51,7 @@ public class ConveyorMesh
         int ogVerticesLength = originalSegmentVertices.Length;
         Vector3[] newVertices = new Vector3[newVerticesLength];
 
-        for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount; currentEdgeLoop++) // loop through all new mesh segments
+        for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount - 1; currentEdgeLoop++) // loop through all new mesh segments
         {
             int targetSegmentIndexStart = currentEdgeLoop * ogVerticesLength;
             for (int currentOgVertex = 0; currentOgVertex < originalSegmentVertices.Length; currentOgVertex++) //loop through all original mesh vertices
@@ -61,65 +62,32 @@ public class ConveyorMesh
                 //front loop
                 if (IsOriginalVertexInFront(originalSegmentVertices[currentOgVertex]))
                 {
-                    newVertices[targetVertexIndex] = _bezier.orientedPoints.WorldToLocal(originalSegmentVertices[currentOgVertex], currentEdgeLoop + 1);
+                    newVertices[targetVertexIndex] = _orientedPoints.GetPointInLocalSpace(originalSegmentVertices[currentOgVertex], currentEdgeLoop + 1);
                 }
                 // back loop
                 else
                 {
-                    newVertices[targetVertexIndex] = _bezier.orientedPoints.WorldToLocal(originalSegmentVertices[currentOgVertex], currentEdgeLoop);
-                }
+                    newVertices[targetVertexIndex] = _orientedPoints.GetPointInLocalSpace(originalSegmentVertices[currentOgVertex], currentEdgeLoop);
+                } 
             }
         }
         return newVertices;
     }
-    bool IsOriginalUVStart(Vector2 originalUV)
+    Vector2[] GetUVs(int edgeLoopCount,Vector2[] originalUVs, UvSegment[] segmentUV, float[] segmentDistanceForward, float[] segmentDistanceBackward, bool reverse)
     {
-        if (originalUV.y <= 0)
-        {
-            return true;
-        }
-        return false;
-    }
-    Vector2[] GetExtrudedMeshUVs(int edgeLoopCount, Vector2[] originalSegmentUVs, bool reverse)
-    {
-        int newUVsLength = edgeLoopCount * originalSegmentUVs.Length;
-        int ogUVsLength = originalSegmentUVs.Length;
+        int newUVsLength = edgeLoopCount * originalUVs.Length;
         Vector2[] newUVs = new Vector2[newUVsLength];
 
-        for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount; currentEdgeLoop++)
+        for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount - 1; currentEdgeLoop++)
         {
-            int targetSegmentIndexStart = currentEdgeLoop * ogUVsLength;
-            for (int currentOgUVs = 0; currentOgUVs < originalSegmentUVs.Length; currentOgUVs++)
-            {
-                int targetUVsIndex = targetSegmentIndexStart + currentOgUVs;
-                if (IsOriginalUVStart(originalSegmentUVs[currentOgUVs]))
-                {
-                    newUVs[targetUVsIndex] = new Vector2();
-                }
-                else
-                {
-                    newUVs[targetUVsIndex] = new Vector2();
-                }
-            }
-        }
-        return newUVs;
-    }
-
-    Vector2[] GetUVs(int edgeLoopCount,Vector2[] originalSegmentUVs, NestedArrayInt[] segmentUV, float[] segmentDistance, bool reverse)
-    {
-        int newUVsLength = edgeLoopCount * originalSegmentUVs.Length;
-        Vector2[] newUVs = new Vector2[newUVsLength];
-
-        for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount; currentEdgeLoop++)
-        {
-            int targetSegmentIndexStart = currentEdgeLoop * originalSegmentUVs.Length;
+            int targetSegmentIndexStart = currentEdgeLoop * originalUVs.Length;
             for (int currentSegmentUV = 0; currentSegmentUV < segmentUV.Length; currentSegmentUV++)
             {             
-                Vector2 uvVectorStart = new Vector2(originalSegmentUVs[segmentUV[currentSegmentUV].value[0]].x,  segmentDistance[currentEdgeLoop]);
-                Vector2 uvVectorEnd = new Vector2(originalSegmentUVs[segmentUV[currentSegmentUV].value[1]].x, segmentDistance[currentEdgeLoop + 1]);
+                Vector2 uvVectorStart = new Vector2(segmentDistanceForward[currentEdgeLoop], originalUVs[segmentUV[currentSegmentUV].start].y);
+                Vector2 uvVectorEnd = new Vector2(segmentDistanceForward[currentEdgeLoop + 1], originalUVs[segmentUV[currentSegmentUV].end].y);
 
-                int start = targetSegmentIndexStart + segmentUV[currentEdgeLoop].value[0];
-                int end = targetSegmentIndexStart +  segmentUV[currentEdgeLoop].value[1];
+                int start = targetSegmentIndexStart + segmentUV[currentEdgeLoop].start;
+                int end = targetSegmentIndexStart +  segmentUV[currentEdgeLoop].end;
 
                 newUVs[start] = uvVectorStart;
                 newUVs[end] = uvVectorEnd;
@@ -128,29 +96,33 @@ public class ConveyorMesh
         return newUVs;
     }
      
-    int[] GetTriangles(int edgeLoopCount,int originalVerticesLength,int[] meshAssetTriangles)
+    int[] GetTriangles(int edgeLoopCount,int originalTrianglesLength,int[] meshAssetTriangles)
     {
-        int newTrianglesLength = edgeLoopCount * originalVerticesLength;
+        int newTrianglesLength = edgeLoopCount * originalTrianglesLength;
         int[] newTriangles = new int[newTrianglesLength];
-        for (int i = 0; i < newTrianglesLength; i++)
+        for (int i = 0; i < newTriangles.Length; i++)
         {
             newTriangles[i] = meshAssetTriangles[i];
         }
         return newTriangles;
     }
+    bool IsVertexScrollable(Color32 vertexColor)
+    {
+        return vertexColor.g != 0;
+    }
     Color32[] GetVertexColors(int edgeLoopCount, Color32[] originalVertexColors, byte newConveyorSpeed)
     {
         int newVertexColorsLength = edgeLoopCount * originalVertexColors.Length;
         Color32[] newVertexColors = new Color32[newVertexColorsLength];
-        for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount; currentEdgeLoop++)
+        for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount - 1; currentEdgeLoop++)
         {
             int targetSegmentIndexStart = currentEdgeLoop * originalVertexColors.Length;
             for (int currentOgVertex = 0; currentOgVertex < originalVertexColors.Length; currentOgVertex++)
             {
                 int targetVertexIndex = targetSegmentIndexStart + currentOgVertex;
-                if (originalVertexColors[currentOgVertex].g != 0)
+                if (IsVertexScrollable(originalVertexColors[currentOgVertex]))
                 {
-                    newVertexColors[targetSegmentIndexStart] = new Color32(0, newConveyorSpeed, 0, 0);
+                    newVertexColors[targetVertexIndex] = new Color32(0, newConveyorSpeed, 0, 0);
                 }
             }
         }
@@ -161,20 +133,20 @@ public class ConveyorMesh
 
 
     #region Methods
-    public void AssignBezier(Bezier bezier)
+    public void AssignOrientedPoints(OrientedPoint orientedPoints)
     {
-        _bezier = bezier;
+        _orientedPoints = orientedPoints;
     }
     public void MeshUpdate(bool reverse)
     {
-        int targetEdgeLoopCount = _bezier.pointCount;
+        int targetEdgeLoopCount = _orientedPoints.position.Length;
 
         Vector3[] vertices = GetExtrudedMeshVertices(targetEdgeLoopCount,_meshAssets[currentMeshAssetIndex].ogVertices);
-        Vector2[] uvs = GetUVs(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogUvs, _meshAssets[currentMeshAssetIndex].segmentUV,_bezier.segmentDistance,reverse);
-        int[] triangles = GetTriangles(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogVertices.Length, _meshAssets[currentMeshAssetIndex].trianglesSubMesh[0].value);
+        Vector2[] uvs = GetUVs(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogUvs, _meshAssets[currentMeshAssetIndex].uvSegments,_orientedPoints.segmentDistanceForward,_orientedPoints.segmentDistanceBackward,reverse);
+        int[] triangles = GetTriangles(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogTriangles.Length, _meshAssets[currentMeshAssetIndex].trianglesSubMesh[0].value);
         Color32[] vertexColors = GetVertexColors(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogVertexColors,conveyorSpeed);
 
-        _previewMeshFilter.mesh = GetMeshSubmesh0(vertices,uvs,triangles,vertexColors);
+        _previewMeshFilter.mesh = GetMeshSubmesh0(_previewMeshFilter.mesh, vertices,uvs,triangles,vertexColors);
     }
     #endregion
 

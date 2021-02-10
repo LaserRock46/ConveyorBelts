@@ -26,6 +26,7 @@ public class MeshCapture
 
 
         meshAsset.ogVertices = mesh.vertices;
+        meshAsset.ogTriangles = mesh.triangles;
         meshAsset.ogUvs = mesh.uv;
         meshAsset.ogVertexColors = mesh.colors32;
         _triangles = mesh.triangles;
@@ -38,7 +39,7 @@ public class MeshCapture
             _trianglesSubMesh[i].value = mesh.GetTriangles(i);
         }
         meshAsset.trianglesSubMesh = GetTrianglesSubmesh(meshAsset);
-        meshAsset.segmentUV = GetSegmentUVs(meshAsset);
+        meshAsset.uvSegments = GetSegmentUVs(meshAsset);
     }
     NestedArrayInt[] GetTrianglesSubmesh(MeshAsset meshAsset)
     {
@@ -88,6 +89,7 @@ public class MeshCapture
     public int segmentRepeat;
     public int addSegment;
     public List<Vector3> test;
+    /*
     NestedArrayInt[] GetSegmentUV(MeshAsset meshAsset)
     {
         List<NestedArrayInt> uvSegment = new List<NestedArrayInt>();
@@ -146,11 +148,17 @@ public class MeshCapture
 
         return uvSegment.ToArray();
     }
-   
-    NestedArrayInt[] GetSegmentUVs(MeshAsset meshAsset)
+    */
+    bool IsAxisEquals(Vector3 a, Vector3 b, float tolerance = 0.01f)
     {
-        List<NestedArrayInt> uvSegment = new List<NestedArrayInt>();
-        for (int currentTriangle = 2; currentTriangle < 9; currentTriangle += 3)
+        Vector2 testA = a;
+        Vector2 testB = b;
+        return Vector2.Distance(a, b) < tolerance;
+    }
+    UvSegment[] GetSegmentUVs(MeshAsset meshAsset)
+    {
+        List<UvSegment> uvSegment = new List<UvSegment>();
+        for (int currentTriangle = 2; currentTriangle < _triangles.Length; currentTriangle += 3)
         {
             List<int> allVertices = new List<int>();
             allVertices.Add(_triangles[currentTriangle]);
@@ -168,49 +176,34 @@ public class MeshCapture
                     loop2++;
                     if (secondLoop != firstLoop)
                     {
-                        notEqualsIndex++;
-                        if (Mathf.Approximately(meshAsset.ogVertices[allVertices[firstLoop]].x, meshAsset.ogVertices[allVertices[secondLoop]].x) && Mathf.Approximately(meshAsset.ogVertices[allVertices[firstLoop]].y, meshAsset.ogVertices[allVertices[secondLoop]].y))
+                        notEqualsIndex++;             
+                        if(IsAxisEquals(meshAsset.ogVertices[allVertices[firstLoop]], meshAsset.ogVertices[allVertices[secondLoop]]))
                         {
                             equalsX++;
                             equalsY++;
                             sameAxisVertices.Add(allVertices[secondLoop]);
-
-                        }
-                    
+                        }                 
                     }
-
                 }
-            }
-            if (sameAxisVertices.Count != 0)
-            {
-               
-            }
-            else
-            {
-              
-            }
-            /*
-            NestedArrayInt segment;
+            }        
+            
+            UvSegment segment;
             if (meshAsset.ogVertices[sameAxisVertices[0]].z <= 0)
             {
-                 segment = new NestedArrayInt
-                {
-                    value = new int[] {sameAxisVertices[0], sameAxisVertices[1]}
-                };
+                bool reverseDirection = meshAsset.ogUvs[sameAxisVertices[0]].x >= 0;
+                segment = new UvSegment(sameAxisVertices[0], sameAxisVertices[1], 0, reverseDirection);          
             }
             else
             {
-                 segment = new NestedArrayInt
-                {
-                    value = new int[] { sameAxisVertices[1], sameAxisVertices[0] }
-                };
+                bool reverseDirection = meshAsset.ogUvs[sameAxisVertices[1]].x >= 0;
+                segment = new UvSegment(sameAxisVertices[1], sameAxisVertices[0], 0, reverseDirection);        
             }
             if (!uvSegment.Contains(segment))
             {
                 uvSegment.Add(segment);
                 addSegment++;
             }
-            */
+            
         }    
         return uvSegment.ToArray();
     }

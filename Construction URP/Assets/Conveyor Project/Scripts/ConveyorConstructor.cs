@@ -5,7 +5,8 @@ using UnityEngine;
 public class ConveyorConstructor : MonoBehaviour
 {
     #region Temp
-    //[Header("Temporary Things", order = 0)]
+    [Header("Temporary Things", order = 0)]
+    public bool updateCurveManual;
     #endregion
 
     #region Fields
@@ -13,8 +14,10 @@ public class ConveyorConstructor : MonoBehaviour
     public bool isConveyorConstructorEnabled;
 
     [SerializeField] private Bezier _bezier;
+    [SerializeField] private ConveyorPath _conveyorPath;
+
     [SerializeField] private ConveyorMesh _conveyorMesh;
-    [SerializeField] private ConveyorConstructorConditions _conditions;
+    private ConveyorConstructorConditions _conditions;
     [SerializeField] private LayerMask _raycastTarget = new LayerMask();
 
     public Transform previewTransform = null;
@@ -62,7 +65,7 @@ public class ConveyorConstructor : MonoBehaviour
         Vector3 endPosition = _conveyorEndTransform.position;
         endPosition.y = 0;
 
-        return (startPosition - endPosition).normalized;
+        return (endPosition - startPosition).normalized;
     }
     Vector3 GetPreviewTransformManualRotation()
     {
@@ -75,8 +78,8 @@ public class ConveyorConstructor : MonoBehaviour
     #region Methods
     void Start()
     {
-        _conditions = new ConveyorConstructorConditions(_bezier, this);
-        _conveyorMesh.AssignBezier(_bezier);
+        _conditions = new ConveyorConstructorConditions(this);
+        _conveyorMesh.AssignOrientedPoints(_conveyorPath.orientedPoints);
     }
     void Update()
     {
@@ -87,6 +90,12 @@ public class ConveyorConstructor : MonoBehaviour
         FinishAndCreateUpdate();
 
         _bezier.DebugView();
+
+        if (updateCurveManual)
+        {
+            _bezier.Compute();
+            _conveyorMesh.MeshUpdate(false);
+        }
     }
     private void FixedUpdate()
     {

@@ -11,12 +11,11 @@ public class ConveyorConstructorConditions
 
     #region Fields
     [Header("Fields", order = 1)]
-    private Bezier _bezier;
+   
     private ConveyorConstructor _conveyorConstructor;
 
-    public ConveyorConstructorConditions(Bezier bezier, ConveyorConstructor conveyorConstructor)
+    public ConveyorConstructorConditions( ConveyorConstructor conveyorConstructor)
     {
-        _bezier = bezier;
         _conveyorConstructor = conveyorConstructor;
     }
     #endregion

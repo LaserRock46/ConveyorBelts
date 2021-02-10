@@ -39,9 +39,9 @@ public class DebugUvSegments : MonoBehaviour
         {
             segmentIndex++;
         }
-        segmentIndex = Mathf.Clamp(segmentIndex, 0, meshAsset.segmentUV.Length - 1);
-        start = meshAsset.segmentUV[segmentIndex].value[0];
-        end = meshAsset.segmentUV[segmentIndex].value[1];
+        segmentIndex = Mathf.Clamp(segmentIndex, 0, meshAsset.uvSegments.Length - 1);
+        start = meshAsset.uvSegments[segmentIndex].start;
+        end = meshAsset.uvSegments[segmentIndex].end;
         Debug.DrawLine(transform.TransformPoint(meshAsset.ogVertices[start]), transform.TransformPoint(meshAsset.ogVertices[end]), Color.red);
         startV = meshAsset.ogVertices[start];
         endV = meshAsset.ogVertices[end];
