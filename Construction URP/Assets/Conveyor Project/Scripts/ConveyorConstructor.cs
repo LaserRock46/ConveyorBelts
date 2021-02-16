@@ -6,18 +6,21 @@ public class ConveyorConstructor : MonoBehaviour
 {
     #region Temp
     [Header("Temporary Things", order = 0)]
+   
     public bool updateCurveManual;
     #endregion
 
     #region Fields
     [Header("Fields", order = 1)]
     public bool isConveyorConstructorEnabled;
-
+    [Header("____________________")]
     [SerializeField] private Bezier _bezier;
+    [Header("____________________")]
     [SerializeField] private ConveyorPath _conveyorPath;
-
+    [Header("____________________")]
     [SerializeField] private ConveyorMesh _conveyorMesh;
     private ConveyorConstructorConditions _conditions;
+    [Header("____________________")]
     [SerializeField] private LayerMask _raycastTarget = new LayerMask();
 
     public Transform previewTransform = null;
@@ -93,14 +96,14 @@ public class ConveyorConstructor : MonoBehaviour
 
         if (updateCurveManual)
         {
-            _bezier.Compute();
+            //_bezier.Compute();
+            _conveyorPath.Compute();
             _conveyorMesh.MeshUpdate(false);
         }
     }
     private void FixedUpdate()
     {
-        RaycastUpdate();
-        
+        RaycastUpdate();      
     }
     public void EnableConveyorConstructor(bool enable)
     {
@@ -204,7 +207,8 @@ public class ConveyorConstructor : MonoBehaviour
             UpdatePreviewPrototypeAndBezierLocation();
             if (_conditions.CanUpdateBezier() || _conditions.CanResetPreview())
             {
-                _bezier.Compute();
+                //_bezier.Compute();
+                _conveyorPath.Compute();
                 _conveyorMesh.MeshUpdate(false);
             }      
         }
