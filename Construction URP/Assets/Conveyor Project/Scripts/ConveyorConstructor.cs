@@ -14,8 +14,6 @@ public class ConveyorConstructor : MonoBehaviour
     [Header("Fields", order = 1)]
     public bool isConveyorConstructorEnabled;
     [Header("____________________")]
-    [SerializeField] private Bezier _bezier;
-    [Header("____________________")]
     [SerializeField] private ConveyorPath _conveyorPath;
     [Header("____________________")]
     [SerializeField] private ConveyorMesh _conveyorMesh;
@@ -91,14 +89,15 @@ public class ConveyorConstructor : MonoBehaviour
         RotationUpdate();
         BezierAndMeshUpdate();
         FinishAndCreateUpdate();
-
-        _bezier.DebugView();
-
+      
         if (updateCurveManual)
-        {
-            //_bezier.Compute();
+        { 
             _conveyorPath.Compute();
             _conveyorMesh.MeshUpdate(false);
+        }
+        if (isConveyorConstructorEnabled)
+        {
+            _conveyorPath.DebugDraw();
         }
     }
     private void FixedUpdate()

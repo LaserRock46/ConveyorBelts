@@ -61,11 +61,13 @@ public class ConveyorPath
 
     #region Methods
     public void Compute()
+    {           
+        circularArcStart.GetCircularArc(circularArcEnd);
+    }
+    public void DebugDraw()
     {
-      
         circularArcStart.DebugCircles(circularArcEnd);
         circularArcEnd.DebugCircles(circularArcStart);
-        circularArcStart.GetCircularArc(circularArcEnd);
     }
     
     #endregion
