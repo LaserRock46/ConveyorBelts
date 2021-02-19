@@ -5,8 +5,8 @@ using UnityEngine;
 [System.Serializable]
 public class OrientedPoint
 {
-    public Vector3[] position;
-    public Quaternion[] rotation;
+    public Vector3[] positions;
+    public Quaternion[] rotations;
 
     public float totalDistance;
     public float[] segmentDistanceForward;
@@ -14,7 +14,7 @@ public class OrientedPoint
     public  Vector3 GetPointInLocalSpace(Vector3 vertexPosition, int index)
     {
         vertexPosition.z = 0;
-        return position[index] + rotation[index] * vertexPosition;
+        return positions[index] + rotations[index] * vertexPosition;
     }
     /*
     public  Vector3 WorldToLocal(Vector3 vertexPosition, int index)
@@ -30,6 +30,6 @@ public class OrientedPoint
     }
     public  Vector3 LocalToWorldDirection(Vector3 dir, int index)
     {
-        return rotation[index] * dir;
+        return rotations[index] * dir;
     }
 }

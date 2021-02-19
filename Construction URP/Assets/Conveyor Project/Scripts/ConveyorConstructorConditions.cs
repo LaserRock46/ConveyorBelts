@@ -30,8 +30,7 @@ public class ConveyorConstructorConditions
     {
         if(_conveyorConstructor.raycastPosition != _prevHitPoint)
         {
-            _prevHitPoint = _conveyorConstructor.raycastPosition;
-            //Debug.Log("NeedUpdateAfterMove()");
+            _prevHitPoint = _conveyorConstructor.raycastPosition;         
             return true;
         }
         return false;
@@ -48,12 +47,17 @@ public class ConveyorConstructorConditions
         return false;
     }
     private int _prevRotationStep = 0;
+    private bool _prevRotationIsAuto = false;
     public bool NeedUpdateAfterRotation()
     {
         if (_conveyorConstructor.rotationStep != _prevRotationStep)
         {
-            _prevRotationStep = _conveyorConstructor.rotationStep;
-            //Debug.Log("NeedUpdateAfterRotation()");
+            _prevRotationStep = _conveyorConstructor.rotationStep;     
+            return true;
+        }
+        if (_conveyorConstructor.rotationIsAuto != _prevRotationIsAuto)
+        {
+            _prevRotationIsAuto = _conveyorConstructor.rotationIsAuto;
             return true;
         }
         return false;

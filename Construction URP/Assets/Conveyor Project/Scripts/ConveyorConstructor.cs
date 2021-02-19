@@ -92,7 +92,7 @@ public class ConveyorConstructor : MonoBehaviour
       
         if (updateCurveManual)
         { 
-            _conveyorPath.Compute();
+            _conveyorPath.ConstructPath();
             _conveyorMesh.MeshUpdate(false);
         }
         if (isConveyorConstructorEnabled)
@@ -116,11 +116,11 @@ public class ConveyorConstructor : MonoBehaviour
             StartCoroutine(ChangeBuildingStage(BuildingStage.InitializedPreview));
 
         }
-        if (_conditions.CanSetStart())
+        if (_conditions.CanSetStart() && !_conditions.IsPointerOverUI())
         {
             StartCoroutine(ChangeBuildingStage(BuildingStage.SetStart));
         }
-        if (_conditions.CanSetEnd())
+        if (_conditions.CanSetEnd() && !_conditions.IsPointerOverUI())
         {
             StartCoroutine(ChangeBuildingStage(BuildingStage.SetEnd));
         }
@@ -207,7 +207,7 @@ public class ConveyorConstructor : MonoBehaviour
             if (_conditions.CanUpdateBezier() || _conditions.CanResetPreview())
             {
                 //_bezier.Compute();
-                _conveyorPath.Compute();
+                _conveyorPath.ConstructPath();
                 _conveyorMesh.MeshUpdate(false);
             }      
         }

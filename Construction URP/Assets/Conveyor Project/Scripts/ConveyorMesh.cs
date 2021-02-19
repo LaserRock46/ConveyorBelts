@@ -139,8 +139,8 @@ public class ConveyorMesh
     }
     public void MeshUpdate(bool reverse)
     {
-        if (_orientedPoints.position.Length == 0) return;
-        int targetEdgeLoopCount = _orientedPoints.position.Length;
+        if (_orientedPoints.positions.Length == 0) return;
+        int targetEdgeLoopCount = _orientedPoints.positions.Length;
 
         Vector3[] vertices = GetExtrudedMeshVertices(targetEdgeLoopCount,_meshAssets[currentMeshAssetIndex].ogVertices);
         Vector2[] uvs = GetUVs(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogUvs, _meshAssets[currentMeshAssetIndex].uvSegments,_orientedPoints.segmentDistanceForward,_orientedPoints.segmentDistanceBackward,reverse);

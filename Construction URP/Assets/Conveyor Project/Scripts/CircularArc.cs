@@ -9,13 +9,8 @@ public class CircularArc
     [Header("Temporary Things", order = 0)]
     [SerializeField] private bool _debugCircles;
     [SerializeField] private bool _debugDrawTestConnection;
-    public Vector2Int[] testPointsIndex;
-    private Transform[] _thisPoints;
-    private Transform[] _oppositePoints;
-    private int _indexThisPoint = 0;
-    private int _indexOppositePoint = 0;
+ 
     private bool _found;
-    public int minBackwardPoint = 15;
 
     #endregion
 
@@ -28,9 +23,16 @@ public class CircularArc
     public Transform pointsRightAnchor;
     public Transform[] pointsLeft;
     public Transform[] pointsRight;
+
+    public Transform[] thisPoints;
+    public Transform[] oppositePoints;
+    public int indexThisPoint = 0;
+    public int indexOppositePoint = 0;
+
     [SerializeField] private float _angleTolerance = 5;
     [SerializeField] private float _distanceTolerance = 0.1f;
-
+    [SerializeField] private int _minBackwardPoint = 9;
+  
 
     #endregion
 
@@ -54,7 +56,7 @@ public class CircularArc
                         {
                             return (thisPoint, oppositePoint, true);
                         }
-                        else if(thisPoint >= minBackwardPoint )
+                        else if(thisPoint >= _minBackwardPoint )
                         {
                             return (thisPoint, oppositePoint, true);
                         }
@@ -97,12 +99,39 @@ public class CircularArc
         }
         return (null, null);
     }
+    public Transform[] GetArcPoints(Transform[] pointsFromAnchor, int indexPoint, StartingOrder startingOrder)
+    {
+        List<Transform> arcPoints = new List<Transform>();
+        if(startingOrder == StartingOrder.Start)
+        {
+            for (int i = 0; i <= indexOppositePoint; i++)
+            {
+                arcPoints.Add(pointsFromAnchor[i]);
+            }
+        }
+        else
+        {
+            for (int i = indexOppositePoint; i >= 0; i--)
+            {
+                arcPoints.Add(pointsFromAnchor[i]);
+            }
+        }
+        return arcPoints.ToArray();
+    }
+    public Transform GetThisArcPointEnd()
+    {
+        return thisPoints[indexThisPoint];
+    }
+    public Transform GetOppositeArcPointStart()
+    {
+        return oppositePoints[indexOppositePoint];
+    }
     #endregion
 
 
 
     #region Methods
-    public void GetCircularArc(CircularArc oppositeCircularArc)
+    public void GetCircularArcIndexPoints(CircularArc oppositeCircularArc)
     {
         var getNearestPointsAnchors = GetNearestPoints(this, oppositeCircularArc);
         var getArcEndPointIndex = GetArcEndPointsIndex(getNearestPointsAnchors.thisAnchorPoints, getNearestPointsAnchors.oppositeAnchorPoints,selfAnchor, oppositeCircularArc.selfAnchor);
@@ -111,10 +140,11 @@ public class CircularArc
             Debug.DrawLine(getNearestPointsAnchors.thisAnchorPoints[getArcEndPointIndex.indexThisPoint].position, getNearestPointsAnchors.oppositeAnchorPoints[getArcEndPointIndex.indexOppositePoint].position, Color.red);
         }
 
-        _thisPoints = getNearestPointsAnchors.thisAnchorPoints;
-        _oppositePoints = getNearestPointsAnchors.oppositeAnchorPoints;
-        _indexThisPoint = getArcEndPointIndex.indexThisPoint;
-        _indexOppositePoint = getArcEndPointIndex.indexOppositePoint;
+        thisPoints = getNearestPointsAnchors.thisAnchorPoints;
+        oppositePoints = getNearestPointsAnchors.oppositeAnchorPoints;
+        indexThisPoint = getArcEndPointIndex.indexThisPoint;
+        indexOppositePoint = getArcEndPointIndex.indexOppositePoint;
+
         _found = getArcEndPointIndex.found;
     }
     public void DebugCircles(CircularArc oppositeCircularArc)
@@ -129,7 +159,7 @@ public class CircularArc
         }
         if (_debugDrawTestConnection && _found)
         {
-            Debug.DrawLine(_thisPoints[_indexThisPoint].position, _oppositePoints[_indexOppositePoint].position,Color.green);
+            Debug.DrawLine(thisPoints[indexThisPoint].position, oppositePoints[indexOppositePoint].position,Color.green);
         }
     }
     #endregion

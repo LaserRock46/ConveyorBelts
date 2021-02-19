@@ -12,11 +12,12 @@ public class ConveyorPath
 
     #region Fields
     [Header("Fields", order = 1)]
-    public OrientedPoint orientedPoints;
+    [HideInInspector] public OrientedPoint orientedPoints;
     public Transform previewTransform;
    
     public CircularArc circularArcStart;
     public CircularArc circularArcEnd;
+    public Bezier bezier;
     #endregion
 
     #region Functions
@@ -60,14 +61,40 @@ public class ConveyorPath
 
 
     #region Methods
-    public void Compute()
+    public void ConstructPath()
     {           
-        circularArcStart.GetCircularArc(circularArcEnd);
+        circularArcStart.GetCircularArcIndexPoints(circularArcEnd);
+        bezier.AlignControlPoints(circularArcStart.GetThisArcPointEnd(),circularArcStart.GetOppositeArcPointStart());
+        bezier.Compute();
+        GetOrientedPoints();
+    }
+    void GetOrientedPoints()
+    {
+        Transform[] arcStart = circularArcStart.GetArcPoints(circularArcStart.thisPoints,circularArcStart.indexThisPoint, circularArcStart.order);
+        Transform[] arcEnd = circularArcStart.GetArcPoints(circularArcStart.oppositePoints, circularArcStart.indexOppositePoint, circularArcEnd.order);
+        var getPositionsAndRotationsArcStart = GetPositionsAndRotations(previewTransform, arcStart);
+        var getPositionsAndRotationsArcEnd = GetPositionsAndRotations(previewTransform, arcEnd);
+
+        List<Vector3> allPositions = new List<Vector3>();
+        List<Quaternion> allRotations = new List<Quaternion>();
+
+        allPositions.AddRange(getPositionsAndRotationsArcStart.positions);
+        allPositions.AddRange(bezier.orientedPoints.positions);
+        allPositions.AddRange(getPositionsAndRotationsArcEnd.positions);
+
+        allRotations.AddRange(getPositionsAndRotationsArcStart.rotations);
+        allRotations.AddRange(bezier.orientedPoints.rotations);
+        allRotations.AddRange(getPositionsAndRotationsArcEnd.rotations);
+
+        orientedPoints.positions = allPositions.ToArray();
+        orientedPoints.rotations = allRotations.ToArray();
     }
     public void DebugDraw()
     {
         circularArcStart.DebugCircles(circularArcEnd);
         circularArcEnd.DebugCircles(circularArcStart);
+
+
     }
     
     #endregion

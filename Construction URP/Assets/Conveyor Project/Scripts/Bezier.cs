@@ -13,13 +13,8 @@ public class Bezier
     [Header("Fields", order = 1)]
     public int pointCount = 8;
     [SerializeField] private Transform _previewTransform; 
-    public Transform[] controlPointsB1;
-    public Transform[] controlPointsB2;
-    public OrientedPoint orientedPoints;
-
-    public float totalDistance;
-    public float[] segmentDistanceForward;
-    public float[] segmentDistanceBackward;
+    public Transform[] controlPoints;
+    [HideInInspector] public OrientedPoint orientedPoints;
 
     public Vector3 GetPoint(float t, Transform[] controlPoint)
     {
@@ -71,76 +66,26 @@ public class Bezier
         }
         return (positions, rotations);
     }
-    public (float totalDistance, float[] segmentDistanceForward, float[] segmentDistanceBackward) GetSegmentsLength()
+    public void AlignControlPoints(Transform targetStart,Transform targetEnd)
     {
-        float totalDistanceForward = 0;
-        float totalDistanceBackward = 0;
-        float[] segmentDistanceForward = new float[pointCount];
-        float[] segmentDistanceBackward = new float[pointCount];
-
-        for (int i = 1; i < pointCount; i++)
-        {
-            float distanceForward = Vector3.Distance(orientedPoints.position[i - 1], orientedPoints.position[i]);
-
-            totalDistanceForward += distanceForward;
-            segmentDistanceForward[i] = totalDistanceForward;
-        }
-        for (int i = pointCount - 2; i >= 0; i--)
-        {
-            float distanceBackward = Vector3.Distance(orientedPoints.position[i + 1], orientedPoints.position[i]);
-            totalDistanceBackward += distanceBackward;
-            segmentDistanceBackward[i] = totalDistanceBackward;
-        }
-        return (totalDistanceForward, segmentDistanceForward, segmentDistanceBackward);
-    }
-    public Vector3 GetBezierConnectionPosition()
-    {
-        return Vector3.Lerp(controlPointsB1[2].position, controlPointsB2[1].position,0.5f);
+        controlPoints[0].SetPositionAndRotation(targetStart.position,targetStart.rotation);
+        controlPoints[3].SetPositionAndRotation(targetEnd.position, targetEnd.rotation);
     }
     public void Compute()
-    {
-        Vector3 connectionPosition = GetBezierConnectionPosition();
-        //controlPointsB1[3].position = connectionPosition;
-        //controlPointsB2[0].position = connectionPosition;
-        controlPointsB1[2].LookAt(controlPointsB2[1]);
-        controlPointsB2[1].LookAt(2 * controlPointsB2[1].position - controlPointsB1[2].position);
-
-        var getPositionsAndRotationsB1 = GetPositionsAndRotations(pointCount/2,controlPointsB1);
-        var getPositionsAndRotationsB2 = GetPositionsAndRotations(pointCount/2,controlPointsB2);
-
-        List<Vector3> allPositions = new List<Vector3>();
-        List<Quaternion> allRotations = new List<Quaternion>();
-        allPositions.AddRange(getPositionsAndRotationsB1.position);
-        allPositions.AddRange(getPositionsAndRotationsB2.position);
-        allRotations.AddRange(getPositionsAndRotationsB1.rotation);
-        allRotations.AddRange(getPositionsAndRotationsB2.rotation);
-        orientedPoints.position = allPositions.ToArray();
-        orientedPoints.rotation = allRotations.ToArray();
-
-
-        var getSegmentsLength = GetSegmentsLength();
-        totalDistance = getSegmentsLength.totalDistance;
-        segmentDistanceForward = getSegmentsLength.segmentDistanceForward;
-        segmentDistanceBackward = getSegmentsLength.segmentDistanceBackward;
-
+    {        
+        var getPositionsAndRotations = GetPositionsAndRotations(pointCount,controlPoints);     
+        orientedPoints.positions = getPositionsAndRotations.position;
+        orientedPoints.rotations = getPositionsAndRotations.rotation;
     }
-  
     public void DebugView()
     {
-        if (orientedPoints.position.Length == 0) return;
+        if (orientedPoints.positions.Length == 0) return;
         if (debugControlPoints)
         {
-            for (int i = 1; i < controlPointsB1.Length; i++)
+            for (int i = 1; i < controlPoints.Length; i++)
             {
-                Debug.DrawLine(controlPointsB1[i - 1].position, controlPointsB1[i].position, Color.magenta);
-                Debug.DrawLine(controlPointsB2[i - 1].position, controlPointsB2[i].position, Color.magenta);
-            }
-            /*
-            for (int i = 0; i < controlPointTransform.Length; i++)
-            {
-                controlPointTransform[i].name = controlPointTransform[i].position.y.ToString("F2");
-            }
-            */
+                Debug.DrawLine(controlPoints[i - 1].position, controlPoints[i].position, Color.magenta);      
+            }         
         }
         if (debugOrientedPoints)
         {
@@ -156,7 +101,6 @@ public class Bezier
                 Debug.DrawLine(orientedPoints.LocalToWorld(_previewTransform, Vector3.zero, i), orientedPoints.LocalToWorld(_previewTransform, Vector3.up,i), Color.green);
                 Debug.DrawLine(orientedPoints.LocalToWorld(_previewTransform, Vector3.zero, i), orientedPoints.LocalToWorld(_previewTransform, Vector3.right,i), Color.red);
                 Debug.DrawLine(orientedPoints.LocalToWorld(_previewTransform, Vector3.zero, i), orientedPoints.LocalToWorld(_previewTransform, Vector3.forward,i), Color.blue);
-
             }
         }
     }
