@@ -204,9 +204,8 @@ public class ConveyorConstructor : MonoBehaviour
         if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation()|| _conditions.NeedUpdateAfterCameraMove() || _conditions.CanResetPreview())
         {
             UpdatePreviewPrototypeAndBezierLocation();
-            if (_conditions.CanUpdateBezier() || _conditions.CanResetPreview())
-            {
-                //_bezier.Compute();
+            if (_conditions.CanUpdatePath() || _conditions.CanResetPreview())
+            {          
                 _conveyorPath.ConstructPath();
                 _conveyorMesh.MeshUpdate(false);
             }      

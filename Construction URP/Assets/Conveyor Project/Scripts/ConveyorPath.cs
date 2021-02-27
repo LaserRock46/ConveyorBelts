@@ -8,6 +8,9 @@ public class ConveyorPath
 
     #region Temp
     [Header("Temporary Things", order = 0)]
+    [SerializeField] private bool _drawPathDebug;
+    public Transform[] arcStart;
+    public Transform[] arcEnd;
     #endregion
 
     #region Fields
@@ -67,11 +70,15 @@ public class ConveyorPath
         bezier.AlignControlPoints(circularArcStart.GetThisArcPointEnd(),circularArcStart.GetOppositeArcPointStart());
         bezier.Compute();
         GetOrientedPoints();
+        GetPathLength();
     }
     void GetOrientedPoints()
     {
         Transform[] arcStart = circularArcStart.GetArcPoints(circularArcStart.thisPoints,circularArcStart.indexThisPoint, circularArcStart.order);
         Transform[] arcEnd = circularArcStart.GetArcPoints(circularArcStart.oppositePoints, circularArcStart.indexOppositePoint, circularArcEnd.order);
+        this.arcStart = arcStart;
+        this.arcEnd = arcEnd;
+
         var getPositionsAndRotationsArcStart = GetPositionsAndRotations(previewTransform, arcStart);
         var getPositionsAndRotationsArcEnd = GetPositionsAndRotations(previewTransform, arcEnd);
 
@@ -89,12 +96,24 @@ public class ConveyorPath
         orientedPoints.positions = allPositions.ToArray();
         orientedPoints.rotations = allRotations.ToArray();
     }
+    void GetPathLength()
+    {
+        var getSegmentsLength = GetSegmentsLength(orientedPoints.positions);
+        orientedPoints.segmentDistanceForward = getSegmentsLength.segmentDistanceForward;
+        orientedPoints.segmentDistanceBackward = getSegmentsLength.segmentDistanceBackward;
+        orientedPoints.totalDistance = getSegmentsLength.totalDistance;
+    }
     public void DebugDraw()
     {
+        if (!_drawPathDebug) return;
+
         circularArcStart.DebugCircles(circularArcEnd);
         circularArcEnd.DebugCircles(circularArcStart);
 
-
+        for (int i = 1; i < orientedPoints.positions.Length; i++)
+        {
+            Debug.DrawLine(orientedPoints.LocalToWorld(previewTransform, Vector3.zero, i - 1), orientedPoints.LocalToWorld(previewTransform, Vector3.zero, i), Color.green);
+        }
     }
     
     #endregion

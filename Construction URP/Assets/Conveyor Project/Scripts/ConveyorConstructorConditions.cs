@@ -62,7 +62,7 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
-    public bool CanUpdateBezier()
+    public bool CanUpdatePath()
     {
         if(_conveyorConstructor.buildingStage != ConveyorConstructor.BuildingStage.None)
         {

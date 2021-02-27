@@ -9,6 +9,7 @@ public class CircularArc
     [Header("Temporary Things", order = 0)]
     [SerializeField] private bool _debugCircles;
     [SerializeField] private bool _debugDrawTestConnection;
+    [SerializeField] private float _testAngleTolerance;
  
     private bool _found;
 
@@ -32,6 +33,7 @@ public class CircularArc
     [SerializeField] private float _angleTolerance = 5;
     [SerializeField] private float _distanceTolerance = 0.1f;
     [SerializeField] private int _minBackwardPoint = 9;
+    [SerializeField] private int _pointsLimit = 26;
   
 
     #endregion
@@ -44,14 +46,15 @@ public class CircularArc
     (int indexThisPoint,int indexOppositePoint, bool found)GetArcEndPointsIndex(Transform[] points,Transform[] oppositePoints,Transform thisAnchor, Transform oppositeAnchor)
     {
 
-        for (int thisPoint = 0; thisPoint < points.Length; thisPoint++)
+        for (int thisPoint = 0; thisPoint < _pointsLimit; thisPoint++)
         {
-            for (int oppositePoint = 0; oppositePoint < oppositePoints.Length; oppositePoint++)
+            for (int oppositePoint = 0; oppositePoint < _pointsLimit; oppositePoint++)
             {
                 if (points[thisPoint].InverseTransformPoint(oppositePoints[oppositePoint].position).x < _distanceTolerance)
                 {
                     if (Quaternion.Angle(points[thisPoint].rotation, oppositePoints[oppositePoint].rotation) < _angleTolerance)
                     {
+                        _testAngleTolerance = Quaternion.Angle(points[thisPoint].rotation, oppositePoints[oppositePoint].rotation);
                         if (IsOppositeAnchorOnFront(thisAnchor,oppositeAnchor))
                         {
                             return (thisPoint, oppositePoint, true);
@@ -104,14 +107,14 @@ public class CircularArc
         List<Transform> arcPoints = new List<Transform>();
         if(startingOrder == StartingOrder.Start)
         {
-            for (int i = 0; i <= indexOppositePoint; i++)
+            for (int i = 0; i <= indexPoint; i++)
             {
                 arcPoints.Add(pointsFromAnchor[i]);
             }
         }
         else
         {
-            for (int i = indexOppositePoint; i >= 0; i--)
+            for (int i = indexPoint; i >= 0; i--)
             {
                 arcPoints.Add(pointsFromAnchor[i]);
             }
@@ -136,14 +139,12 @@ public class CircularArc
         var getNearestPointsAnchors = GetNearestPoints(this, oppositeCircularArc);
         var getArcEndPointIndex = GetArcEndPointsIndex(getNearestPointsAnchors.thisAnchorPoints, getNearestPointsAnchors.oppositeAnchorPoints,selfAnchor, oppositeCircularArc.selfAnchor);
         if (getArcEndPointIndex.found)
-        {
-            Debug.DrawLine(getNearestPointsAnchors.thisAnchorPoints[getArcEndPointIndex.indexThisPoint].position, getNearestPointsAnchors.oppositeAnchorPoints[getArcEndPointIndex.indexOppositePoint].position, Color.red);
+        {        
+            thisPoints = getNearestPointsAnchors.thisAnchorPoints;
+            oppositePoints = getNearestPointsAnchors.oppositeAnchorPoints;
+            indexThisPoint = getArcEndPointIndex.indexThisPoint;
+            indexOppositePoint = getArcEndPointIndex.indexOppositePoint;
         }
-
-        thisPoints = getNearestPointsAnchors.thisAnchorPoints;
-        oppositePoints = getNearestPointsAnchors.oppositeAnchorPoints;
-        indexThisPoint = getArcEndPointIndex.indexThisPoint;
-        indexOppositePoint = getArcEndPointIndex.indexOppositePoint;
 
         _found = getArcEndPointIndex.found;
     }

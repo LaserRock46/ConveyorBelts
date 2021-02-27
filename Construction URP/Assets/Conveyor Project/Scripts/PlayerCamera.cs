@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class PlayerCamera : MonoBehaviour
 {
     #region Temp
@@ -25,6 +26,8 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] private SphereCollider _cameraCollider;
     [SerializeField] private Transform _cameraCenter;
     private bool _isPivotBlocked;
+
+    [SerializeField] private CinemachineCameraOffset _cameraOffset;
     #endregion
 
     #region Functions
@@ -116,24 +119,17 @@ public class PlayerCamera : MonoBehaviour
             _pitchAccumulatedAmount = Mathf.Clamp(_pitchAccumulatedAmount,0, 1);
             float angle = Mathf.LerpAngle(pitchElevationDown,pitchElevationUp,_pitchAccumulatedAmount);
             pitch.localEulerAngles = new Vector3(angle,0,0);
-            _cameraCollider.center = yawAndPosition.InverseTransformPoint(_cameraCenter.position);
+            UpdateColliderPosition();
         }
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
             Cursor.lockState = CursorLockMode.Confined;
         }
-        /*
-        if (_pitchAccumulatedAmount > pitchElevationUp)
-        {
-            pitch.localEulerAngles = new Vector3(pitchElevationUp, 0, 0);
-            _pitchAccumulatedAmount = pitchElevationUp;
-        }
-        if (_pitchAccumulatedAmount < pitchElevationDown)
-        {
-            pitch.localEulerAngles = new Vector3(Mathf.Abs(pitchElevationDown), 0, 0);
-            _pitchAccumulatedAmount = pitchElevationDown;
-        }
-        */
+       
+    }
+    void UpdateColliderPosition()
+    {
+            _cameraCollider.center = yawAndPosition.InverseTransformPoint(_cameraCenter.position);
     }
     void Movement()
     {
@@ -165,6 +161,10 @@ public class PlayerCamera : MonoBehaviour
             }
         }
           
+    }
+    public void ChangeCameraOffset(float offset)
+    {
+        _cameraOffset.m_Offset = new Vector3(0, 0, offset);
     }
     #endregion
 
