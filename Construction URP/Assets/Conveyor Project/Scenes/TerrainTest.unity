@@ -6164,7 +6164,7 @@ MonoBehaviour:
         segmentDistanceForward: []
         segmentDistanceBackward: []
   _conveyorMesh:
-    _drawMesh: 1
+    _drawMesh: 0
     _meshAssets:
     - {fileID: 11400000, guid: 3d3cdd14d7866f243bc881572ab8e6de, type: 2}
     currentMeshAssetIndex: 0

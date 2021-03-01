@@ -51,6 +51,9 @@ public class MeshCapture
         Edge[] edges = GetEdges(vertexDatas, originalTriangles, originalVertices);
         EdgeLoop edgeLoop = new EdgeLoop(vertexDatas,edges);
         int[] precomputedTriangles = GetPrecomputedTrianglesArray(meshAsset.loopCount,edgeLoop);
+
+        meshAsset.edgeLoop = edgeLoop;
+        meshAsset.precomputedTriangles = precomputedTriangles;
     }
     NestedArrayInt[] GetTrianglesSubmesh(MeshAsset meshAsset)
     {
@@ -227,22 +230,26 @@ public class MeshCapture
         for (int vertexIndex = 2; vertexIndex < originalTriangles.Length; vertexIndex += 3)
         {        
             int[] backLoopVertexIndices = GetBackLoopVertexIndices(vertexIndex,originalTriangles,originalVertices);
-            Edge edge = GetEdgeWithWindingOrder(vertexDatas, backLoopVertexIndices);
-            edges.Add(edge);
+            if (backLoopVertexIndices.Length == 2)
+            {
+                Edge edge = GetEdgeWithWindingOrder(vertexDatas, backLoopVertexIndices);
+                edges.Add(edge);
+            }
         }
         return edges.ToArray();
     }
     int[] GetBackLoopVertexIndices(int vertexIndex,int[] originalTriangles, Vector3[] originalVertices)
-    {
+    {   
         List<int> backLoopVertexIndices = new List<int>();
-        for (int currentVertexIndex = vertexIndex; currentVertexIndex >= vertexIndex - 3; currentVertexIndex--)
-        {
+        for (int currentVertexIndex = vertexIndex; currentVertexIndex >= vertexIndex - 2; currentVertexIndex--)
+        {         
             int originalVertexIndex = originalTriangles[currentVertexIndex];
             if (!IsOriginalVertexInFront(originalVertices[originalVertexIndex]))
             {
                 backLoopVertexIndices.Add(originalVertexIndex);
             }
         }
+      
         return backLoopVertexIndices.ToArray();
     }
     Edge GetEdgeWithWindingOrder(VertexData[] vertexDatas, int[] backLoopVertexIndices)
@@ -264,36 +271,36 @@ public class MeshCapture
         Edge edge = new Edge(vertexDataRight,vertexDataLeft);
 
         return edge;
-    }   
+    }
     int[] GetPrecomputedTrianglesArray(int loopCount, EdgeLoop edgeLoop)
     {
-        int trianglesLength = loopCount * edgeLoop.vertexDatas.Length;
-        int[] triangles = new int[trianglesLength];
-       
+        List<int> precomputedTriangles = new List<int>();       
 
-        for (int currentLoop = 0; currentLoop < loopCount; currentLoop++)
+        for (int currentLoop = 0; currentLoop < loopCount - 1; currentLoop++)
         {          
             for (int currentEdge = 0; currentEdge < edgeLoop.edges.Length; currentEdge++)
             {
-                int[] getQuadFromEdge = GetQuadFromEdge(edgeLoop.edges[currentEdge],currentLoop,edgeLoop.vertexDatas.Length);
+                int[] quad = GetQuadFromEdge(edgeLoop.edges[currentEdge],currentLoop,edgeLoop.vertexDatas.Length);
+                precomputedTriangles.AddRange(quad);
             }
         }
 
-        return triangles;
+        return precomputedTriangles.ToArray();
     }
     int[] GetQuadFromEdge(Edge edge, int loopIndex, int loopVertexDatasLength)
     {
-        int[] quad = new int[6];
         int baseBackLoop = loopVertexDatasLength * loopIndex;
         int baseFrontLoop = loopVertexDatasLength * (loopIndex + 1);
 
-        int triangleIndiceFromBackLoop0 = baseBackLoop;
-        int triangleIndiceFromBackLoop1 = baseBackLoop;
-        int triangleIndiceFromBackLoop2 = baseFrontLoop;
+        int triangleIndiceFromBackLoop0 = baseBackLoop + edge.vertexDataRight.vertexIndex;
+        int triangleIndiceFromBackLoop1 = baseBackLoop + edge.vertexDataLeft.vertexIndex; 
+        int triangleIndiceFromBackLoop2 = baseFrontLoop + edge.vertexDataLeft.vertexIndex; 
 
-        int triangleIndiceFromFrontLoop0 = baseFrontLoop;
-        int triangleIndiceFromFrontLoop1 = baseFrontLoop;
-        int triangleIndiceFromFrontLoop2 = baseBackLoop;
+        int triangleIndiceFromFrontLoop0 = baseFrontLoop + edge.vertexDataLeft.vertexIndex; 
+        int triangleIndiceFromFrontLoop1 = baseFrontLoop + edge.vertexDataRight.vertexIndex; 
+        int triangleIndiceFromFrontLoop2 = baseBackLoop + edge.vertexDataRight.vertexIndex; 
+
+        int[] quad = new int[6];
 
         quad[0] = triangleIndiceFromBackLoop0;
         quad[1] = triangleIndiceFromBackLoop1;

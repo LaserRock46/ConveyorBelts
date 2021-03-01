@@ -230,6 +230,36 @@ public class ConveyorMesh
         }
         return newVertexColors;
     }
+    int[] GetTrimmedPrecomputedTriangles(int edgeLoopCount, EdgeLoop edgeLoop, int[] precomputedTriangles)
+    {
+        int trianglesLength = edgeLoopCount * edgeLoop.edges.Length * 6;
+        int[] trimmedPrecomputedTriangles = new int[trianglesLength];
+
+        for (int i = 0; i < trimmedPrecomputedTriangles.Length; i++)
+        {
+            trimmedPrecomputedTriangles[i] = precomputedTriangles[i];
+        }
+        return trimmedPrecomputedTriangles;
+    }
+    (Vector3[] vertices,Vector2[] uvs, Color32[] vertexColors) GetVertexDataArray(int edgeLoopCount, EdgeLoop edgeLoop)
+    {
+        Vector3[] vertices = new Vector3[0];
+        Vector2[] uvs = new Vector2[0];
+        Color32[] vertexColors = new Color32[0];
+        return (vertices, uvs, vertexColors);
+    }
+    Vector3 GetVertice()
+    {
+        return new Vector3();
+    }
+    Vector2 GetUV()
+    {
+        return new Vector2();
+    }
+    Color32 GetVertexColor()
+    {
+        return new Color32();
+    }
     #endregion
 
 
@@ -248,8 +278,8 @@ public class ConveyorMesh
 
         Vector3[] vertices = GetExtrudedMeshVerticesAlternative(targetEdgeLoopCount,_meshAssets[currentMeshAssetIndex].ogVertices);
         Vector2[] uvs = GetUVsAlternative(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogUvs, _meshAssets[currentMeshAssetIndex].uvSegments,_orientedPoints.segmentDistanceForward,_orientedPoints.segmentDistanceBackward,reverse);
-        int[] triangles = GetTrianglesAlternative(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogTriangles.Length, _meshAssets[currentMeshAssetIndex].trianglesSubMesh[0].value);
         Color32[] vertexColors = GetVertexColorsAlternative(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogVertexColors,conveyorSpeed);
+        int[] triangles = GetTrianglesAlternative(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].ogTriangles.Length, _meshAssets[currentMeshAssetIndex].trianglesSubMesh[0].value);
 
         _previewMeshFilter.mesh = GetMeshSubmesh0(_previewMeshFilter.mesh, vertices,uvs,triangles,vertexColors);
     }

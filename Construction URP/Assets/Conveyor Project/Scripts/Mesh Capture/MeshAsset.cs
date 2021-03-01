@@ -7,36 +7,43 @@ using UnityEngine;
 public class MeshAsset : ScriptableObject
 {
     #region Mesh Asset Data
-    [SerializeField] public bool generateCollider;
     [Space]
-    [SerializeField] public int loopCount = 128;
+    public Vector3[] ogVertices;
     [Space]
-    [SerializeField] public Vector3[] ogVertices;
+    public int[] ogTriangles;
     [Space]
-    [SerializeField] public int[] ogTriangles;
+    public Vector2[] ogUvs;
     [Space]
-    [SerializeField] public Vector2[] ogUvs;
+    public Color32[] ogVertexColors;
     [Space]
-    [SerializeField] public Color32[] ogVertexColors;
+    public int subMeshCount;
     [Space]
-    [SerializeField] public int subMeshCount;
+    public NestedArrayInt[] trianglesSubMesh;
     [Space]
-    [SerializeField] public NestedArrayInt[] trianglesSubMesh;
+    public UvSegment[] uvSegments;
+    /// refactored
+    public bool generateCollider;
     [Space]
-    [SerializeField] public UvSegment[] uvSegments;
+    public int loopCount = 128;
     [Space]
-    [SerializeField] public Material[] materials;
+    public Material[] materials;
+    [Space]
+    public EdgeLoop edgeLoop;
+    [Space]
+    public int[] precomputedTriangles;
+
+
     #endregion
     [Space]
     [Header("Bake Data Source")]
     public MeshCapture meshCapture;
     [ContextMenu("Get Data")]
     public void GetData()
-    {    
-        meshCapture.GetData(this);   
+    {
+        meshCapture.GetData(this);
     }
-  
-    
+
+
 
 }
 
