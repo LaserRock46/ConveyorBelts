@@ -34,7 +34,8 @@ public class MeshAsset : ScriptableObject
     [Space]
     public UvMapOrientation uvMapOrientation;
     public enum UvMapOrientation { ForwardX,ForwardY}
-
+    [Space]
+    public float compensateForwardStretch = 1;
     #endregion
     [Space]
     [Header("Bake Data Source")]

@@ -261,11 +261,11 @@ public class MeshCapture
         {
             if(backLoopVertexIndices[0] == vertexDatas[currentVertexData].originalVertexIndex)
             {
-                vertexDataRight = vertexDatas[currentVertexData];
+                vertexDataLeft = vertexDatas[currentVertexData];
             }
             if (backLoopVertexIndices[1] == vertexDatas[currentVertexData].originalVertexIndex)
             {
-                vertexDataLeft = vertexDatas[currentVertexData];
+                vertexDataRight = vertexDatas[currentVertexData];
             }
         }
         Edge edge = new Edge(vertexDataRight,vertexDataLeft);

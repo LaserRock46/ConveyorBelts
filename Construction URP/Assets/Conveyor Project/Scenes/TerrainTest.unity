@@ -6164,14 +6164,14 @@ MonoBehaviour:
         segmentDistanceForward: []
         segmentDistanceBackward: []
   _conveyorMesh:
-    _drawMesh: 0
+    _drawMesh: 1
     _meshAssets:
-    - {fileID: 11400000, guid: 3d3cdd14d7866f243bc881572ab8e6de, type: 2}
+    - {fileID: 11400000, guid: 362530a98ca4de543a4b30aa6dbfb7ae, type: 2}
     currentMeshAssetIndex: 0
     _previewTransform: {fileID: 1407808980}
     _previewMeshFilter: {fileID: 1407808979}
     _previewMeshRenderer: {fileID: 1407808978}
-    conveyorSpeed: 0
+    conveyorSpeed: 10
   _raycastTarget:
     serializedVersion: 2
     m_Bits: 65
