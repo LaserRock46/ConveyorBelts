@@ -230,6 +230,7 @@ public class ConveyorMesh
         }
         return newVertexColors;
     }
+    //refactored
     int[] GetTrimmedPrecomputedTriangles(int edgeLoopCount, EdgeLoop edgeLoop, int[] precomputedTriangles)
     {
         int trianglesLength = edgeLoopCount * edgeLoop.edges.Length * 6;
@@ -241,24 +242,63 @@ public class ConveyorMesh
         }
         return trimmedPrecomputedTriangles;
     }
-    (Vector3[] vertices,Vector2[] uvs, Color32[] vertexColors) GetVertexDataArray(int edgeLoopCount, EdgeLoop edgeLoop)
+    (Vector3[] vertices,Vector2[] uvs, Color32[] vertexColors) GetVertexDataArray(int edgeLoopCount, OrientedPoint orientedPoints, EdgeLoop edgeLoop, bool reversedUV, MeshAsset.UvMapOrientation uvMapOrientation)
     {
-        Vector3[] vertices = new Vector3[0];
-        Vector2[] uvs = new Vector2[0];
-        Color32[] vertexColors = new Color32[0];
+        int newVertexDataArrayLength = edgeLoopCount * edgeLoop.vertexDatas.Length;
+        Vector3[] vertices = new Vector3[newVertexDataArrayLength];
+        Vector2[] uvs = new Vector2[newVertexDataArrayLength];
+        Color32[] vertexColors = new Color32[newVertexDataArrayLength];
+
+        for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount; currentEdgeLoop++)
+        {
+            int currentLoopArrayIndex = currentEdgeLoop * edgeLoop.vertexDatas.Length;
+
+            for (int currentVertexData = 0; currentVertexData < edgeLoop.vertexDatas.Length; currentVertexData++)
+            {
+                int currentVertexDataIndex = currentLoopArrayIndex + currentVertexData;
+
+               
+            }
+        }
+
         return (vertices, uvs, vertexColors);
     }
-    Vector3 GetVertice()
+    Vector3 GetVertex(int currentEdgeLoop, VertexData vertexData, OrientedPoint orientedPoints)
     {
-        return new Vector3();
+        return orientedPoints.GetPointInLocalSpace(vertexData.vertexPosition,currentEdgeLoop);
     }
-    Vector2 GetUV()
+    Vector2 GetUV(int currentEdgeLoop, VertexData vertexData, bool reversedUV, OrientedPoint orientedPoints, MeshAsset.UvMapOrientation uvMapOrientation)
     {
-        return new Vector2();
+        float forwardLength = 0;
+        float sidewardLength = 0;
+        Vector2 uv = new Vector2();
+
+        if (uvMapOrientation == MeshAsset.UvMapOrientation.ForwardX)
+        {         
+            forwardLength = vertexData.vertexUV.x < 0 ?orientedPoints.segmentDistanceBackward[currentEdgeLoop]: orientedPoints.segmentDistanceForward[currentEdgeLoop];
+            sidewardLength = vertexData.vertexUV.y;
+            uv = new Vector2(forwardLength, sidewardLength);
+        }
+        else
+        {
+            forwardLength = vertexData.vertexUV.y < 0 ? orientedPoints.segmentDistanceBackward[currentEdgeLoop] : orientedPoints.segmentDistanceForward[currentEdgeLoop];
+            sidewardLength = vertexData.vertexUV.x;
+            uv = new Vector2(sidewardLength, forwardLength);
+        }
+        return uv;
     }
-    Color32 GetVertexColor()
+    Color32 GetVertexColor(VertexData vertexData, byte newConveyorSpeed)
     {
-        return new Color32();
+        Color32 vertexColor = new Color32();
+        if (IsVertexScrollable(vertexData.vertexColor))
+        {
+             vertexColor = new Color32(vertexData.vertexColor.r, newConveyorSpeed, vertexData.vertexColor.b, vertexData.vertexColor.a);
+        }
+        else
+        {
+            vertexColor = vertexData.vertexColor;
+        }
+        return vertexColor;
     }
     #endregion
 

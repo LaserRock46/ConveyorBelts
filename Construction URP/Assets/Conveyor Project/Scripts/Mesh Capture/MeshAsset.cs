@@ -31,7 +31,9 @@ public class MeshAsset : ScriptableObject
     public EdgeLoop edgeLoop;
     [Space]
     public int[] precomputedTriangles;
-
+    [Space]
+    public UvMapOrientation uvMapOrientation;
+    public enum UvMapOrientation { ForwardX,ForwardY}
 
     #endregion
     [Space]
