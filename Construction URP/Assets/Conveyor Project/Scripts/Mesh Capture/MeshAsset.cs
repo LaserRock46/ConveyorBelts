@@ -7,6 +7,21 @@ using UnityEngine;
 public class MeshAsset : ScriptableObject
 {
     #region Mesh Asset Data
+    [Space]
+    public Vector3[] ogVertices;
+    [Space]
+    public int[] ogTriangles;
+    [Space]
+    public Vector2[] ogUvs;
+    [Space]
+    public Color32[] ogVertexColors;
+    [Space]
+    public int subMeshCount;
+    [Space]
+    public NestedArrayInt[] trianglesSubMesh;
+    [Space]
+    public UvSegment[] uvSegments;
+    /// refactored
     public bool generateCollider;
     [Space]
     public int loopCount = 128;

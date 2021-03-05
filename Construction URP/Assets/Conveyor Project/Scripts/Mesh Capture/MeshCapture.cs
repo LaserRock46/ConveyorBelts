@@ -6,6 +6,10 @@ using UnityEngine;
 public class MeshCapture
 {
     public Mesh mesh;
+    //public MeshAsset meshAsset;
+
+    private int[] _triangles;
+    private List<NestedArrayInt> _trianglesSubMesh = new List<NestedArrayInt>();
 
     public void GetData(MeshAsset meshAsset)
     {
@@ -18,8 +22,26 @@ public class MeshCapture
         {
             Debug.LogError("meshAsset == null");
             return;
-        }  
-      
+        }
+
+
+        meshAsset.ogVertices = mesh.vertices;
+        meshAsset.ogTriangles = mesh.triangles;
+        meshAsset.ogUvs = mesh.uv;
+        meshAsset.ogVertexColors = mesh.colors32;
+        _triangles = mesh.triangles;
+
+        meshAsset.subMeshCount = mesh.subMeshCount;
+        _trianglesSubMesh.Clear();
+        for (int i = 0; i < meshAsset.subMeshCount; i++)
+        {
+            _trianglesSubMesh.Add(new NestedArrayInt());
+            _trianglesSubMesh[i].value = mesh.GetTriangles(i);
+        }
+        meshAsset.trianglesSubMesh = GetTrianglesSubmeshAlternative(meshAsset);
+        meshAsset.uvSegments = GetSegmentUVs(meshAsset);
+
+        /// refactored
         Vector3[] originalVertices = mesh.vertices;
         Vector2[] originalUVs = mesh.uv;
         int[] originalTriangles = mesh.triangles;
@@ -33,7 +55,157 @@ public class MeshCapture
         meshAsset.edgeLoop = edgeLoop;
         meshAsset.precomputedTriangles = precomputedTriangles;
     }
+    NestedArrayInt[] GetTrianglesSubmesh(MeshAsset meshAsset)
+    {
+        List<NestedArrayInt> trianglesSubmesh = new List<NestedArrayInt>();
+        for (int i = 0; i < meshAsset.subMeshCount; i++)
+        {
+            trianglesSubmesh.Add(new NestedArrayInt());
+            trianglesSubmesh[i].value = new int[_trianglesSubMesh[i].value.Length * meshAsset.loopCount];
+        }
+
+        for (int currentEdgeLoop = 0; currentEdgeLoop < meshAsset.loopCount; currentEdgeLoop++)
+        {
+            for (int currentSubmesh = 0; currentSubmesh < meshAsset.subMeshCount; currentSubmesh++)
+            {
+                int triangleSegmentPositionInArray = _trianglesSubMesh[currentSubmesh].value.Length * currentEdgeLoop;
+                for (int i2 = 0; i2 < _trianglesSubMesh[currentSubmesh].value.Length; i2++)
+                {
+                    int targetTrianglePositionInTriangleIndexArray = triangleSegmentPositionInArray + i2;
+
+                    int baseValue = 0;
+                    int previousMaxValue = 0;
+                    if (currentEdgeLoop == 0)
+                    {
+                        baseValue = _trianglesSubMesh[currentSubmesh].value[i2];
+                    }
+                    if (currentEdgeLoop > 0)
+                    {
+                        baseValue = _trianglesSubMesh[currentSubmesh].value[i2];
+
+                        previousMaxValue = meshAsset.ogVertices.Length * currentEdgeLoop;
+                    }
+
+                    int triangleValue = baseValue + previousMaxValue;
+                    trianglesSubmesh[currentSubmesh].value[targetTrianglePositionInTriangleIndexArray] = triangleValue;
+                }
+            }
+        }
+        return trianglesSubmesh.ToArray();
+    }
+   
+    bool IsOriginalVertexInFront(Vector3 originalVertex)
+    {
+        if (originalVertex.z >= 0)
+        {
+            return true;
+        }
+        return false;
+    }
+    NestedArrayInt[] GetTrianglesSubmeshAlternative(MeshAsset meshAsset)
+    {
+        List<NestedArrayInt> trianglesSubmesh = new List<NestedArrayInt>();
+        for (int i = 0; i < meshAsset.subMeshCount; i++)
+        {
+            trianglesSubmesh.Add(new NestedArrayInt());
+            trianglesSubmesh[i].value = new int[(_trianglesSubMesh[i].value.Length/2) * meshAsset.loopCount];
+        }
+
+        for (int currentEdgeLoop = 0; currentEdgeLoop < meshAsset.loopCount - 1; currentEdgeLoop++)
+        {
+            for (int currentSubmesh = 0; currentSubmesh < meshAsset.subMeshCount; currentSubmesh++)
+            {
+                int trianglesHalfLength = _trianglesSubMesh[currentSubmesh].value.Length / 2;
+                int triangleSegmentPositionInArray = trianglesHalfLength * currentEdgeLoop;
+                for (int currentOgTriangle = 0; currentOgTriangle < _trianglesSubMesh[currentSubmesh].value.Length; currentOgTriangle++)
+                {
+                    int targetTrianglePositionInTriangleIndexArray = triangleSegmentPositionInArray + currentOgTriangle;
+                  
+                   
+                    int baseValue = _trianglesSubMesh[currentSubmesh].value[currentOgTriangle];
+
+                    int halfVerticesLength = meshAsset.ogVertices.Length / 2;
+                    int previousMaxValue = halfVerticesLength * currentEdgeLoop;
+                    int nextMaxValue = halfVerticesLength * (currentEdgeLoop + 1);
+
+                    int triangleValue = 0;
+
+                    if (currentEdgeLoop > 1)
+                    {
+                        if (IsOriginalVertexInFront(meshAsset.ogVertices[baseValue]))
+                        {
+                            triangleValue = baseValue + nextMaxValue;
+                        }
+                        else
+                        {
+                            triangleValue = baseValue + previousMaxValue;
+                        }
+                    }
+                    else
+                    {
+                        triangleValue = baseValue;
+                    }
+                    triangleValue = baseValue;
+                    trianglesSubmesh[currentSubmesh].value[targetTrianglePositionInTriangleIndexArray] = triangleValue;
+                }
+            }
+        }
+        return trianglesSubmesh.ToArray();
+    }
   
+    bool IsAxisEquals(Vector3 a, Vector3 b, float tolerance = 0.01f)
+    {
+        Vector2 testA = a;
+        Vector2 testB = b;
+        return Vector2.Distance(a, b) < tolerance;
+    }
+    UvSegment[] GetSegmentUVs(MeshAsset meshAsset)
+    {
+        List<UvSegment> uvSegment = new List<UvSegment>();
+        for (int currentTriangle = 2; currentTriangle < _triangles.Length; currentTriangle += 3)
+        {
+            List<int> allVertices = new List<int>();
+            allVertices.Add(_triangles[currentTriangle]);
+            allVertices.Add(_triangles[currentTriangle - 1]);
+            allVertices.Add(_triangles[currentTriangle - 2]);
+
+           List<int> sameAxisVertices = new List<int>();
+
+
+            for (int firstLoop = 0; firstLoop < allVertices.Count; firstLoop++)
+            {             
+                for (int secondLoop = 0; secondLoop < allVertices.Count; secondLoop++)
+                {
+                    if (secondLoop != firstLoop)
+                    {          
+                        if(IsAxisEquals(meshAsset.ogVertices[allVertices[firstLoop]], meshAsset.ogVertices[allVertices[secondLoop]]))
+                        {
+                            sameAxisVertices.Add(allVertices[secondLoop]);
+                        }                 
+                    }
+                }
+            }        
+            
+            UvSegment segment;
+            if (meshAsset.ogVertices[sameAxisVertices[0]].z <= 0)
+            {
+                bool reverseDirection = meshAsset.ogUvs[sameAxisVertices[0]].x >= 0;
+                segment = new UvSegment(sameAxisVertices[0], sameAxisVertices[1], 0, reverseDirection);          
+            }
+            else
+            {
+                bool reverseDirection = meshAsset.ogUvs[sameAxisVertices[1]].x >= 0;
+                segment = new UvSegment(sameAxisVertices[1], sameAxisVertices[0], 0, reverseDirection);        
+            }
+            if (!uvSegment.Contains(segment))
+            {
+                uvSegment.Add(segment);
+            }
+            
+        }    
+        return uvSegment.ToArray();
+    }
+    //// refectored system
     VertexData[] GetVertexDatas(Vector3[] originalVertices,Vector2[] originalUVs, Color32[] originalVertexColors)
     {
         List<VertexData> vertexDatas = new List<VertexData>();
@@ -52,26 +224,20 @@ public class MeshCapture
         }
         return vertexDatas.ToArray();
     }
-    bool IsOriginalVertexInFront(Vector3 originalVertex)
-    {       
-        return originalVertex.z >= 0;
-    }
     Edge[] GetEdges(VertexData[] vertexDatas, int[] originalTriangles, Vector3[] originalVertices)
     {
         List<Edge> edges = new List<Edge>();
         for (int vertexIndex = 2; vertexIndex < originalTriangles.Length; vertexIndex += 3)
         {        
-            int[] triangle = new int[] {originalTriangles[vertexIndex - 2], originalTriangles[vertexIndex - 1], originalTriangles[vertexIndex] };
-            Edge.IndiceLoopOrder[] backLoopVertexIndices = GetBackLoopVertexIndices(triangle,originalVertices);
+            int[] backLoopVertexIndices = GetBackLoopVertexIndices(vertexIndex,originalTriangles,originalVertices);
             if (backLoopVertexIndices.Length == 2)
             {
-                Edge edge = GetEdgeWithWindingOrder(vertexDatas, backLoopVertexIndices,triangle,originalVertices);
+                Edge edge = GetEdgeWithWindingOrder(vertexDatas, backLoopVertexIndices);
                 edges.Add(edge);
             }
         }
         return edges.ToArray();
     }
-    /*
     int[] GetBackLoopVertexIndices(int vertexIndex,int[] originalTriangles, Vector3[] originalVertices)
     {   
         List<int> backLoopVertexIndices = new List<int>();
@@ -86,45 +252,25 @@ public class MeshCapture
       
         return backLoopVertexIndices.ToArray();
     }
-    */
-    Edge.IndiceLoopOrder[] GetBackLoopVertexIndices(int[] triangle, Vector3[] originalVertices)
+    Edge GetEdgeWithWindingOrder(VertexData[] vertexDatas, int[] backLoopVertexIndices)
     {
-        Edge.IndiceLoopOrder[] backLoopVertexIndices = new Edge.IndiceLoopOrder[3];
-        for (int i = 0; i < triangle.Length; i++)
+        VertexData vertexDataRight = null;
+        VertexData vertexDataLeft = null; 
+
+        for (int currentVertexData = 0; currentVertexData < vertexDatas.Length; currentVertexData++)
         {
-            int originalVertexIndex = triangle[i];
-            backLoopVertexIndices[i] = IsOriginalVertexInFront(originalVertices[originalVertexIndex])? Edge.IndiceLoopOrder.Front:Edge.IndiceLoopOrder.Back;
-        }
-        return backLoopVertexIndices;
-    }
-    Edge GetEdgeWithWindingOrder(VertexData[] vertexDatas, Edge.IndiceLoopOrder[] backLoopVertexIndices, int[] triangle, Vector3[] originalVertices)
-    {
-        Edge.IndiceLoopOrder[] triangleFromBackLoopOrder = new Edge.IndiceLoopOrder[3];
-        Edge.IndiceLoopOrder[] triangleFromFrontLoopOrder = new Edge.IndiceLoopOrder[3];
-        VertexData[] triangleFromBackLoop = new VertexData[3];
-        VertexData[] triangleFromFrontLoop = new VertexData[3];
-
-
-
-        Edge edge = new Edge(triangleFromBackLoopOrder,triangleFromFrontLoopOrder,triangleFromBackLoop,triangleFromFrontLoop);
-        return edge;
-    }
-    bool IsOriginalVertexInSameLine(Vector3 a,Vector3 b)
-    {
-        Vector2 aV2 = a;
-        Vector2 bV2 = b;
-        return Vector2.Distance(aV2,bV2) < 0.001f;
-    }
-    VertexData GetMatchingVertexData(VertexData[] vertexDatas, int triangle)
-    {
-        for (int i = 0; i < vertexDatas.Length; i++)
-        {
-            if(triangle == vertexDatas[i].originalVertexIndex)
+            if(backLoopVertexIndices[0] == vertexDatas[currentVertexData].originalVertexIndex)
             {
-                return vertexDatas[i];
+                vertexDataLeft = vertexDatas[currentVertexData];
+            }
+            if (backLoopVertexIndices[1] == vertexDatas[currentVertexData].originalVertexIndex)
+            {
+                vertexDataRight = vertexDatas[currentVertexData];
             }
         }
-        return null;
+        Edge edge = new Edge(vertexDataRight,vertexDataLeft);
+
+        return edge;
     }
     int[] GetPrecomputedTrianglesArray(int loopCount, EdgeLoop edgeLoop)
     {
@@ -145,7 +291,7 @@ public class MeshCapture
     {
         int baseBackLoop = loopVertexDatasLength * loopIndex;
         int baseFrontLoop = loopVertexDatasLength * (loopIndex + 1);
-        /*
+
         int triangleIndiceFromBackLoop0 = baseBackLoop + edge.vertexDataRight.vertexIndex;
         int triangleIndiceFromBackLoop1 = baseBackLoop + edge.vertexDataLeft.vertexIndex; 
         int triangleIndiceFromBackLoop2 = baseFrontLoop + edge.vertexDataLeft.vertexIndex; 
@@ -153,17 +299,16 @@ public class MeshCapture
         int triangleIndiceFromFrontLoop0 = baseFrontLoop + edge.vertexDataLeft.vertexIndex; 
         int triangleIndiceFromFrontLoop1 = baseFrontLoop + edge.vertexDataRight.vertexIndex; 
         int triangleIndiceFromFrontLoop2 = baseBackLoop + edge.vertexDataRight.vertexIndex; 
-        */
 
         int[] quad = new int[6];
-        /*
+
         quad[0] = triangleIndiceFromBackLoop0;
         quad[1] = triangleIndiceFromBackLoop1;
         quad[2] = triangleIndiceFromBackLoop2;
         quad[3] = triangleIndiceFromFrontLoop0;
         quad[4] = triangleIndiceFromFrontLoop1;
         quad[5] = triangleIndiceFromFrontLoop2;
-        */
+
         return quad;
     }
 }
