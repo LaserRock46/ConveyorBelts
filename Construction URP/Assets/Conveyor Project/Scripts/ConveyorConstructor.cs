@@ -43,6 +43,7 @@ public class ConveyorConstructor : MonoBehaviour
     [HideInInspector] public int rotationStep;
     [SerializeField] private int _rotationStepAngle = 10;
     [SerializeField] private int _rotationStepCount = 35;
+    [SerializeField] private Transform _autoRotationLookTarget;
     public bool rotationIsAuto;
 
     [SerializeField] private Vector3 _conveyorEndResetPosition = Vector3.forward;
@@ -51,7 +52,31 @@ public class ConveyorConstructor : MonoBehaviour
     #endregion
 
     #region Functions
-    Vector3 GetPreviewPositionForGrounded()
+    Vector3 GetPreviewPositionForGroundedEnd()
+    {
+        Vector3 position = GetPreviewPositionForGroundedStart();
+        position.y = 0;
+        Vector3 startTransform = _conveyorStartTransform.position;
+        startTransform.y = 0;
+
+        if (Vector3.Distance(position, startTransform) < 4)
+        {
+            Vector3 yOffset = new Vector3();
+            RaycastHit hit;
+
+            if (Physics.Raycast(_conveyorEndTransform.position, -_conveyorEndTransform.up, out hit, Mathf.Infinity, _raycastTarget))
+            {
+                yOffset = hit.point + (pillarHeight * pillarStackCount) - pillarToGroundOffset;
+            }
+            Vector3 diff = position - startTransform;
+            Vector3 diffNormalized = diff.normalized * 4;
+            Vector3 safePosition = diffNormalized + startTransform;
+            safePosition.y = yOffset.y;
+            return safePosition;
+        }
+        return GetPreviewPositionForGroundedStart();
+    }
+    Vector3 GetPreviewPositionForGroundedStart()
     {
         return raycastPosition + (pillarHeight * pillarStackCount) - pillarToGroundOffset;
     }
@@ -61,7 +86,7 @@ public class ConveyorConstructor : MonoBehaviour
     }
     Vector3 GetPreviewEndTransformAutoRotation()
     {
-        Vector3 startPosition = _conveyorStartTransform.position;
+        Vector3 startPosition = _conveyorPath.arcStart[_conveyorPath.arcStart.Length-1].position;
         startPosition.y = 0;
         Vector3 endPosition = _conveyorEndTransform.position;
         endPosition.y = 0;
@@ -87,7 +112,7 @@ public class ConveyorConstructor : MonoBehaviour
         PreviewStateUpdate();
         BuildingStageUpdate();
         RotationUpdate();
-        BezierAndMeshUpdate();
+        PathAndMeshUpdate();
         FinishAndCreateUpdate();
       
         if (updateCurveManual)
@@ -166,7 +191,7 @@ public class ConveyorConstructor : MonoBehaviour
         {
             _conveyorEndTransform.localPosition = _conveyorEndResetPosition;
             _conveyorEndTransform.forward = _conveyorStartTransform.forward;
-            previewTransform.position = GetPreviewPositionForGrounded();
+            previewTransform.position = GetPreviewPositionForGroundedStart();
         }
         if (_conditions.CanHidePreview())
         {
@@ -199,19 +224,20 @@ public class ConveyorConstructor : MonoBehaviour
             }
         }
     }
-    void BezierAndMeshUpdate()
+    void PathAndMeshUpdate()
     {
         if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation()|| _conditions.NeedUpdateAfterCameraMove() || _conditions.CanResetPreview())
         {
-            UpdatePreviewPrototypeAndBezierLocation();
-            if (_conditions.CanUpdatePath() || _conditions.CanResetPreview())
+            UpdatePreviewAlignment();
+            if (_conditions.CanUpdatePath()||_conditions.CanResetPreview())
             {          
                 _conveyorPath.ConstructPath();
                 _conveyorMesh.MeshUpdate(false);
             }      
+           
         }
     } 
-    void UpdatePreviewPrototypeAndBezierLocation()
+    void UpdatePreviewAlignment()
     {     
         if (_conditions.CanAlignToGround())
         {
@@ -226,12 +252,12 @@ public class ConveyorConstructor : MonoBehaviour
     {
         if (_conditions.CanMoveBeltStart())
         {
-            previewTransform.position = GetPreviewPositionForGrounded();
+            previewTransform.position = GetPreviewPositionForGroundedStart();
             previewTransform.eulerAngles = GetPreviewTransformManualRotation();
         }
         if (_conditions.CanMoveBeltEnd())
         {
-            _conveyorEndTransform.position = GetPreviewPositionForGrounded();
+            _conveyorEndTransform.position = GetPreviewPositionForGroundedEnd();
 
             if (_conditions.IsEndPointRotationAuto())
             {

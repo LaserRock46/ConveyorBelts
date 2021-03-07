@@ -10,7 +10,7 @@ public class CircularArc
     [SerializeField] private bool _debugCircles;
     [SerializeField] private bool _debugDrawTestConnection;
     [SerializeField] private float _testAngleTolerance;
- 
+   
     private bool _found;
 
     #endregion
