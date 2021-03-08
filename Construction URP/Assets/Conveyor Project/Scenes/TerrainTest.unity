@@ -5238,7 +5238,7 @@ MonoBehaviour:
   _conveyorMesh:
     _drawMesh: 1
     _meshAssets:
-    - {fileID: 11400000, guid: 362530a98ca4de543a4b30aa6dbfb7ae, type: 2}
+    - {fileID: 11400000, guid: 8c1ff6afba5967144bc2863e9234e41a, type: 2}
     currentMeshAssetIndex: 0
     _previewTransform: {fileID: 1407808980}
     _previewMeshFilter: {fileID: 1407808979}

@@ -78,7 +78,7 @@ public class MeshCapture
             int[] backLoopVertexIndices = GetBackLoopVertexIndices(originalTriangle,originalVertices);
             if (backLoopVertexIndices.Length == 2)
             {
-                Edge edge = GetEdgeWithWindingOrder(vertexDatas, backLoopVertexIndices);
+                Edge edge = GetEdgeWithWindingOrder(vertexDatas, backLoopVertexIndices,originalTriangle,originalVertices);
                 edges.Add(edge);
             }
         }
@@ -97,26 +97,69 @@ public class MeshCapture
         }                  
         return backLoopVertexIndices.ToArray();
     }
-    Edge GetEdgeWithWindingOrder(VertexData[] vertexDatas, int[] backLoopVertexIndices)
+    Edge GetEdgeWithWindingOrder(VertexData[] vertexDatas, int[] backLoopVertexIndices,int[] originalTriangle, Vector3[] originalVertices)
     {
-        VertexData vertexDataRight = null;
-        VertexData vertexDataLeft = null; 
+        VertexData vertexDataRight = GetMatchingVertexData(backLoopVertexIndices[0],vertexDatas);
+        VertexData vertexDataLeft = GetMatchingVertexData(backLoopVertexIndices[1], vertexDatas);
 
+        Vector3 sampleLeftBack = vertexDataLeft.vertexPosition;
+        Vector3 sampleRightBack = vertexDataRight.vertexPosition;
+        Vector3 sampleLeftFront = vertexDataLeft.vertexPosition;
+        sampleLeftFront.z = 1;
+        Vector3 sampleRightFront = vertexDataRight.vertexPosition;
+        sampleRightFront.z = 1;
+
+        Edge.WindingOrder sampleLeftBackOrder = Edge.WindingOrder.LeftBack;
+        Edge.WindingOrder sampleRightBackOrder = Edge.WindingOrder.RigthBack;
+        Edge.WindingOrder sampleLeftFrontOrder = Edge.WindingOrder.LeftFront;
+        Edge.WindingOrder sampleRightFrontOrder = Edge.WindingOrder.RightFront;
+
+        Vector3 originalQuadNormal = GetQuadNormal(originalVertices[originalTriangle[0]], originalVertices[originalTriangle[1]], originalVertices[originalTriangle[2]]);
+
+        WindingOrderSolution[] solutionsBackLoopTriangle = new WindingOrderSolution[]
+        {
+            new WindingOrderSolution(sampleLeftBack,sampleRightBack,sampleLeftFront,sampleLeftBackOrder,sampleRightBackOrder,sampleLeftFrontOrder),
+            new WindingOrderSolution(sampleRightBack,sampleLeftBack,sampleLeftFront,sampleRightBackOrder,sampleLeftBackOrder,sampleLeftFrontOrder)
+        };
+        WindingOrderSolution[] solutionsFrontLoopTriangle = new WindingOrderSolution[]
+       {
+            new WindingOrderSolution(sampleLeftFront,sampleRightFront,sampleRightBack,sampleLeftFrontOrder,sampleRightFrontOrder,sampleRightBackOrder),
+            new WindingOrderSolution(sampleRightFront,sampleLeftFront,sampleRightBack,sampleRightFrontOrder,sampleLeftFrontOrder,sampleRightBackOrder)
+       };
+
+        Edge.WindingOrder[] fromFrontLoopTriangle = GetTriangleWindingOrderSolution(originalQuadNormal, solutionsFrontLoopTriangle);
+        Edge.WindingOrder[] fromBackLoopTriangle = GetTriangleWindingOrderSolution(originalQuadNormal, solutionsBackLoopTriangle);
+       
+        return new Edge(vertexDataRight, vertexDataLeft, fromFrontLoopTriangle, fromBackLoopTriangle);
+    }
+    VertexData GetMatchingVertexData(int backLoopVertexIndex,VertexData[] vertexDatas)
+    {
         for (int currentVertexData = 0; currentVertexData < vertexDatas.Length; currentVertexData++)
         {
-            if(backLoopVertexIndices[0] == vertexDatas[currentVertexData].originalVertexIndex)
+            if (backLoopVertexIndex == vertexDatas[currentVertexData].originalVertexIndex)
             {
-                vertexDataLeft = vertexDatas[currentVertexData];
-            }
-            if (backLoopVertexIndices[1] == vertexDatas[currentVertexData].originalVertexIndex)
+                return vertexDatas[currentVertexData];
+            }          
+        }
+        return null;
+    }
+    Vector3 GetQuadNormal(Vector3 v0,Vector3 v1, Vector3 v2)
+    {
+        return new Plane(v0,v1,v2).normal;
+    }
+    Edge.WindingOrder[] GetTriangleWindingOrderSolution(Vector3 originalQuadNormal, WindingOrderSolution[] windingOrderSolutions)
+    {
+        for (int i = 0; i < windingOrderSolutions.Length; i++)
+        {
+            Vector3 solutionQuadNormal = GetQuadNormal(windingOrderSolutions[i].v0, windingOrderSolutions[i].v1, windingOrderSolutions[i].v2);
+            if (solutionQuadNormal == originalQuadNormal)
             {
-                vertexDataRight = vertexDatas[currentVertexData];
+                return new Edge.WindingOrder[] { windingOrderSolutions[i].order0, windingOrderSolutions[i].order1, windingOrderSolutions[i].order2 };
             }
         }
-        Edge edge = new Edge(vertexDataRight,vertexDataLeft);
-
-        return edge;
+        return null;
     }
+
     int[] GetPrecomputedTrianglesArray(int loopCount, EdgeLoop edgeLoop)
     {
         List<int> precomputedTriangles = new List<int>();       
@@ -137,16 +180,16 @@ public class MeshCapture
         int baseBackLoop = loopVertexDatasLength * loopIndex;
         int baseFrontLoop = loopVertexDatasLength * (loopIndex + 1);
 
-        int triangleIndiceFromBackLoop0 = baseBackLoop + edge.vertexDataRight.vertexIndex;
-        int triangleIndiceFromBackLoop1 = baseBackLoop + edge.vertexDataLeft.vertexIndex; 
-        int triangleIndiceFromBackLoop2 = baseFrontLoop + edge.vertexDataLeft.vertexIndex; 
+        int triangleIndiceFromBackLoop0 = GetIndice(baseBackLoop, baseFrontLoop, edge.vertexDataLeft, edge.vertexDataRight, edge.fromBackLoopTriangle[0]);
+        int triangleIndiceFromBackLoop1 = GetIndice(baseBackLoop, baseFrontLoop, edge.vertexDataLeft, edge.vertexDataRight, edge.fromBackLoopTriangle[1]);
+        int triangleIndiceFromBackLoop2 = GetIndice(baseBackLoop, baseFrontLoop, edge.vertexDataLeft, edge.vertexDataRight, edge.fromBackLoopTriangle[2]);
 
-        int triangleIndiceFromFrontLoop0 = baseFrontLoop + edge.vertexDataLeft.vertexIndex; 
-        int triangleIndiceFromFrontLoop1 = baseFrontLoop + edge.vertexDataRight.vertexIndex; 
-        int triangleIndiceFromFrontLoop2 = baseBackLoop + edge.vertexDataRight.vertexIndex; 
+        int triangleIndiceFromFrontLoop0 = GetIndice(baseBackLoop, baseFrontLoop, edge.vertexDataLeft, edge.vertexDataRight, edge.fromFrontLoopTriangle[0]);
+        int triangleIndiceFromFrontLoop1 = GetIndice(baseBackLoop, baseFrontLoop, edge.vertexDataLeft, edge.vertexDataRight, edge.fromFrontLoopTriangle[1]);
+        int triangleIndiceFromFrontLoop2 = GetIndice(baseBackLoop, baseFrontLoop, edge.vertexDataLeft, edge.vertexDataRight, edge.fromFrontLoopTriangle[2]);
+
 
         int[] quad = new int[6];
-
         quad[0] = triangleIndiceFromBackLoop0;
         quad[1] = triangleIndiceFromBackLoop1;
         quad[2] = triangleIndiceFromBackLoop2;
@@ -155,5 +198,20 @@ public class MeshCapture
         quad[5] = triangleIndiceFromFrontLoop2;
 
         return quad;
+    }
+    int GetIndice(int baseBackLoop, int baseFrontLoop,VertexData vertexDataLeft, VertexData vertexDataRight, Edge.WindingOrder windingOrder)
+    {
+        switch (windingOrder)
+        {
+            case Edge.WindingOrder.LeftBack:
+                return baseBackLoop + vertexDataLeft.vertexIndex;
+            case Edge.WindingOrder.RigthBack:
+                return baseBackLoop + vertexDataRight.vertexIndex;
+            case Edge.WindingOrder.LeftFront:
+                return baseFrontLoop + vertexDataLeft.vertexIndex;
+            case Edge.WindingOrder.RightFront:
+                return baseFrontLoop + vertexDataRight.vertexIndex;
+        }
+        return 0;
     }
 }
