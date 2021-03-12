@@ -137,6 +137,7 @@ public class CircularArc
     public void GetCircularArcIndexPoints(CircularArc oppositeCircularArc)
     {
         var getNearestPointsAnchors = GetNearestPoints(this, oppositeCircularArc);
+      
         var getArcEndPointIndex = GetArcEndPointsIndex(getNearestPointsAnchors.thisAnchorPoints, getNearestPointsAnchors.oppositeAnchorPoints,selfAnchor, oppositeCircularArc.selfAnchor);
         if (getArcEndPointIndex.found)
         {        
@@ -146,8 +147,9 @@ public class CircularArc
             indexOppositePoint = getArcEndPointIndex.indexOppositePoint;
         }
 
-        _found = getArcEndPointIndex.found;
+        _found = getArcEndPointIndex.found;      
     }
+   
     public void DebugCircles(CircularArc oppositeCircularArc)
     {
         if (_debugCircles)

@@ -6,7 +6,6 @@ public class ConveyorConstructor : MonoBehaviour
 {
     #region Temp
     [Header("Temporary Things", order = 0)]
-   
     public bool updateCurveManual;
     #endregion
 
@@ -26,6 +25,9 @@ public class ConveyorConstructor : MonoBehaviour
     [SerializeField] private Transform _conveyorStartTransform = null;
     [SerializeField] private Transform _conveyorEndTransform = null;
 
+    [SerializeField] private GameObject[] _startPillarsStack;
+    [SerializeField] private GameObject[] _endPillarsStack;
+
     public enum BuildingStage { None, InitializedPreview, SetStart, SetEnd }
     public BuildingStage buildingStage = BuildingStage.None;
 
@@ -37,8 +39,9 @@ public class ConveyorConstructor : MonoBehaviour
     [SerializeField] private Vector3 pillarHeight = new Vector3();
     [SerializeField] private Vector3 pillarToGroundOffset = new Vector3(0, -0.1f, 0);
     [SerializeField] private Vector3 conveyorTipToPillarOffset = new Vector3();
-    public int pillarStackCount = 1;
-    public int pillarStackCountMax = 5;
+    public int startPillarsStackCount = 1;
+    public int endPillarsStackCount = 1;
+    public int pillarsStackCountMax = 5;
 
     [HideInInspector] public int rotationStep;
     [SerializeField] private int _rotationStepAngle = 10;
@@ -65,8 +68,8 @@ public class ConveyorConstructor : MonoBehaviour
             RaycastHit hit;
 
             if (Physics.Raycast(_conveyorEndTransform.position, -_conveyorEndTransform.up, out hit, Mathf.Infinity, _raycastTarget))
-            {
-                yOffset = hit.point + (pillarHeight * pillarStackCount) - pillarToGroundOffset;
+            {             
+                yOffset = hit.point + (pillarHeight * endPillarsStackCount) - pillarToGroundOffset;
             }
             Vector3 diff = position - startTransform;
             Vector3 diffNormalized = diff.normalized * 4;
@@ -74,19 +77,40 @@ public class ConveyorConstructor : MonoBehaviour
             safePosition.y = yOffset.y;
             return safePosition;
         }
-        return GetPreviewPositionForGroundedStart();
+        return raycastPosition + (pillarHeight * endPillarsStackCount) - pillarToGroundOffset ;
     }
     Vector3 GetPreviewPositionForGroundedStart()
     {
-        return raycastPosition + (pillarHeight * pillarStackCount) - pillarToGroundOffset;
+        
+        return raycastPosition + (pillarHeight * startPillarsStackCount) - pillarToGroundOffset ;
     }
     Vector3 GetPreviewPositionForPillar()
     {
         return raycastGameObject.GetComponent<Pillar>().tipAnchor.position + conveyorTipToPillarOffset;
     }
+    Vector3 GetPreviewPositionForPillarInStack(int heightMultiplier, bool isEndPillar = false)
+    {
+        Vector3 pillarPosition = (-pillarHeight * heightMultiplier) - pillarToGroundOffset - conveyorTipToPillarOffset;
+       
+        return pillarPosition;
+    }
     Vector3 GetPreviewEndTransformAutoRotation()
     {
-        Vector3 startPosition = _conveyorPath.arcStart[_conveyorPath.arcStart.Length-1].position;
+        int lookAtPointIndex = _conveyorPath.circularArcStart.indexThisPoint;
+        Vector3 startPosition = new Vector3();
+
+        float leftToEnd = Vector3.Distance(_conveyorPath.circularArcStart.pointsLeftAnchor.position, _conveyorEndTransform.position);
+        float rightToEnd = Vector3.Distance(_conveyorPath.circularArcStart.pointsRightAnchor.position, _conveyorEndTransform.position);
+       
+        if (leftToEnd < rightToEnd)
+        {
+            startPosition = _conveyorPath.circularArcStart.pointsLeft[lookAtPointIndex].position;          
+        }
+        else 
+        {
+            startPosition = _conveyorPath.circularArcStart.pointsRight[lookAtPointIndex].position;  
+        }
+
         startPosition.y = 0;
         Vector3 endPosition = _conveyorEndTransform.position;
         endPosition.y = 0;
@@ -111,6 +135,7 @@ public class ConveyorConstructor : MonoBehaviour
     {
         PreviewStateUpdate();
         BuildingStageUpdate();
+        PreviewPillarsUpdate();
         RotationUpdate();
         PathAndMeshUpdate();
         FinishAndCreateUpdate();
@@ -192,6 +217,7 @@ public class ConveyorConstructor : MonoBehaviour
             _conveyorEndTransform.localPosition = _conveyorEndResetPosition;
             _conveyorEndTransform.forward = _conveyorStartTransform.forward;
             previewTransform.position = GetPreviewPositionForGroundedStart();
+           
         }
         if (_conditions.CanHidePreview())
         {
@@ -200,6 +226,50 @@ public class ConveyorConstructor : MonoBehaviour
         if (_conditions.CanEnablePreview())
         {
             previewGameObject.SetActive(true);
+        }
+    }
+    void PreviewPillarsUpdate()
+    {
+        if (_conditions.CanIncreaseStartPillarCount())
+        {
+            startPillarsStackCount++;
+            endPillarsStackCount = startPillarsStackCount;
+            EnableNeededPreviewPillars();        
+        }
+        if (_conditions.CanDecreaseStartPillarCount())
+        {
+            startPillarsStackCount--;
+            endPillarsStackCount = startPillarsStackCount;
+            EnableNeededPreviewPillars();         
+        }
+        if (_conditions.CanIncreaseEndPillarCount())
+        {
+            endPillarsStackCount++;
+            EnableNeededPreviewPillars();
+        }
+        if (_conditions.CanDecreaseEndPillarCount())
+        {
+            endPillarsStackCount--;
+            EnableNeededPreviewPillars();
+        }
+
+        if (_conditions.CanResetPreview())
+        {
+            startPillarsStackCount = endPillarsStackCount;       
+            EnableNeededPreviewPillars();
+        }
+    }
+    void EnableNeededPreviewPillars()
+    {
+        for (int i = 0; i < pillarsStackCountMax; i++)
+        {
+            if (buildingStage == BuildingStage.SetStart || _conditions.CanResetPreview())
+            {
+                _startPillarsStack[i].transform.localPosition = GetPreviewPositionForPillarInStack(i + 1);
+            }
+            _endPillarsStack[i].transform.localPosition = GetPreviewPositionForPillarInStack(i + 1,true);
+            _startPillarsStack[i].SetActive(startPillarsStackCount - 1 >= i);
+            _endPillarsStack[i].SetActive(endPillarsStackCount - 1 >= i);
         }
     }
     void RaycastUpdate()
@@ -226,8 +296,9 @@ public class ConveyorConstructor : MonoBehaviour
     }
     void PathAndMeshUpdate()
     {
-        if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation()|| _conditions.NeedUpdateAfterCameraMove() || _conditions.CanResetPreview())
+        if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation()|| _conditions.NeedUpdateAfterCameraMove() || _conditions.CanResetPreview() || _conditions.NeedUpdateAfterPillarHeightChanged())
         {
+          
             UpdatePreviewAlignment();
             if (_conditions.CanUpdatePath()||_conditions.CanResetPreview())
             {          
@@ -250,7 +321,7 @@ public class ConveyorConstructor : MonoBehaviour
     }
     void AlignToGround()
     {
-        if (_conditions.CanMoveBeltStart())
+        if (_conditions.CanMoveBeltStart() || _conditions.CanResetPreview())
         {
             previewTransform.position = GetPreviewPositionForGroundedStart();
             previewTransform.eulerAngles = GetPreviewTransformManualRotation();

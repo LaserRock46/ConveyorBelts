@@ -41,7 +41,6 @@ public class ConveyorConstructorConditions
         if (_conveyorConstructor.playerCameraTransform.position != _prevCameraPosition)
         {
             _prevCameraPosition = _conveyorConstructor.playerCameraTransform.position;
-            //Debug.Log("NeedUpdateAfterCameraMove()");
             return true;
         }
         return false;
@@ -62,6 +61,22 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
+    private int _prevStartStack = 0;
+    private int _prevEndStack = 0;
+    public bool NeedUpdateAfterPillarHeightChanged()
+    {
+        if(_prevStartStack != _conveyorConstructor.startPillarsStackCount)
+        {
+            _prevStartStack = _conveyorConstructor.startPillarsStackCount;
+            return true;
+        }
+        if (_prevEndStack != _conveyorConstructor.endPillarsStackCount)
+        {
+            _prevEndStack = _conveyorConstructor.endPillarsStackCount;
+            return true;
+        }
+        return false;
+    }
     public bool CanUpdatePath()
     {
         if(_conveyorConstructor.buildingStage != ConveyorConstructor.BuildingStage.None)
@@ -72,14 +87,12 @@ public class ConveyorConstructorConditions
     }
     public bool IsEndPointRotationAuto()
     {
-        //Debug.Log("IsEndPointRotationAuto() " + _conveyorConstructor.rotationIsAuto);
         return _conveyorConstructor.rotationIsAuto;
     }
     public bool CanInitializeBuildingProcess()
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && _conveyorConstructor.isConveyorConstructorEnabled)
         {
-            //Debug.Log("CanInitializeBuildingProcess()");
             return true;
         }
         return false;
@@ -88,7 +101,6 @@ public class ConveyorConstructorConditions
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.InitializedPreview)
         {
-            //Debug.Log("CanSetStart()");
             return true;
         }
         return false;
@@ -97,7 +109,6 @@ public class ConveyorConstructorConditions
     {
         if (Input.GetKeyDown(KeyCode.Mouse0) && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart)
         {
-            //Debug.Log("CanSetEnd()");
             return true;
         }
         return false;
@@ -106,7 +117,6 @@ public class ConveyorConstructorConditions
     {
         if(Input.GetKeyDown(KeyCode.Mouse0) && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetEnd)
         {
-            //Debug.Log("CanFinishAndCreate()");
             return true;
         }
         return false;
@@ -115,16 +125,30 @@ public class ConveyorConstructorConditions
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            //Debug.Log("CanAbort()");
             return true;
         }
         return false;
+    }
+    public bool CanIncreaseStartPillarCount()
+    {     
+        return Input.GetKeyDown(KeyCode.Period) && _conveyorConstructor.startPillarsStackCount < _conveyorConstructor.pillarsStackCountMax && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart;
+    }
+    public bool CanDecreaseStartPillarCount()
+    {
+        return Input.GetKeyDown(KeyCode.Comma) && _conveyorConstructor.startPillarsStackCount > 1 && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart;
+    }
+    public bool CanIncreaseEndPillarCount()
+    {
+        return Input.GetKeyDown(KeyCode.Period) && _conveyorConstructor.endPillarsStackCount < _conveyorConstructor.pillarsStackCountMax && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetEnd;
+    }
+    public bool CanDecreaseEndPillarCount()
+    {
+        return Input.GetKeyDown(KeyCode.Comma) && _conveyorConstructor.endPillarsStackCount > 1 && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetEnd;
     }
     public bool CanHidePreview()
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None  && _conveyorConstructor.previewGameObject.activeSelf && !_conveyorConstructor.isConveyorConstructorEnabled)
         {
-            //Debug.Log("CanHidePreview()");
             return true;
         }
         return false;
@@ -133,12 +157,10 @@ public class ConveyorConstructorConditions
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && _conveyorConstructor.previewGameObject.activeSelf)
         {
-            //Debug.Log("CanResetPreview()");
             return true;
         }
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && !_conveyorConstructor.previewGameObject.activeSelf && _conveyorConstructor.isConveyorConstructorEnabled)
         {
-            //Debug.Log("CanResetPreview()");
             return true;
         }
         return false;
@@ -146,22 +168,19 @@ public class ConveyorConstructorConditions
     public bool CanEnablePreview()
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.InitializedPreview && !_conveyorConstructor.previewGameObject.activeSelf)
-        {
-            //Debug.Log("CanEnablePreview()");
+        {        
             return true;
         }
         return false;
     }
     public bool CanChangeRotationMode()
     {
-        //Debug.Log("CanChangeRotationMode()");
         return Input.GetKeyDown(KeyCode.Mouse2);
     }
     public bool CanRotateOneStepLeft()
     {
         if(Input.GetAxis("Mouse ScrollWheel") < 0)
         {
-            //Debug.Log("CanRotateOneStepLeft()");
             return true;
         }
         return false;
@@ -170,7 +189,6 @@ public class ConveyorConstructorConditions
     {
         if (Input.GetAxis("Mouse ScrollWheel") > 0)
         {
-            //Debug.Log("CanRotateOneStepRight()");
             return true;
         }
         return false;
@@ -179,7 +197,6 @@ public class ConveyorConstructorConditions
     {
         if(_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart)
         {
-            //Debug.Log("CanMoveBeltStart()");
             return true;
         }
         return false;
@@ -261,9 +278,6 @@ public class ConveyorConstructorConditions
         return true;
     }
     #endregion
-
-
-
     #region Methods
   
     #endregion

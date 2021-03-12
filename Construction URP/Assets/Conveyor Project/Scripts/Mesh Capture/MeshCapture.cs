@@ -6,11 +6,6 @@ using UnityEngine;
 public class MeshCapture
 {
     public Mesh mesh;
-    //public MeshAsset meshAsset;
-
-    private int[] _triangles;
-    private List<NestedArrayInt> _trianglesSubMesh = new List<NestedArrayInt>();
-
     public void GetData(MeshAsset meshAsset)
     {
         if (mesh == null)
