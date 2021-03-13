@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Pillar : MonoBehaviour
+public class ConveyorInstantiator : MonoBehaviour
 {
     #region Temp
     //[Header("Temporary Things", order = 0)]
@@ -10,20 +10,24 @@ public class Pillar : MonoBehaviour
 
     #region Fields
     [Header("Fields", order = 1)]
-    public bool isOccupied;
-    public Transform self;
-    public Transform tipAnchor;
-    public int indexInPillarStack = 1;
+    private Transform _buildingsRoot;
     #endregion
 
     #region Functions
-    
+
     #endregion
 
-    
+
 
     #region Methods
-   
+    public void InstantiateInGameplayMode()
+    {
+
+    }
+    public void InstantiateInSaveLoadMode()
+    {
+
+    }
     #endregion
 
 }

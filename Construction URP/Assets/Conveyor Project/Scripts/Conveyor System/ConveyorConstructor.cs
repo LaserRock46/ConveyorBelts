@@ -11,7 +11,7 @@ public class ConveyorConstructor : MonoBehaviour
 
     #region Fields
     [Header("Fields", order = 1)]
-    public bool isConveyorConstructorEnabled;
+    public GlobalBoolAsset isConveyorConstructorEnabled;
     [Header("____________________")]
     [SerializeField] private ConveyorPath _conveyorPath;
     [Header("____________________")]
@@ -133,40 +133,40 @@ public class ConveyorConstructor : MonoBehaviour
     }
     void Update()
     {
-        PreviewStateUpdate();
         BuildingStageUpdate();
-        PreviewPillarsUpdate();
-        RotationUpdate();
-        PathAndMeshUpdate();
-        FinishAndCreateUpdate();
-      
-        if (updateCurveManual)
-        { 
-            _conveyorPath.ConstructPath();
-            _conveyorMesh.MeshUpdate(false);
-        }
-        if (isConveyorConstructorEnabled)
+        PreviewStateUpdate();
+        if (_conditions.CanUpdateBuildingProcess())
         {
-            _conveyorPath.DebugDraw();
+            PreviewPillarsUpdate();
+            RotationUpdate();
+            PathAndMeshUpdate();
+            FinishAndCreateUpdate();
+
+            if (updateCurveManual)
+            {
+                _conveyorPath.ConstructPath();
+                _conveyorMesh.MeshUpdate(false);
+            }
+            if (isConveyorConstructorEnabled.value)
+            {
+                _conveyorPath.DebugDraw();
+            }
         }
     }
     private void FixedUpdate()
     {
-        RaycastUpdate();      
-    }
-    public void EnableConveyorConstructor(bool enable)
-    {
-        isConveyorConstructorEnabled = enable;
-        StartCoroutine(ChangeBuildingStage(BuildingStage.None));
-    }
+        if (_conditions.CanUpdateBuildingProcess())
+        {
+            RaycastUpdate();
+        }
+    }   
     void BuildingStageUpdate()
     {
         if (_conditions.CanInitializeBuildingProcess())
         {
             StartCoroutine(ChangeBuildingStage(BuildingStage.InitializedPreview));
-
         }
-        if (_conditions.CanSetStart() && !_conditions.IsPointerOverUI())
+        if (_conditions.CanSetStart())
         {
             StartCoroutine(ChangeBuildingStage(BuildingStage.SetStart));
         }
@@ -176,15 +176,13 @@ public class ConveyorConstructor : MonoBehaviour
         }
         if (_conditions.CanAbort())
         {
-            StartCoroutine(ChangeBuildingStage(BuildingStage.None));
-            EnableConveyorConstructor(false);
+            StartCoroutine(ChangeBuildingStage(BuildingStage.None));        
         }
     }
     IEnumerator ChangeBuildingStage(BuildingStage buildingStage)
     {
         yield return new WaitForEndOfFrame();
         this.buildingStage = buildingStage;
-        //Debug.Log(buildingStage);
         yield return null;
     }
     void RotationUpdate()
@@ -215,17 +213,18 @@ public class ConveyorConstructor : MonoBehaviour
         if (_conditions.CanResetPreview())
         {
             _conveyorEndTransform.localPosition = _conveyorEndResetPosition;
-            _conveyorEndTransform.forward = _conveyorStartTransform.forward;
-            previewTransform.position = GetPreviewPositionForGroundedStart();
-           
+            _conveyorEndTransform.forward = _conveyorStartTransform.forward;       
+            previewTransform.position = new Vector3(0,-1000,0);         
         }
         if (_conditions.CanHidePreview())
         {
             previewGameObject.SetActive(false);
+            previewTransform.position = new Vector3(0, -1000, 0);
         }
         if (_conditions.CanEnablePreview())
         {
             previewGameObject.SetActive(true);
+            previewTransform.position = new Vector3(0, -1000, 0);
         }
     }
     void PreviewPillarsUpdate()
@@ -314,7 +313,7 @@ public class ConveyorConstructor : MonoBehaviour
         {
             AlignToGround();
         }
-        if (_conditions.CanAlignToPillar())
+        if (!_conditions.IsThisSideOfPillarOccupied())
         {
             AlignToPillar();
         }
@@ -355,7 +354,7 @@ public class ConveyorConstructor : MonoBehaviour
     }
     void FinishAndCreateUpdate()
     {
-        if (_conditions.CanFinishAndCreate() && _conditions.ConstructionMeetsRequirements())
+        if (_conditions.CanFinishAndCreate() && _conditions.ConstructionMeetsRequirements() && !_conditions.IsPointerOverUI())
         {
             buildingStage = BuildingStage.None;
         }

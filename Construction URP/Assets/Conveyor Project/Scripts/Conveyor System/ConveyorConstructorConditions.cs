@@ -91,11 +91,15 @@ public class ConveyorConstructorConditions
     }
     public bool CanInitializeBuildingProcess()
     {
-        if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && _conveyorConstructor.isConveyorConstructorEnabled)
+        if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && _conveyorConstructor.isConveyorConstructorEnabled.value == true)
         {
             return true;
         }
         return false;
+    }
+    public bool CanUpdateBuildingProcess()
+    {
+        return _conveyorConstructor.isConveyorConstructorEnabled.value;
     }
     public bool CanSetStart()
     {
@@ -122,8 +126,8 @@ public class ConveyorConstructorConditions
         return false;
     }
     public bool CanAbort()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
+    {  
+        if(_conveyorConstructor.isConveyorConstructorEnabled.value == false && _conveyorConstructor.buildingStage != ConveyorConstructor.BuildingStage.None)
         {
             return true;
         }
@@ -147,7 +151,7 @@ public class ConveyorConstructorConditions
     }
     public bool CanHidePreview()
     {
-        if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None  && _conveyorConstructor.previewGameObject.activeSelf && !_conveyorConstructor.isConveyorConstructorEnabled)
+        if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None  && _conveyorConstructor.previewGameObject.activeSelf && !_conveyorConstructor.isConveyorConstructorEnabled.value)
         {
             return true;
         }
@@ -159,7 +163,7 @@ public class ConveyorConstructorConditions
         {
             return true;
         }
-        if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && !_conveyorConstructor.previewGameObject.activeSelf && _conveyorConstructor.isConveyorConstructorEnabled)
+        if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && !_conveyorConstructor.previewGameObject.activeSelf && _conveyorConstructor.isConveyorConstructorEnabled.value)
         {
             return true;
         }
@@ -218,11 +222,15 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
-    public bool CanAlignToPillar()
+    public bool IsThisSideOfPillarOccupied()
     {
         if(_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
-            if(pillar.isOccupied == false)
+            if(CanAlignToPillarFront() && pillar.IsOccupiedFront())
+            {
+                return true;
+            }
+            if (CanAlignToPillarBack() && pillar.IsOccupiedBack())
             {
                 return true;
             }
@@ -231,7 +239,7 @@ public class ConveyorConstructorConditions
     }
     public bool CanAlignToPillarFront()
     {
-        if (_conveyorConstructor.previewGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
+        if (_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
             if ( pillar.self.InverseTransformPoint(_conveyorConstructor.raycastPosition).z > 0)
             {
@@ -242,7 +250,7 @@ public class ConveyorConstructorConditions
     }
     public bool CanAlignToPillarBack()
     {
-        if (_conveyorConstructor.previewGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
+        if (_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
             if (pillar.self.InverseTransformPoint(_conveyorConstructor.raycastPosition).z < 0)
             {

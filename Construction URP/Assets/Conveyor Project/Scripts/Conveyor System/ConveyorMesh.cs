@@ -12,8 +12,11 @@ public class ConveyorMesh
 
     #region Fields
     [Header("Fields", order = 1)]
-    [SerializeField] private MeshAsset[] _meshAssets;
-    public int currentMeshAssetIndex;
+    [SerializeField] private MeshAsset _conveyorMeshAsset;
+    [SerializeField] private MeshAsset _pipelineMeshAsset;
+    [SerializeField] private GlobalBoolAsset _isConveyorSelected;
+    [SerializeField] private GlobalBoolAsset _isPipelineSelected;
+
     private OrientedPoint _orientedPoints;
     [SerializeField] private Transform _previewTransform;
     [SerializeField] private MeshFilter _previewMeshFilter;
@@ -22,7 +25,19 @@ public class ConveyorMesh
     #endregion
 
     #region Functions
-    public Mesh GetMeshSubmesh0(Mesh newMesh, Vector3[] vertices, Vector2[] uvs, int[] triangles, Color32[] vertexColors)
+    MeshAsset GetSelectedMeshAsset()
+    {
+        if (_isConveyorSelected.value)
+        {         
+            return _conveyorMeshAsset;
+        }
+        else if (_isPipelineSelected.value)
+        {
+            return _pipelineMeshAsset;
+        }
+        return null;
+    }
+    public Mesh GetMesh(Mesh newMesh, Vector3[] vertices, Vector2[] uvs, int[] triangles, Color32[] vertexColors)
     {
 
         newMesh.Clear();
@@ -132,10 +147,10 @@ public class ConveyorMesh
         if (_orientedPoints.positions.Length == 0) return;
 
         int targetEdgeLoopCount = _orientedPoints.positions.Length;
-      
-        var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, _meshAssets[currentMeshAssetIndex].edgeLoop, reversedUV, _meshAssets[currentMeshAssetIndex].uvMapOrientation, conveyorSpeed, _meshAssets[currentMeshAssetIndex].compensateForwardStretch);
-        int[] precomputedTriangles = GetTrimmedPrecomputedTriangles(targetEdgeLoopCount, _meshAssets[currentMeshAssetIndex].edgeLoop, _meshAssets[currentMeshAssetIndex].precomputedTriangles);
-        _previewMeshFilter.mesh = GetMeshSubmesh0(_previewMeshFilter.mesh, vertexDataArrays.vertices, vertexDataArrays.uvs, precomputedTriangles, vertexDataArrays.vertexColors);
+        MeshAsset selectedMeshAsset = GetSelectedMeshAsset();
+        var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, selectedMeshAsset.edgeLoop, reversedUV, selectedMeshAsset.uvMapOrientation, conveyorSpeed, selectedMeshAsset.compensateForwardStretch);
+        int[] precomputedTriangles = GetTrimmedPrecomputedTriangles(targetEdgeLoopCount, selectedMeshAsset.edgeLoop, selectedMeshAsset.precomputedTriangles);
+        _previewMeshFilter.mesh = GetMesh(_previewMeshFilter.mesh, vertexDataArrays.vertices, vertexDataArrays.uvs, precomputedTriangles, vertexDataArrays.vertexColors);
     }
     #endregion
 

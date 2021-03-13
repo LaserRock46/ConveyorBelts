@@ -51,7 +51,7 @@ public class BuildingManager : MonoBehaviour
     }
     public void ToggleConveyorConstructor(bool isOn)
     {
-        conveyorConstructor.EnableConveyorConstructor(isOn);
+        //conveyorConstructor.EnableConveyorConstructor(isOn);
         DisableAnyOtherToggle(conveyorConstructorToggle);
     }
     #endregion
