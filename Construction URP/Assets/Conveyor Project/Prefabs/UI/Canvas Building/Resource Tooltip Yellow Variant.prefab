@@ -109,7 +109,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1567776457706667626, guid: cba0faf3e344d354f81a7068cd3b1277, type: 3}
       propertyPath: m_Name
-      value: Yellow Tooltip Variant
+      value: Resource Tooltip Yellow Variant
       objectReference: {fileID: 0}
     - target: {fileID: 1567776458118284377, guid: cba0faf3e344d354f81a7068cd3b1277, type: 3}
       propertyPath: m_IsActive

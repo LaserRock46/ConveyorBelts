@@ -10,7 +10,9 @@ public class ConveyorInstantiator : MonoBehaviour
 
     #region Fields
     [Header("Fields", order = 1)]
-    private Transform _buildingsRoot;
+    [SerializeField] private Transform _buildingsRoot;
+    [SerializeField] private GameObject _conveyorPrefab;
+    [SerializeField] private GameObject _pipelinePrefab;
     #endregion
 
     #region Functions

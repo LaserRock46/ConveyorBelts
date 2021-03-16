@@ -11,13 +11,16 @@ public class ConveyorConstructor : MonoBehaviour
 
     #region Fields
     [Header("Fields", order = 1)]
+    private ConveyorConstructorConditions _conditions;
     public GlobalBoolAsset isConveyorConstructorEnabled;
     [Header("____________________")]
     [SerializeField] private ConveyorPath _conveyorPath;
     [Header("____________________")]
     [SerializeField] private ConveyorMesh _conveyorMesh;
-    private ConveyorConstructorConditions _conditions;
     [Header("____________________")]
+    [SerializeField] private ConveyorInstantiator _conveyorInstantiator;
+    [Header("____________________")]
+
     [SerializeField] private LayerMask _raycastTarget = new LayerMask();
 
     public Transform previewTransform = null;
