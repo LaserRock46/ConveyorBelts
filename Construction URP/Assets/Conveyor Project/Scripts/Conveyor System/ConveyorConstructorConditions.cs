@@ -89,6 +89,14 @@ public class ConveyorConstructorConditions
     {
         return _conveyorConstructor.rotationIsAuto;
     }
+    public bool IsStartPillarsEnabled()
+    {
+        return _conveyorConstructor.startPillarsStack[0].activeSelf;
+    }
+    public bool IsEndPillarsEnabled()
+    {
+        return _conveyorConstructor.endPillarsStack[0].activeSelf;
+    }
     public bool CanInitializeBuildingProcess()
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.None && _conveyorConstructor.isConveyorConstructorEnabled.value == true)
@@ -135,19 +143,19 @@ public class ConveyorConstructorConditions
     }
     public bool CanIncreaseStartPillarCount()
     {     
-        return Input.GetKeyDown(KeyCode.Period) && _conveyorConstructor.startPillarsStackCount < _conveyorConstructor.pillarsStackCountMax && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart;
+        return Input.GetKeyDown(KeyCode.Period) && _conveyorConstructor.startPillarsStackCount < _conveyorConstructor.pillarsStackCountMax && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart && IsStartPillarsEnabled();
     }
     public bool CanDecreaseStartPillarCount()
     {
-        return Input.GetKeyDown(KeyCode.Comma) && _conveyorConstructor.startPillarsStackCount > 1 && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart;
+        return Input.GetKeyDown(KeyCode.Comma) && _conveyorConstructor.startPillarsStackCount > 1 && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart && IsStartPillarsEnabled();
     }
     public bool CanIncreaseEndPillarCount()
     {
-        return Input.GetKeyDown(KeyCode.Period) && _conveyorConstructor.endPillarsStackCount < _conveyorConstructor.pillarsStackCountMax && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetEnd;
+        return Input.GetKeyDown(KeyCode.Period) && _conveyorConstructor.endPillarsStackCount < _conveyorConstructor.pillarsStackCountMax && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetEnd && IsEndPillarsEnabled();
     }
     public bool CanDecreaseEndPillarCount()
     {
-        return Input.GetKeyDown(KeyCode.Comma) && _conveyorConstructor.endPillarsStackCount > 1 && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetEnd;
+        return Input.GetKeyDown(KeyCode.Comma) && _conveyorConstructor.endPillarsStackCount > 1 && _conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetEnd && IsEndPillarsEnabled();
     }
     public bool CanHidePreview()
     {
@@ -222,22 +230,27 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
+    
     public bool IsThisSideOfPillarOccupied()
     {
         if(_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
-            if(CanAlignToPillarFront() && pillar.IsOccupiedFront())
+            if(IsThisSidePillarFront() && pillar.IsOccupiedFront())
             {
                 return true;
             }
-            if (CanAlignToPillarBack() && pillar.IsOccupiedBack())
+            if (IsThisSidePillarBack() && pillar.IsOccupiedBack())
             {
                 return true;
             }
         }
         return false;
     }
-    public bool CanAlignToPillarFront()
+    public bool CanAlignToPillar()
+    {
+        return _conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar);             
+    }
+    public bool IsThisSidePillarFront()
     {
         if (_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
@@ -248,7 +261,7 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
-    public bool CanAlignToPillarBack()
+    public bool IsThisSidePillarBack()
     {
         if (_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
@@ -259,25 +272,11 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
-    public bool IsDetectedConveyorConnectorStart()
+    public bool IsExistingConveyorSideSame(ConveyorConnectionData.ConveyorSide newConveyorSide)
     {
-        if (_conveyorConstructor.previewGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out ConveyorControllerConnector conveyorControllerConnector))
+        if (_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
-            if (conveyorControllerConnector.conveyorController.startConnector == _conveyorConstructor.previewGameObject)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-    public bool IsDetectedConveyorConnectorEnd()
-    {
-        if (_conveyorConstructor.previewGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out ConveyorControllerConnector conveyorControllerConnector))
-        {
-            if (conveyorControllerConnector.conveyorController.endConnector == _conveyorConstructor.previewGameObject)
-            {
-                return true;
-            }
+            return pillar.conveyorSide == newConveyorSide;
         }
         return false;
     }

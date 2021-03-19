@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ConveyorController : MonoBehaviour
+public class ConveyorController : MonoBehaviour, IConveyorItemGate
 {
      #region Temp
     //[Header("Temporary Things", order = 0)]
@@ -10,10 +10,18 @@ public class ConveyorController : MonoBehaviour
 
     #region Fields
     [Header("Fields", order = 1)]
-    public bool isStartOccupied;
-    public bool isEndOccupied;
-    public GameObject startConnector;
-    public GameObject endConnector;
+    private bool _isStartOccupied;
+    private bool _isEndOccupied;
+    private bool _isDirectionReversed;
+  
+    private IConveyorItemGate _consecutiveFactoryOrConveyor;
+
+    private Vector3[] _positions;
+    private Quaternion[] _rotations;
+    private List<Transform> _items;
+    private List<int> _itemType;
+    private List<float> _itemProgress;
+
     #endregion
 
     #region Functions
@@ -23,12 +31,13 @@ public class ConveyorController : MonoBehaviour
 
 
     #region Methods
-  public void SwapConnectors()
+    public void PassItem()
     {
-        Vector3 startConnectorPosition = startConnector.transform.position;
-        Quaternion startConnectorRotation = startConnector.transform.rotation;
-        startConnector.transform.SetPositionAndRotation(endConnector.transform.position,endConnector.transform.rotation);
-        endConnector.transform.SetPositionAndRotation(startConnectorPosition,startConnectorRotation);
+     
+    }
+    public void Setup(bool isDirectionReversed, Vector3[] positions, Quaternion[] rotations)
+    {
+
     }
     #endregion
 

@@ -48,7 +48,7 @@ public class ConveyorMesh
         newMesh.RecalculateBounds();
         newMesh.RecalculateNormals();
         newMesh.RecalculateTangents();
-        //newMesh.RecalculateUVDistributionMetric(0);
+     
         return newMesh;
     }
     int[] GetTrimmedPrecomputedTriangles(int edgeLoopCount, EdgeLoop edgeLoop, int[] precomputedTriangles)

@@ -12,6 +12,9 @@ public class Pillar : MonoBehaviour
     [Header("Fields", order = 1)]
     private bool _isOccupiedFront = false;
     private bool _isOccupiedBack = false;
+    public IConveyorItemGate frontSideConveyor;
+    public IConveyorItemGate backSideConveyor;
+    public ConveyorConnectionData.ConveyorSide conveyorSide;
     public Transform self;
     public Transform tipAnchor;
     public int indexInPillarStack = 1;
