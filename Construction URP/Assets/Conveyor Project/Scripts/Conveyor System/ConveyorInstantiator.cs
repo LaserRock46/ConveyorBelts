@@ -63,6 +63,8 @@ public class ConveyorInstantiator : MonoBehaviour
             newConveyor = SpawnPipeline(previewTransform);
         }
         newConveyor.GetComponent<MeshFilter>().mesh = GetMeshCopy(previewTransform.GetComponent<MeshFilter>().mesh);
+        MeshCollider meshCollider = newConveyor.GetComponent<MeshCollider>();
+        meshCollider.sharedMesh = GetMeshCopy(previewTransform.GetComponent<MeshCollider>().sharedMesh);
         return newConveyor;
     }
     GameObject GetPillar(GameObject previewPillar, int index)

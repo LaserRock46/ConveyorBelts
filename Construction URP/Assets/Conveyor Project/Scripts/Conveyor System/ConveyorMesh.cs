@@ -21,6 +21,7 @@ public class ConveyorMesh
     [SerializeField] private Transform _previewTransform;
     [SerializeField] private MeshFilter _previewMeshFilter;
     [SerializeField] private MeshRenderer _previewMeshRenderer;
+    [SerializeField] private MeshCollider _previewMeshCollider;
     [Range(0,255)] public byte conveyorSpeed = 50;
     #endregion
 
@@ -51,6 +52,24 @@ public class ConveyorMesh
      
         return newMesh;
     }
+    public Mesh GetMeshCollider(Mesh newMesh, Vector3[] vertices,int[] triangles)
+    {
+        if (!newMesh)
+        {
+            newMesh = new Mesh();
+            Debug.Log("NM");
+        }
+        else
+        {
+            newMesh.Clear();
+            Debug.Log("old M");
+        }
+        newMesh.SetVertices(vertices);     
+        newMesh.SetTriangles(triangles, 0);          
+        newMesh.RecalculateNormals();   
+
+        return newMesh;
+    }
     int[] GetTrimmedPrecomputedTriangles(int edgeLoopCount, EdgeLoop edgeLoop, int[] precomputedTriangles)
     {
         int trianglesLength = (edgeLoopCount - 1) * edgeLoop.edges.Length * 6;
@@ -62,7 +81,7 @@ public class ConveyorMesh
         }
         return trimmedPrecomputedTriangles;
     }
-    (Vector3[] vertices,Vector2[] uvs, Color32[] vertexColors) GetVertexDataArrays(int edgeLoopCount, OrientedPoint orientedPoints, EdgeLoop edgeLoop, bool reversedUV, MeshAsset.UvMapOrientation uvMapOrientation, byte newConveyorSpeed, float compansateForwardStretch)
+    (Vector3[] vertices,Vector2[] uvs, Color32[] vertexColors) GetVertexDataArrays(int edgeLoopCount, OrientedPoint orientedPoints, EdgeLoop edgeLoop, bool reversedUV = false, MeshAsset.UvMapOrientation uvMapOrientation = MeshAsset.UvMapOrientation.ForwardX, byte newConveyorSpeed = 0, float compansateForwardStretch = 1)
     {
         int newVertexDataArrayLength = edgeLoopCount * edgeLoop.vertexDatas.Length;
         Vector3[] vertices = new Vector3[newVertexDataArrayLength];
@@ -151,6 +170,14 @@ public class ConveyorMesh
         var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, selectedMeshAsset.edgeLoop, reversedUV, selectedMeshAsset.uvMapOrientation, conveyorSpeed, selectedMeshAsset.compensateForwardStretch);
         int[] precomputedTriangles = GetTrimmedPrecomputedTriangles(targetEdgeLoopCount, selectedMeshAsset.edgeLoop, selectedMeshAsset.precomputedTriangles);
         _previewMeshFilter.mesh = GetMesh(_previewMeshFilter.mesh, vertexDataArrays.vertices, vertexDataArrays.uvs, precomputedTriangles, vertexDataArrays.vertexColors);
+    }
+    public void BakeCollider()
+    {
+        int targetEdgeLoopCount = _orientedPoints.positions.Length;
+        MeshAsset selectedMeshAsset = GetSelectedMeshAsset();
+        var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, selectedMeshAsset.edgeLoopCollider);
+        int[] precomputedTriangles = GetTrimmedPrecomputedTriangles(targetEdgeLoopCount, selectedMeshAsset.edgeLoopCollider, selectedMeshAsset.precomputedTrianglesCollider);
+        _previewMeshCollider.sharedMesh = GetMeshCollider(_previewMeshCollider.sharedMesh,vertexDataArrays.vertices,precomputedTriangles);
     }
     #endregion
 

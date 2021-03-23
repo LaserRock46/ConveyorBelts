@@ -6,6 +6,7 @@ using UnityEngine;
 public class MeshCapture
 {
     public Mesh mesh;
+    public Mesh meshCollider;
     public void GetData(MeshAsset meshAsset)
     {
         if (mesh == null)
@@ -31,6 +32,20 @@ public class MeshCapture
 
         meshAsset.edgeLoop = edgeLoop;
         meshAsset.precomputedTriangles = precomputedTriangles;
+
+        if (meshCollider == null) return;
+        Vector3[] originalVerticesCollider = meshCollider.vertices;
+        Vector2[] originalUVsCollider = meshCollider.uv;
+        int[] originalTrianglesCollider = meshCollider.triangles;
+        Color32[] originalVertexColorsCollider = meshCollider.colors32;
+
+        VertexData[] vertexDatasCollider = GetVertexDatas(originalVerticesCollider, originalUVsCollider, originalVertexColorsCollider);
+        Edge[] edgesCollider = GetEdges(vertexDatasCollider, originalTrianglesCollider, originalVerticesCollider);
+        EdgeLoop edgeLoopCollider = new EdgeLoop(vertexDatasCollider, edgesCollider);
+        int[] precomputedTrianglesCollider = GetPrecomputedTrianglesArray(meshAsset.loopCount, edgeLoopCollider);
+
+        meshAsset.edgeLoopCollider = edgeLoopCollider;
+        meshAsset.precomputedTrianglesCollider = precomputedTrianglesCollider;
     } 
     bool IsOriginalVertexInFront(Vector3 originalVertex)
     {
@@ -57,7 +72,12 @@ public class MeshCapture
                 int vertexIndex = vertexDatas.Count;
                 Vector3 vertexPosition = originalVertices[currentVertex];
                 Vector2 vertexUV = originalUVs[currentVertex];
-                Color32 vertexColor = originalVertexColors[currentVertex];
+                Color32 vertexColor = new Color32();
+                if (originalVertexColors.Length != 0)
+                {
+                    vertexColor = originalVertexColors[currentVertex];
+                }
+
                 VertexData vertexData = new VertexData(originalVertexIndex, vertexIndex, vertexPosition, vertexUV, vertexColor);
                 vertexDatas.Add(vertexData);
             }

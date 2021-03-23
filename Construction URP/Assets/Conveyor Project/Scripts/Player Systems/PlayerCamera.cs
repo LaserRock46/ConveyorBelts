@@ -25,7 +25,7 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField]private Rigidbody _rigidbody;
     [SerializeField] private SphereCollider _cameraCollider;
     [SerializeField] private Transform _cameraCenter;
-    private bool _isPivotBlocked;
+    private bool _isBlocked;
 
     [SerializeField] private CinemachineCameraOffset _cameraOffset;
     #endregion
@@ -77,12 +77,8 @@ public class PlayerCamera : MonoBehaviour
     }
     private Vector3 _obstacleCheckBox = new Vector3(3f,0.5f,3f);
     bool IsStoppedByObstacle()
-    {       
-        if (Physics.CheckBox(yawAndPosition.position,_obstacleCheckBox,yawAndPosition.rotation))
-        {
-            return true;
-        }
-        return false;
+    {
+        return Physics.CheckBox(yawAndPosition.position, _obstacleCheckBox, yawAndPosition.rotation);
     }
 
     #endregion
@@ -113,12 +109,13 @@ public class PlayerCamera : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Mouse1))
         {
-            yawAndPosition.Rotate(Vector3.up, GetYawAmount());
-            //pitch.Rotate(Vector3.right, GetPitchAmount());
+            yawAndPosition.Rotate(Vector3.up, GetYawAmount());     
+            
             _pitchAccumulatedAmount -= GetPitchAmount();
             _pitchAccumulatedAmount = Mathf.Clamp(_pitchAccumulatedAmount,0, 1);
             float angle = Mathf.LerpAngle(pitchElevationDown,pitchElevationUp,_pitchAccumulatedAmount);
             pitch.localEulerAngles = new Vector3(angle,0,0);
+
             UpdateColliderPosition();
         }
         if (Input.GetKeyDown(KeyCode.Mouse1))
@@ -133,13 +130,13 @@ public class PlayerCamera : MonoBehaviour
     }
     void Movement()
     {
-        _isPivotBlocked = IsStoppedByObstacle();
+        _isBlocked = IsStoppedByObstacle();
 
         if (GetInputDirectionHorizontal() != Vector3.zero || GetInputDirectionVertical() != Vector3.zero)
         {
           
             Vector3 targetDirection = GetInputDirectionHorizontal();
-            if (!_isPivotBlocked)
+            if (!_isBlocked)
             {
                 targetDirection.y = GetInputDirectionVertical().y;
             }
@@ -151,7 +148,7 @@ public class PlayerCamera : MonoBehaviour
         }
         if (GetInputDirectionHorizontal() == Vector3.zero && GetInputDirectionVertical() == Vector3.zero && _rigidbody.velocity != Vector3.zero)
         {
-            if (!_isPivotBlocked)
+            if (!_isBlocked)
             {
                 _rigidbody.velocity = Vector3.zero;
             }

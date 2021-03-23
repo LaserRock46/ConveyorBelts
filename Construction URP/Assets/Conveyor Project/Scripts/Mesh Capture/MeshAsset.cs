@@ -7,7 +7,6 @@ using UnityEngine;
 public class MeshAsset : ScriptableObject
 {
     #region Mesh Asset Data
-    public bool generateCollider;
     [Space]
     public int loopCount = 128;
     [Space]
@@ -16,6 +15,10 @@ public class MeshAsset : ScriptableObject
     public EdgeLoop edgeLoop;
     [Space]
     public int[] precomputedTriangles;
+    [Space]
+    public EdgeLoop edgeLoopCollider;
+    [Space]
+    public int[] precomputedTrianglesCollider;
     [Space]
     public UvMapOrientation uvMapOrientation;
     public enum UvMapOrientation { ForwardX,ForwardY}

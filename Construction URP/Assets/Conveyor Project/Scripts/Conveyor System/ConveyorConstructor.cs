@@ -395,7 +395,9 @@ public class ConveyorConstructor : MonoBehaviour
         if (_conditions.CanFinishAndCreate() && _conditions.ConstructionMeetsRequirements() && !_conditions.IsPointerOverUI())
         {
             buildingStage = BuildingStage.None;
+            _conveyorMesh.BakeCollider();
             _conveyorInstantiator.InstantiateInGameplayMode(_conveyorPath.orientedPoints,previewTransform,startPillarsStack,endPillarsStack);
+           
         }
     }
     #endregion
