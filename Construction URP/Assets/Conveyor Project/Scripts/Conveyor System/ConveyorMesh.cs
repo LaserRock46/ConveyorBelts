@@ -57,12 +57,10 @@ public class ConveyorMesh
         if (!newMesh)
         {
             newMesh = new Mesh();
-            Debug.Log("NM");
         }
         else
         {
             newMesh.Clear();
-            Debug.Log("old M");
         }
         newMesh.SetVertices(vertices);     
         newMesh.SetTriangles(triangles, 0);          
@@ -163,8 +161,11 @@ public class ConveyorMesh
     public void MeshUpdate(bool reversedUV)
     {
         if (!_drawMesh) return;
-        if (_orientedPoints.positions.Length == 0) return;
-
+        if (_orientedPoints.positions.Length == 0)
+        {
+            Debug.Log("nima");
+            return;
+        }
         int targetEdgeLoopCount = _orientedPoints.positions.Length;
         MeshAsset selectedMeshAsset = GetSelectedMeshAsset();
         var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, selectedMeshAsset.edgeLoop, reversedUV, selectedMeshAsset.uvMapOrientation, conveyorSpeed, selectedMeshAsset.compensateForwardStretch);

@@ -9,8 +9,7 @@ public class ConveyorPath
     #region Temp
     [Header("Temporary Things", order = 0)]
     [SerializeField] private bool _drawPathDebug;
-    public Transform[] arcStart;
-    public Transform[] arcEnd;
+
     #endregion
 
     #region Fields
@@ -21,6 +20,7 @@ public class ConveyorPath
     public CircularArc circularArcStart;
     public CircularArc circularArcEnd;
     public Bezier bezier;
+    public float simplifyAngleTolerance = 5;
     #endregion
 
     #region Functions
@@ -58,7 +58,10 @@ public class ConveyorPath
         }
         return (totalDistanceForward, segmentDistanceForward, segmentDistanceBackward);
     }
-   
+   bool IsRotationsTooSimilar(Quaternion last, Quaternion current)
+    {
+        return Quaternion.Angle(last, current) < simplifyAngleTolerance;
+    }
     #endregion
 
 
@@ -70,14 +73,13 @@ public class ConveyorPath
         bezier.AlignControlPoints(circularArcStart.GetThisArcPointEnd(),circularArcStart.GetOppositeArcPointStart());
         bezier.Compute();
         GetOrientedPoints();
+        Simplify();
         GetPathLength();
     }
     void GetOrientedPoints()
     {
         Transform[] arcStart = circularArcStart.GetArcPoints(circularArcStart.thisPoints,circularArcStart.indexThisPoint, circularArcStart.order);
         Transform[] arcEnd = circularArcStart.GetArcPoints(circularArcStart.oppositePoints, circularArcStart.indexOppositePoint, circularArcEnd.order);
-        this.arcStart = arcStart;
-        this.arcEnd = arcEnd;
 
         var getPositionsAndRotationsArcStart = GetPositionsAndRotations(previewTransform, arcStart);
         var getPositionsAndRotationsArcEnd = GetPositionsAndRotations(previewTransform, arcEnd);
@@ -95,6 +97,36 @@ public class ConveyorPath
 
         orientedPoints.positions = allPositions.ToArray();
         orientedPoints.rotations = allRotations.ToArray();
+    }
+    void Simplify()
+    {
+        List<Vector3> simplifiedPositions = new List<Vector3>();
+        List<Quaternion> simplifiedRotations= new List<Quaternion>();
+
+        int lastNonsimilarIndex = 0;
+               
+        for (int i = 0; i < orientedPoints.rotations.Length; i++)
+        {
+            if ( i > 0 && i < orientedPoints.rotations.Length - 1)
+            {
+                if (!IsRotationsTooSimilar(orientedPoints.rotations[lastNonsimilarIndex], orientedPoints.rotations[i]))
+                {
+                    simplifiedPositions.Add(orientedPoints.positions[i]);
+                    simplifiedRotations.Add(orientedPoints.rotations[i]);
+                    lastNonsimilarIndex = i;
+                }
+            }
+            else
+            {
+                simplifiedPositions.Add(orientedPoints.positions[i]);
+                simplifiedRotations.Add(orientedPoints.rotations[i]);
+            }
+        }
+      
+
+        orientedPoints.positions = simplifiedPositions.ToArray();
+        orientedPoints.rotations = simplifiedRotations.ToArray();
+
     }
     void GetPathLength()
     {

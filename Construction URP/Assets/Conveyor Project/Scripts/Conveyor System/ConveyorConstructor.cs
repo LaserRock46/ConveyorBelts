@@ -397,7 +397,7 @@ public class ConveyorConstructor : MonoBehaviour
             buildingStage = BuildingStage.None;
             _conveyorMesh.BakeCollider();
             _conveyorInstantiator.InstantiateInGameplayMode(_conveyorPath.orientedPoints,previewTransform,startPillarsStack,endPillarsStack);
-           
+            Debug.Log("Loop count: " + _conveyorPath.orientedPoints.positions.Length);
         }
     }
     #endregion
