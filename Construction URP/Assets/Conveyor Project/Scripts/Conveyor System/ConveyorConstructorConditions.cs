@@ -205,7 +205,7 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
-    public bool CanMoveBeltStart()
+    public bool CanMoveConveyorStart()
     {
         if(_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetStart)
         {
@@ -213,7 +213,7 @@ public class ConveyorConstructorConditions
         }
         return false;
     }
-    public bool CanMoveBeltEnd()
+    public bool CanMoveConveyorEnd()
     {
         if (_conveyorConstructor.buildingStage == ConveyorConstructor.BuildingStage.SetEnd)
         {
@@ -231,24 +231,24 @@ public class ConveyorConstructorConditions
         return false;
     }
     
-    public bool IsThisSideOfPillarOccupied()
+    public bool CanAlignToPillar()
     {
         if(_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
         {
-            if(IsThisSidePillarFront() && pillar.IsOccupiedFront())
+            if(IsThisSidePillarFront() && !pillar.IsOccupiedFront())
             {
                 return true;
             }
-            if (IsThisSidePillarBack() && pillar.IsOccupiedBack())
+            if (IsThisSidePillarBack() && !pillar.IsOccupiedBack())
             {
                 return true;
             }
         }
         return false;
     }
-    public bool CanAlignToPillar()
+    public bool CanMatchDirection(ConveyorConnectionData connectionDataStart, ConveyorConnectionData connectionDataEnd)
     {
-        return _conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar);             
+        return true;
     }
     public bool IsThisSidePillarFront()
     {

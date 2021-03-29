@@ -10,8 +10,8 @@ public class Pillar : MonoBehaviour
 
     #region Fields
     [Header("Fields", order = 1)]
-    private bool _isOccupiedFront = false;
-    private bool _isOccupiedBack = false;
+    [SerializeField] private bool _isOccupiedFront = false;
+    [SerializeField] private bool _isOccupiedBack = false;
     public IConveyorItemGate frontSideConveyor;
     public IConveyorItemGate backSideConveyor;
     public ConveyorConnectionData.ConveyorSide conveyorSide;
@@ -46,9 +46,17 @@ public class Pillar : MonoBehaviour
             // Can't destroy
         }
     }
-    public void OccupyFront()
+    public void Setup(ConveyorConnectionData.ConveyorSide conveyorSide, ConveyorConnectionData.PillarSide occupiedPillarSide)
     {
-        _isOccupiedFront = true;       
+        this.conveyorSide = conveyorSide;
+        if(occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
+        {
+            _isOccupiedFront = true;
+        }
+        if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Back)
+        {
+            _isOccupiedBack = true;
+        }
     }
     #endregion
 

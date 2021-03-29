@@ -12,7 +12,7 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     [Header("Fields", order = 1)]
     private bool _isStartOccupied;
     private bool _isEndOccupied;
-    private bool _isDirectionReversed;
+    [SerializeField] private bool _isDirectionReversed;
   
     private IConveyorItemGate _consecutiveFactoryOrConveyor;
 
@@ -37,7 +37,9 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     }
     public void Setup(bool isDirectionReversed, Vector3[] positions, Quaternion[] rotations)
     {
-
+        _isDirectionReversed = isDirectionReversed;
+        _positions = positions;
+        _rotations = rotations;
     }
     #endregion
 

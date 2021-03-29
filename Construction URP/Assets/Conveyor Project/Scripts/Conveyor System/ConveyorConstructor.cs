@@ -20,17 +20,16 @@ public class ConveyorConstructor : MonoBehaviour
     [Header("____________________")]
     [SerializeField] private ConveyorInstantiator _conveyorInstantiator;
     [Header("____________________")]
-
+    [SerializeField] private ConveyorConstructorVisuals _conveyorConstructorVisuals;
+    [Header("____________________")]
     [SerializeField] private LayerMask _raycastTarget = new LayerMask();
 
     public Transform previewTransform = null;
     public GameObject previewGameObject = null;
     [SerializeField] private Transform _conveyorStartTransform = null;
     [SerializeField] private Transform _conveyorEndTransform = null;
-
-    [UnityEngine.Serialization.FormerlySerializedAs("_startPillarsStack")]
+   
     public GameObject[] startPillarsStack;
-    [UnityEngine.Serialization.FormerlySerializedAs("_endPillarsStack")]
     public  GameObject[] endPillarsStack;
 
     public enum BuildingStage { None, InitializedPreview, SetStart, SetEnd }
@@ -138,6 +137,49 @@ public class ConveyorConstructor : MonoBehaviour
     {
         return new Vector3(0, rotationStep * _rotationStepAngle, 0);
     }
+    bool IsConveyorDirectionReversed()
+    {      
+       return _conveyorInstantiator.connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.End;
+    }
+    ConveyorConnectionData.ConveyorSide GetConveyorSideForExistingPillar(Pillar alignedPillar)
+    {
+        ConveyorConnectionData.ConveyorSide conveyorSide = ConveyorConnectionData.ConveyorSide.None;
+        if (_conditions.CanMoveConveyorStart())
+        {
+            if(alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.None|| alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.End)
+            {
+                conveyorSide = ConveyorConnectionData.ConveyorSide.Start;
+            }
+            else if(alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.Start)
+            {
+                conveyorSide = ConveyorConnectionData.ConveyorSide.End;
+            }
+        }
+        else if (_conditions.CanMoveConveyorEnd())
+        {
+            if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.None || alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.Start)
+            {
+                conveyorSide = ConveyorConnectionData.ConveyorSide.End;
+            }
+            else if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.End)
+            {
+                conveyorSide = ConveyorConnectionData.ConveyorSide.Start;
+            }
+        }
+        return conveyorSide;
+    }
+    (ConveyorConnectionData.ConveyorSide conveyorSideStart, ConveyorConnectionData.ConveyorSide conveyorSideEnd) GetConveyorSides(ConveyorConnectionData connectionDataStart,ConveyorConnectionData connectionDataEnd)
+    {
+        ConveyorConnectionData.ConveyorSide conveyorSideStart = ConveyorConnectionData.ConveyorSide.None;
+        ConveyorConnectionData.ConveyorSide conveyorSideEnd = ConveyorConnectionData.ConveyorSide.None;
+
+
+        return (conveyorSideStart, conveyorSideEnd);
+    }
+    ConveyorConnectionData.ConveyorSide GetReversedConveyorSide(ConveyorConnectionData.ConveyorSide conveyorSide)
+    {
+        return conveyorSide == ConveyorConnectionData.ConveyorSide.Start ? ConveyorConnectionData.ConveyorSide.End : ConveyorConnectionData.ConveyorSide.Start;
+    }
     #endregion
 
 
@@ -158,12 +200,7 @@ public class ConveyorConstructor : MonoBehaviour
             RotationUpdate();
             PathAndMeshUpdate();
             FinishAndCreateUpdate();
-
-            if (updateCurveManual)
-            {
-                _conveyorPath.ConstructPath();
-                _conveyorMesh.MeshUpdate(false);
-            }
+         
             if (isConveyorConstructorEnabled.value)
             {
                 _conveyorPath.DebugDraw();
@@ -231,7 +268,8 @@ public class ConveyorConstructor : MonoBehaviour
         {
             _conveyorEndTransform.localPosition = _conveyorEndResetPosition;
             _conveyorEndTransform.forward = _conveyorStartTransform.forward;       
-            previewTransform.position = new Vector3(0,-1000,0);         
+            previewTransform.position = new Vector3(0,-1000,0);
+            _conveyorConstructorVisuals.UpdateArrowsDirection(false);
         }
         if (_conditions.CanHidePreview())
         {
@@ -315,15 +353,13 @@ public class ConveyorConstructor : MonoBehaviour
     void PathAndMeshUpdate()
     {
         if (_conditions.NeedUpdateAfterMove() || _conditions.NeedUpdateAfterRotation()|| _conditions.NeedUpdateAfterCameraMove() || _conditions.CanResetPreview() || _conditions.NeedUpdateAfterPillarHeightChanged())
-        {
-          
+        {     
             UpdatePreviewAlignment();
             if (_conditions.CanUpdatePath()||_conditions.CanResetPreview())
             {          
-                _conveyorPath.ConstructPath();
-                _conveyorMesh.MeshUpdate(false);
-            }      
-           
+                _conveyorPath.ConstructPath();              
+                _conveyorMesh.MeshUpdate(IsConveyorDirectionReversed());
+            }              
         }
     } 
     void UpdatePreviewAlignment()
@@ -339,7 +375,7 @@ public class ConveyorConstructor : MonoBehaviour
     }
     void AlignToGround()
     {
-        if (_conditions.CanMoveBeltStart() || _conditions.CanResetPreview())
+        if (_conditions.CanMoveConveyorStart() || _conditions.CanResetPreview())
         {
             previewTransform.position = GetPreviewPositionForGroundedStart();
             previewTransform.eulerAngles = GetPreviewTransformManualRotation();
@@ -347,8 +383,11 @@ public class ConveyorConstructor : MonoBehaviour
             {
                 EnableNeededPreviewPillars(true,true);
             }
+
+            _conveyorInstantiator.connectionDataStart = new ConveyorConnectionData(null,false,ConveyorConnectionData.PillarSide.Front,ConveyorConnectionData.ConveyorSide.Start);
+            _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(ConveyorConnectionData.ConveyorSide.End);
         }
-        if (_conditions.CanMoveBeltEnd())
+        if (_conditions.CanMoveConveyorEnd())
         {
             _conveyorEndTransform.position = GetPreviewPositionForGroundedEnd();
 
@@ -365,39 +404,75 @@ public class ConveyorConstructor : MonoBehaviour
             {
                 EnableNeededPreviewPillars(_conditions.IsStartPillarsEnabled(), true);
             }
+
+            ConveyorConnectionData.ConveyorSide conveyorSide = GetReversedConveyorSide(_conveyorInstantiator.connectionDataStart.conveyorSide);
+            _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(null, false, ConveyorConnectionData.PillarSide.Back, conveyorSide);
+            
+            /*
+            if (_conveyorInstantiator.connectionDataStart.isAlignedToExistingPillar == true && _conveyorInstantiator.connectionDataStart.alignedToPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.None)
+            {
+                _conveyorInstantiator.connectionDataStart.conveyorSide = ConveyorConnectionData.ConveyorSide.Start;
+                _conveyorInstantiator.connectionDataEnd.conveyorSide = ConveyorConnectionData.ConveyorSide.End;
+            }
+            */
         }
+        _conveyorConstructorVisuals.UpdateArrowsDirection(IsConveyorDirectionReversed());
     }
     void AlignToPillar()
     {
-        if (_conditions.CanMoveBeltStart())
+        if (_conditions.CanMoveConveyorStart())
         {
-                previewTransform.position = GetPreviewPositionAllignedToPillar();
-                previewTransform.forward = GetPreviewRotationAllignedToPillarStart();
+            previewTransform.position = GetPreviewPositionAllignedToPillar();
+            previewTransform.forward = GetPreviewRotationAllignedToPillarStart();
             if (_conditions.IsStartPillarsEnabled())
             {
                 EnableNeededPreviewPillars(false, false);
             }
 
+            Pillar pillar = raycastGameObject.GetComponent<Pillar>();
+            ConveyorConnectionData.PillarSide pillarSide = _conditions.IsThisSidePillarFront() ? ConveyorConnectionData.PillarSide.Front : ConveyorConnectionData.PillarSide.Back;
+            ConveyorConnectionData.ConveyorSide conveyorSide = GetConveyorSideForExistingPillar(pillar);
+
+            _conveyorInstantiator.connectionDataStart = new ConveyorConnectionData(pillar, true, pillarSide, conveyorSide);
+            _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(GetReversedConveyorSide(conveyorSide));
+           
         }
 
-        if (_conditions.CanMoveBeltEnd())
+        if (_conditions.CanMoveConveyorEnd())
         {
             _conveyorEndTransform.position = GetPreviewPositionAllignedToPillar();
             _conveyorEndTransform.forward = GetPreviewRotationAllignedToPillarEnd();
             if (_conditions.IsEndPillarsEnabled())
             {
-                EnableNeededPreviewPillars(_conditions.IsStartPillarsEnabled(), false);        
+                EnableNeededPreviewPillars(_conditions.IsStartPillarsEnabled(), false);
             }
+
+            Pillar pillar = raycastGameObject.GetComponent<Pillar>();
+            ConveyorConnectionData.PillarSide pillarSide = _conditions.IsThisSidePillarFront() ? ConveyorConnectionData.PillarSide.Front : ConveyorConnectionData.PillarSide.Back;
+            ConveyorConnectionData.ConveyorSide conveyorSide = GetConveyorSideForExistingPillar(pillar);
+
+            _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(pillar, true, pillarSide, conveyorSide);
+            /*
+            if (_conveyorInstantiator.connectionDataStart.isAlignedToExistingPillar == false && conveyorSide == ConveyorConnectionData.ConveyorSide.Start)
+            {
+                _conveyorInstantiator.connectionDataStart.conveyorSide = ConveyorConnectionData.ConveyorSide.End;
+            }
+            if (_conveyorInstantiator.connectionDataStart.isAlignedToExistingPillar == true && _conveyorInstantiator.connectionDataStart.alignedToPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.None)
+            {
+                _conveyorInstantiator.connectionDataStart.conveyorSide = ConveyorConnectionData.ConveyorSide.End;
+            }
+            */
         }
+        _conveyorConstructorVisuals.UpdateArrowsDirection(IsConveyorDirectionReversed());
     }
+
     void FinishAndCreateUpdate()
     {
         if (_conditions.CanFinishAndCreate() && _conditions.ConstructionMeetsRequirements() && !_conditions.IsPointerOverUI())
         {
             buildingStage = BuildingStage.None;
             _conveyorMesh.BakeCollider();
-            _conveyorInstantiator.InstantiateInGameplayMode(_conveyorPath.orientedPoints,previewTransform,startPillarsStack,endPillarsStack);
-            Debug.Log("Loop count: " + _conveyorPath.orientedPoints.positions.Length);
+            _conveyorInstantiator.Instantiate(_conveyorPath.orientedPoints,previewTransform,startPillarsStack,endPillarsStack);
         }
     }
     #endregion

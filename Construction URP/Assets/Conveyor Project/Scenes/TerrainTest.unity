@@ -5239,6 +5239,7 @@ GameObject:
   - component: {fileID: 1349179436}
   - component: {fileID: 1349179435}
   - component: {fileID: 1349179437}
+  - component: {fileID: 1349179438}
   m_Layer: 0
   m_Name: Conveyor Constructor
   m_TagString: Untagged
@@ -5466,9 +5467,10 @@ MonoBehaviour:
         totalDistance: 0
         segmentDistanceForward: []
         segmentDistanceBackward: []
-    simplifyAngleTolerance: 4
+    simplifyAngleTolerance: 5
   _conveyorMesh:
     _drawMesh: 1
+    reversedUV: 0
     _conveyorMeshAsset: {fileID: 11400000, guid: 8c1ff6afba5967144bc2863e9234e41a, type: 2}
     _pipelineMeshAsset: {fileID: 0}
     _isConveyorSelected: {fileID: 11400000, guid: d65ba93d26707764dbd4be2746d69ec4, type: 2}
@@ -5479,6 +5481,7 @@ MonoBehaviour:
     _previewMeshCollider: {fileID: 1407808977}
     conveyorSpeed: 35
   _conveyorInstantiator: {fileID: 1349179437}
+  _conveyorConstructorVisuals: {fileID: 1349179438}
   _raycastTarget:
     serializedVersion: 2
     m_Bits: 65
@@ -5547,6 +5550,31 @@ MonoBehaviour:
   _pillarPrefab: {fileID: 3194944452033174758, guid: d4d98efc4dd15f44993877933372205a, type: 3}
   _isConveyorSelected: {fileID: 11400000, guid: d65ba93d26707764dbd4be2746d69ec4, type: 2}
   _isPipelineSelected: {fileID: 11400000, guid: ede725be41c3d3f4f923204c828f6fc4, type: 2}
+  connectionDataStart:
+    alignedToPillar: {fileID: 0}
+    isAlignedToExistingPillar: 0
+    occupiedPillarSide: 0
+    conveyorSide: 0
+  connectionDataEnd:
+    alignedToPillar: {fileID: 0}
+    isAlignedToExistingPillar: 0
+    occupiedPillarSide: 0
+    conveyorSide: 0
+--- !u!114 &1349179438
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1349179434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc26768e3966d454d80dd2a4dade05dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _arrowStart: {fileID: 1544068628}
+  _arrowEnd: {fileID: 1409286407}
+  _arrowScale: {x: 0.2, y: 0.5, z: 0.2}
 --- !u!1 &1362968489
 GameObject:
   m_ObjectHideFlags: 0

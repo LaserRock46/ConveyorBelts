@@ -17,8 +17,8 @@ public class ConveyorInstantiator : MonoBehaviour
     [SerializeField] private GlobalBoolAsset _isConveyorSelected;
     [SerializeField] private GlobalBoolAsset _isPipelineSelected;
 
-    private ConveyorConnectionData _connectionDataStart;
-    private ConveyorConnectionData _connectionDataEnd;
+    public ConveyorConnectionData connectionDataStart;
+    public ConveyorConnectionData connectionDataEnd;
     #endregion
 
     #region Functions
@@ -47,10 +47,6 @@ public class ConveyorInstantiator : MonoBehaviour
     {
         return Instantiate(_pipelinePrefab, previewTransform.position, previewTransform.rotation, _buildingsRoot);
     }
-    bool IsThisTopPillar(int index)
-    {
-        return index == 0;
-    }
     GameObject GetConveyor(Transform previewTransform)
     {
         GameObject newConveyor = null;
@@ -69,43 +65,73 @@ public class ConveyorInstantiator : MonoBehaviour
     }
     GameObject GetPillar(GameObject previewPillar, int index)
     {
+        GameObject newPillar = null;
         if (previewPillar.activeSelf)
         {
-            GameObject newPillar = SpawnPillar(previewPillar);
-            newPillar.GetComponent<Pillar>().indexInPillarStack = previewPillar.GetComponent<Pillar>().indexInPillarStack;
-            if (IsThisTopPillar(index))
-            {
-
-            }
+            newPillar = SpawnPillar(previewPillar);       
+            newPillar.GetComponent<Pillar>().indexInPillarStack = previewPillar.GetComponent<Pillar>().indexInPillarStack;          
         }
-        return null;
+        return newPillar;
+    }
+    bool IsThisTopPillar(int index)
+    {
+        return index == 0;
+    }
+    bool NeedNewPillars(GameObject[] previewStartPillars, GameObject[] previewEndPillars)
+    {
+        return previewStartPillars[0].activeSelf || previewEndPillars[0].activeSelf;
     }
     #endregion
 
 
 
     #region Methods
-    public void InstantiateInGameplayMode(OrientedPoint orientedPoints,Transform previewTransform,GameObject[] previewStartPillars, GameObject[] previewEndPillars)
+    public void Instantiate(OrientedPoint orientedPoints,Transform previewTransform,GameObject[] previewStartPillars, GameObject[] previewEndPillars)
     {
-        GameObject getConveyor = GetConveyor(previewTransform);
+        GameObject newConveyor = GetConveyor(previewTransform);
+        ConveyorController conveyorController = newConveyor.GetComponent<ConveyorController>();
+        SetupConveyor(conveyorController, orientedPoints);
 
-        for (int i = 0; i < previewStartPillars.Length; i++)
+        Pillar topPillarStart = null;
+        Pillar topPillarEnd = null;
+
+        if (NeedNewPillars(previewStartPillars,previewEndPillars))
         {
-            GameObject startPillar = GetPillar(previewStartPillars[i],i);
-            GameObject endPillar = GetPillar(previewEndPillars[i], i);
+            for (int i = 0; i < previewStartPillars.Length; i++)
+            {
+                GameObject startPillar = GetPillar(previewStartPillars[i], i);
+                GameObject endPillar = GetPillar(previewEndPillars[i], i);
+                         
+                if (startPillar && IsThisTopPillar(i))
+                {
+                    topPillarStart = startPillar.GetComponent<Pillar>();                    
+                }
+                if (endPillar && IsThisTopPillar(i))
+                {
+                    topPillarEnd = endPillar.GetComponent<Pillar>();
+                }
+            }
         }
-    }
-    public void UpdateConnectionDataStart(ConveyorConnectionData connectionDataStart)
-    {
-        _connectionDataStart = connectionDataStart;
-    }
-    public void UpdateConnectionDataEnd(ConveyorConnectionData connectionDataEnd)
-    {
-        _connectionDataEnd = connectionDataEnd;
-    }
-    public void InstantiateInSaveLoadMode()
-    {
 
+        if (connectionDataStart.isAlignedToExistingPillar)
+        {
+            topPillarStart = connectionDataStart.alignedToPillar;         
+        }
+        if (connectionDataEnd.isAlignedToExistingPillar)
+        {
+            topPillarEnd = connectionDataEnd.alignedToPillar;
+        }
+        SetupAlignedPillar(topPillarStart,connectionDataStart);
+        SetupAlignedPillar(topPillarEnd,connectionDataEnd);
+    }
+    void SetupConveyor(ConveyorController conveyorController,OrientedPoint orientedPoints)
+    {
+        bool isDirectionReversed = connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.End;      
+        conveyorController.Setup(isDirectionReversed,orientedPoints.positions,orientedPoints.rotations);
+    }
+    void SetupAlignedPillar(Pillar pillar, ConveyorConnectionData connectionData)
+    {
+        pillar.Setup(connectionData.conveyorSide,connectionData.occupiedPillarSide);
     }
     #endregion
 

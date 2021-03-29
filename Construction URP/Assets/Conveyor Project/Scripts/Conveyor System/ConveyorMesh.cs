@@ -8,6 +8,7 @@ public class ConveyorMesh
     #region Temp
     [Header("Temporary Things", order = 0)]
     [SerializeField] private bool _drawMesh;
+    public bool reversedUV;
     #endregion
 
     #region Fields
@@ -108,31 +109,41 @@ public class ConveyorMesh
     }
     Vector2 GetUV(int currentEdgeLoop, VertexData vertexData, bool reversedUV, OrientedPoint orientedPoints, MeshAsset.UvMapOrientation uvMapOrientation, float compansateForwardStretch)
     {
-        float forwardLength = 0;
-        float sidewardLength = 0;
+        float verticalLength = 0;
+        float horizontalLength = 0;
         Vector2 uv = new Vector2();
 
         if (uvMapOrientation == MeshAsset.UvMapOrientation.ForwardX)
         {         
-            forwardLength = vertexData.vertexUV.x > 0 ?orientedPoints.segmentDistanceBackward[currentEdgeLoop]: orientedPoints.segmentDistanceForward[currentEdgeLoop];
+            //verticalLength = vertexData.vertexUV.x > 0.5 ?orientedPoints.segmentDistanceBackward[currentEdgeLoop]: orientedPoints.segmentDistanceForward[currentEdgeLoop];
+            verticalLength = GetLengthByUV(orientedPoints.segmentDistanceBackward[currentEdgeLoop], orientedPoints.segmentDistanceForward[currentEdgeLoop], vertexData.vertexUV.x,reversedUV);
             if (IsVertexScrollable(vertexData.vertexColor))
             {
-                forwardLength *= compansateForwardStretch;
+                verticalLength *= compansateForwardStretch;
             }
-            sidewardLength = vertexData.vertexUV.y;
-            uv = new Vector2(forwardLength, sidewardLength);
+            horizontalLength = vertexData.vertexUV.y;
+            uv = new Vector2(verticalLength, horizontalLength);
         }
         else
         {
-            forwardLength = vertexData.vertexUV.y > 0 ? orientedPoints.segmentDistanceBackward[currentEdgeLoop] : orientedPoints.segmentDistanceForward[currentEdgeLoop];
+            //verticalLength = vertexData.vertexUV.y > 0.5 ? orientedPoints.segmentDistanceBackward[currentEdgeLoop] : orientedPoints.segmentDistanceForward[currentEdgeLoop];
+            verticalLength = GetLengthByUV(orientedPoints.segmentDistanceBackward[currentEdgeLoop], orientedPoints.segmentDistanceForward[currentEdgeLoop], vertexData.vertexUV.y, reversedUV);
             if (IsVertexScrollable(vertexData.vertexColor))
             {
-                forwardLength *= compansateForwardStretch;
+                verticalLength *= compansateForwardStretch;
             }
-            sidewardLength = vertexData.vertexUV.x;
-            uv = new Vector2(sidewardLength, forwardLength);
+            horizontalLength = vertexData.vertexUV.x;
+            uv = new Vector2(horizontalLength, verticalLength);
         }
         return uv;
+    }
+    float GetLengthByUV(float backward,float forward,float verticalUVcomponent,bool reversedUV)
+    {
+        if (reversedUV)
+        {
+            return verticalUVcomponent > 0.5 ? forward : backward;
+        }
+        return verticalUVcomponent > 0.5 ? backward : forward;
     }
     Color32 GetVertexColor(VertexData vertexData, byte newConveyorSpeed)
     {
@@ -161,6 +172,7 @@ public class ConveyorMesh
     public void MeshUpdate(bool reversedUV)
     {
         if (!_drawMesh) return;
+        this.reversedUV = reversedUV;
         if (_orientedPoints.positions.Length == 0)
         {
             Debug.Log("nima");
