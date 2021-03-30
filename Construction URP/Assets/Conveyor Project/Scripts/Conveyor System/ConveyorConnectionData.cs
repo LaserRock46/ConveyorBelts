@@ -25,4 +25,8 @@ public class ConveyorConnectionData
     {
         this.conveyorSide = conveyorSide;
     }
+    public void CorrectConveyorSide(ConveyorSide conveyorSide)
+    {
+        this.conveyorSide = conveyorSide;
+    }
 }
