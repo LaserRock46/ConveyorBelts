@@ -8,6 +8,8 @@ public class ConveyorMesh
     #region Temp
     [Header("Temporary Things", order = 0)]
     [SerializeField] private bool _drawMesh;
+    public Vector2[] uvs3;
+
     public bool reversedUV;
     #endregion
 
@@ -39,12 +41,13 @@ public class ConveyorMesh
         }
         return null;
     }
-    public Mesh GetMesh(Mesh newMesh, Vector3[] vertices, Vector2[] uvs, int[] triangles, Color32[] vertexColors)
+    public Mesh GetMesh(Mesh newMesh, Vector3[] vertices, Vector2[] uvs, Vector2[] uvs3, int[] triangles, Color32[] vertexColors)
     {
 
         newMesh.Clear();
         newMesh.SetVertices(vertices);
         newMesh.SetUVs(0, uvs);
+        newMesh.SetUVs(3, uvs3);      
         newMesh.SetTriangles(triangles, 0);
         newMesh.SetColors(vertexColors);
         newMesh.RecalculateBounds();
@@ -80,13 +83,14 @@ public class ConveyorMesh
         }
         return trimmedPrecomputedTriangles;
     }
-    (Vector3[] vertices,Vector2[] uvs, Color32[] vertexColors) GetVertexDataArrays(int edgeLoopCount, OrientedPoint orientedPoints, EdgeLoop edgeLoop, bool reversedUV = false, MeshAsset.UvMapOrientation uvMapOrientation = MeshAsset.UvMapOrientation.ForwardX, byte newConveyorSpeed = 0, float compansateForwardStretch = 1)
+    (Vector3[] vertices,Vector2[] uvs, Vector2[] uvs3, Color32[] vertexColors) GetVertexDataArrays(int edgeLoopCount, OrientedPoint orientedPoints, EdgeLoop edgeLoop, bool reversedUV = false, MeshAsset.UvMapOrientation uvMapOrientation = MeshAsset.UvMapOrientation.ForwardX, byte newConveyorSpeed = 0, float compansateForwardStretch = 1)
     {
         int newVertexDataArrayLength = edgeLoopCount * edgeLoop.vertexDatas.Length;
         Vector3[] vertices = new Vector3[newVertexDataArrayLength];
         Vector2[] uvs = new Vector2[newVertexDataArrayLength];
+        Vector2[] uvs3 = new Vector2[newVertexDataArrayLength];
         Color32[] vertexColors = new Color32[newVertexDataArrayLength];
-
+      
         for (int currentEdgeLoop = 0; currentEdgeLoop < edgeLoopCount; currentEdgeLoop++)
         {
             int currentLoopArrayIndex = currentEdgeLoop * edgeLoop.vertexDatas.Length;
@@ -97,11 +101,12 @@ public class ConveyorMesh
 
                 vertices[currentVertexDataArrayIndex] = GetVertex(currentEdgeLoop, edgeLoop.vertexDatas[currentVertexData], orientedPoints);
                 uvs[currentVertexDataArrayIndex] = GetUV(currentEdgeLoop, edgeLoop.vertexDatas[currentVertexData], reversedUV, orientedPoints, uvMapOrientation, compansateForwardStretch);
+                uvs3[currentVertexDataArrayIndex] = GetUV3ForRevealEffect(currentEdgeLoop, reversedUV, orientedPoints);
                 vertexColors[currentVertexDataArrayIndex] = GetVertexColor(edgeLoop.vertexDatas[currentVertexData], newConveyorSpeed);
+              
             }
-        }
-
-        return (vertices, uvs, vertexColors);
+        }     
+        return (vertices, uvs,uvs3, vertexColors);
     }
     Vector3 GetVertex(int currentEdgeLoop, VertexData vertexData, OrientedPoint orientedPoints)
     {
@@ -114,8 +119,7 @@ public class ConveyorMesh
         Vector2 uv = new Vector2();
 
         if (uvMapOrientation == MeshAsset.UvMapOrientation.ForwardX)
-        {         
-            //verticalLength = vertexData.vertexUV.x > 0.5 ?orientedPoints.segmentDistanceBackward[currentEdgeLoop]: orientedPoints.segmentDistanceForward[currentEdgeLoop];
+        {                 
             verticalLength = GetLengthByUV(orientedPoints.segmentDistanceBackward[currentEdgeLoop], orientedPoints.segmentDistanceForward[currentEdgeLoop], vertexData.vertexUV.x,reversedUV);
             if (IsVertexScrollable(vertexData.vertexColor))
             {
@@ -125,8 +129,7 @@ public class ConveyorMesh
             uv = new Vector2(verticalLength, horizontalLength);
         }
         else
-        {
-            //verticalLength = vertexData.vertexUV.y > 0.5 ? orientedPoints.segmentDistanceBackward[currentEdgeLoop] : orientedPoints.segmentDistanceForward[currentEdgeLoop];
+        {         
             verticalLength = GetLengthByUV(orientedPoints.segmentDistanceBackward[currentEdgeLoop], orientedPoints.segmentDistanceForward[currentEdgeLoop], vertexData.vertexUV.y, reversedUV);
             if (IsVertexScrollable(vertexData.vertexColor))
             {
@@ -136,6 +139,12 @@ public class ConveyorMesh
             uv = new Vector2(horizontalLength, verticalLength);
         }
         return uv;
+    }
+    Vector2 GetUV3ForRevealEffect(int currentEdgeLoop , bool reversedUV, OrientedPoint orientedPoints)
+    {
+        float length = reversedUV? orientedPoints.segmentDistanceBackward[currentEdgeLoop] : orientedPoints.segmentDistanceForward[currentEdgeLoop];
+        Vector2 uv3 = new Vector2(length, 0);
+        return uv3;
     }
     float GetLengthByUV(float backward,float forward,float verticalUVcomponent,bool reversedUV)
     {
@@ -147,7 +156,7 @@ public class ConveyorMesh
     }
     Color32 GetVertexColor(VertexData vertexData, byte newConveyorSpeed)
     {
-        Color32 vertexColor = new Color32();
+        Color32 vertexColor = new Color32();          
         if (IsVertexScrollable(vertexData.vertexColor))
         {
              vertexColor = new Color32(vertexData.vertexColor.r, newConveyorSpeed, vertexData.vertexColor.b, vertexData.vertexColor.a);
@@ -155,7 +164,7 @@ public class ConveyorMesh
         else
         {
             vertexColor = vertexData.vertexColor;
-        }
+        }     
         return vertexColor;
     }
     bool IsVertexScrollable(Color32 vertexColor)
@@ -182,7 +191,8 @@ public class ConveyorMesh
         MeshAsset selectedMeshAsset = GetSelectedMeshAsset();
         var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, selectedMeshAsset.edgeLoop, reversedUV, selectedMeshAsset.uvMapOrientation, conveyorSpeed, selectedMeshAsset.compensateForwardStretch);
         int[] precomputedTriangles = GetTrimmedPrecomputedTriangles(targetEdgeLoopCount, selectedMeshAsset.edgeLoop, selectedMeshAsset.precomputedTriangles);
-        _previewMeshFilter.mesh = GetMesh(_previewMeshFilter.mesh, vertexDataArrays.vertices, vertexDataArrays.uvs, precomputedTriangles, vertexDataArrays.vertexColors);
+        uvs3 = vertexDataArrays.uvs3;
+        _previewMeshFilter.mesh = GetMesh(_previewMeshFilter.mesh, vertexDataArrays.vertices, vertexDataArrays.uvs, vertexDataArrays.uvs3, precomputedTriangles, vertexDataArrays.vertexColors);
     }
     public void BakeCollider()
     {

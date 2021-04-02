@@ -480,7 +480,8 @@ public class ConveyorConstructor : MonoBehaviour
         {
             buildingStage = BuildingStage.None;
             _conveyorMesh.BakeCollider();
-            _conveyorInstantiator.Instantiate(_conveyorPath.orientedPoints,previewTransform,startPillarsStack,endPillarsStack);
+            _conveyorInstantiator.Instantiate(_conveyorPath.orientedPoints,previewTransform,startPillarsStack,endPillarsStack,_conveyorMesh.uvs3);
+            _conveyorConstructorVisuals.PlayRevealEffect(_conveyorPath.orientedPoints, previewTransform, _conveyorInstantiator.lastCreatedMesh, IsConveyorDirectionReversed());
         }
     }
     #endregion

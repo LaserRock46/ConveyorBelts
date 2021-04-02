@@ -6,6 +6,7 @@ public class ConveyorInstantiator : MonoBehaviour
 {
     #region Temp
     //[Header("Temporary Things", order = 0)]
+    public Vector2[] uvs3;
     #endregion
 
     #region Fields
@@ -19,6 +20,8 @@ public class ConveyorInstantiator : MonoBehaviour
 
     public ConveyorConnectionData connectionDataStart;
     public ConveyorConnectionData connectionDataEnd;
+
+    public Mesh lastCreatedMesh;
     #endregion
 
     #region Functions
@@ -27,6 +30,15 @@ public class ConveyorInstantiator : MonoBehaviour
         Mesh copy = new Mesh();
         copy.SetVertices(original.vertices);
         copy.SetUVs(0,original.uv);
+        if (original.vertices.Length == uvs3.Length)
+        {
+            //copy.SetUVs(3, uvs3);
+            List<Vector2> uvs33 = new List<Vector2>();
+            original.GetUVs(3,uvs33);
+            copy.SetUVs(3, uvs33);
+            Debug.Log(uvs33.Count);
+            Debug.Log(copy.uv3.Length);
+        }
         copy.SetTriangles(original.triangles,0);
         copy.SetColors(original.colors32);
         copy.RecalculateBounds();
@@ -58,7 +70,8 @@ public class ConveyorInstantiator : MonoBehaviour
         {
             newConveyor = SpawnPipeline(previewTransform);
         }
-        newConveyor.GetComponent<MeshFilter>().mesh = GetMeshCopy(previewTransform.GetComponent<MeshFilter>().mesh);
+        lastCreatedMesh = GetMeshCopy(previewTransform.GetComponent<MeshFilter>().mesh);
+        newConveyor.GetComponent<MeshFilter>().mesh = lastCreatedMesh;
         MeshCollider meshCollider = newConveyor.GetComponent<MeshCollider>();
         meshCollider.sharedMesh = GetMeshCopy(previewTransform.GetComponent<MeshCollider>().sharedMesh);
         return newConveyor;
@@ -86,8 +99,9 @@ public class ConveyorInstantiator : MonoBehaviour
 
 
     #region Methods
-    public void Instantiate(OrientedPoint orientedPoints,Transform previewTransform,GameObject[] previewStartPillars, GameObject[] previewEndPillars)
+    public void Instantiate(OrientedPoint orientedPoints,Transform previewTransform,GameObject[] previewStartPillars, GameObject[] previewEndPillars, Vector2[] uvs3)
     {
+        this.uvs3 = uvs3;
         GameObject newConveyor = GetConveyor(previewTransform);
         ConveyorController conveyorController = newConveyor.GetComponent<ConveyorController>();
         SetupConveyor(conveyorController, orientedPoints);

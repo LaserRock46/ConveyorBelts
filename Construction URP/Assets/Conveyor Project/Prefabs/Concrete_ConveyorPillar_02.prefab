@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 120952556861737475}
   - component: {fileID: 1292129580477141672}
   - component: {fileID: 1746505558227230811}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Concrete_ConveyorPillar_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -60,6 +60,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9411a784d5006040963146abe20ec9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isOccupiedFront: 0
+  _isOccupiedBack: 0
   conveyorSide: 0
   self: {fileID: 120952556861737475}
   tipAnchor: {fileID: 1266240586871382504}
@@ -74,7 +76,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5016810183660823616}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Height
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -105,7 +107,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3070711766558527570}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Conveyer Procedural Belt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -135,7 +137,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1266240586871382504}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Tip Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -166,6 +168,10 @@ PrefabInstance:
     - target: {fileID: 100000, guid: 438c749bf02720a4aaa38afd396b286e, type: 3}
       propertyPath: m_Name
       value: Concrete_ConveyorPillar_02a_snaps005
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 438c749bf02720a4aaa38afd396b286e, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 438c749bf02720a4aaa38afd396b286e, type: 3}
       propertyPath: m_StaticEditorFlags
