@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 558259426444401664}
   - component: {fileID: 3579995833392811158}
   - component: {fileID: 6317534938756835623}
-  - component: {fileID: 1010851928136263590}
   m_Layer: 0
   m_Name: Conveyor_Prefab
   m_TagString: Untagged
@@ -110,18 +109,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a62c008e3e85b2341bccf95be8cc9e9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1010851928136263590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6581151243432342786}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aaf97fe7566d6b34099aa144ec787c11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  selfMesh: {fileID: 0}
-  self: {fileID: 0}
-  color: {r: 0, g: 1, b: 0, a: 1}
+  _isDirectionReversed: 0
+  _positions: []
+  _rotations: []

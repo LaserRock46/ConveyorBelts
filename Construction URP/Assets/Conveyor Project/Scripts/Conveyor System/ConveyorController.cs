@@ -16,8 +16,8 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
   
     private IConveyorItemGate _consecutiveFactoryOrConveyor;
 
-    private Vector3[] _positions;
-    private Quaternion[] _rotations;
+    [SerializeField] private Vector3[] _positions;
+    [SerializeField] private Quaternion[] _rotations;
     private List<Transform> _items;
     private List<int> _itemType;
     private List<float> _itemProgress;
@@ -25,7 +25,24 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     #endregion
 
     #region Functions
-
+    public static Vector3[] PositionsLocalToWorld(Vector3[] local, Transform self)
+    {
+        Vector3[] world = new Vector3[local.Length];
+        for (int i = 0; i < world.Length; i++)
+        {
+            world[i] = self.TransformPoint(local[i]);
+        }
+        return world;
+    }
+    public static Quaternion[] RotationsLocalToWorld(Quaternion[] local,Transform self)
+    {
+        Quaternion[] world = new Quaternion[local.Length];
+        for (int i = 0; i < world.Length; i++)
+        {
+            world[i] = self.rotation * local[i];
+        }
+        return world;
+    }
     #endregion
 
 
@@ -38,8 +55,8 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     public void Setup(bool isDirectionReversed, Vector3[] positions, Quaternion[] rotations)
     {
         _isDirectionReversed = isDirectionReversed;
-        _positions = positions;
-        _rotations = rotations;
+        _positions = PositionsLocalToWorld(positions,transform);
+        _rotations = RotationsLocalToWorld(rotations,transform);
     }
     #endregion
 

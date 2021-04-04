@@ -36,8 +36,7 @@ public class ConveyorInstantiator : MonoBehaviour
             List<Vector2> uvs33 = new List<Vector2>();
             original.GetUVs(3,uvs33);
             copy.SetUVs(3, uvs33);
-            Debug.Log(uvs33.Count);
-            Debug.Log(copy.uv3.Length);
+       
         }
         copy.SetTriangles(original.triangles,0);
         copy.SetColors(original.colors32);

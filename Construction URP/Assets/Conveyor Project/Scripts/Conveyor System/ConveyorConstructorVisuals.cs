@@ -27,6 +27,7 @@ public class ConveyorConstructorVisuals : MonoBehaviour
 
     private Vector3[] _positions;
     private Quaternion[] _rotations;
+    [SerializeField] private ItemTransmission _revealEffectTransmission;
 
     [SerializeField] private string _shaderRevealPropertyString;
     private int _shaderRevealPropertyID;
@@ -76,6 +77,14 @@ public class ConveyorConstructorVisuals : MonoBehaviour
 
         _conveyorTransform.SetPositionAndRotation(previewTransform.position, previewTransform.rotation);
         _conveyorMeshFilter.sharedMesh = lastCreatedMesh;
+
+        Vector3[] worldPositions = ConveyorController.PositionsLocalToWorld(orientedPoints.positions, _conveyorTransform);
+        Quaternion[] worldRotations = ConveyorController.RotationsLocalToWorld(orientedPoints.rotations, _conveyorTransform);
+        Vector3 initialEffectPosition = isConveyorDirectionReversed ? worldPositions[orientedPoints.positions.Length - 1] : worldPositions[0];
+        Quaternion initialEffectRotation = isConveyorDirectionReversed ? worldRotations[orientedPoints.positions.Length - 1] : worldRotations[0];
+        _revealEffectTransform.SetPositionAndRotation(initialEffectPosition,initialEffectRotation);
+        _revealEffectTransmission = new ItemTransmission(_revealEffectTransform, 0, isConveyorDirectionReversed, _revealSpeed, worldPositions);
+
     }
     void UpdateRevealEffect()
     {
@@ -83,6 +92,7 @@ public class ConveyorConstructorVisuals : MonoBehaviour
 
         _revealProgress += Time.deltaTime * _revealSpeed;
            
+        _revealEffectTransmission.Update();
         _revealMaterial.SetFloat(_shaderRevealPropertyID,_revealProgress);     
 
         if(_revealProgress >= _revealTarget)
@@ -91,6 +101,7 @@ public class ConveyorConstructorVisuals : MonoBehaviour
             _conveyorTransform.gameObject.SetActive(false);
             _revealEffectTransform.gameObject.SetActive(false);
         }
+
     }
     #endregion
 
