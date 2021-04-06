@@ -140,7 +140,7 @@ public class ConveyorInstantiator : MonoBehaviour
     void SetupConveyor(ConveyorController conveyorController,OrientedPoint orientedPoints)
     {
         bool isDirectionReversed = connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.End;      
-        conveyorController.Setup(isDirectionReversed,orientedPoints.positions,orientedPoints.rotations);
+        conveyorController.Setup(isDirectionReversed,orientedPoints);
     }
     void SetupAlignedPillar(Pillar pillar, ConveyorConnectionData connectionData)
     {

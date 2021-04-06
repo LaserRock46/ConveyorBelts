@@ -58,7 +58,7 @@ public class ConveyorPath
         }
         return (totalDistanceForward, segmentDistanceForward, segmentDistanceBackward);
     }
-   bool IsRotationsTooSimilar(Quaternion last, Quaternion current)
+    bool IsRotationsTooSimilar(Quaternion last, Quaternion current)
     {
         return Quaternion.Angle(last, current) < simplifyAngleTolerance;
     }

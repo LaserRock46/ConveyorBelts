@@ -75,17 +75,15 @@ public class TestAnimationCurvePaths : MonoBehaviour
         componentX.keys = x;
         componentY.keys = y;
         componentZ.keys = z;
-
-        componentX.postWrapMode = WrapMode.PingPong;
-        componentY.postWrapMode = WrapMode.PingPong;
-        componentZ.postWrapMode = WrapMode.PingPong;
     }
+   
     void UpdatePosition()
     {
         progress += speed * Time.deltaTime;
         target.position = new Vector3(componentX.Evaluate(progress), componentY.Evaluate(progress), componentZ.Evaluate(progress));
+        Vector3 lookAt = new Vector3(componentX.Evaluate(progress+0.5f), componentY.Evaluate(progress + 0.5f), componentZ.Evaluate(progress + 0.5f));
+        target.LookAt(lookAt); 
 
-      
     }
     #endregion
 

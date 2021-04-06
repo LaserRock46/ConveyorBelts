@@ -51,6 +51,7 @@ public class ConveyorConstructorVisuals : MonoBehaviour
     private void Initialize()
     {    
         _shaderRevealPropertyID = Shader.PropertyToID(_shaderRevealPropertyString);
+        _revealEffectTransmission.AddItem(_revealEffectTransform);
     }
     public void UpdateArrowsDirection(bool isConveyorDirectionReversed)
     {
@@ -79,12 +80,9 @@ public class ConveyorConstructorVisuals : MonoBehaviour
         _conveyorMeshFilter.sharedMesh = lastCreatedMesh;
 
         Vector3[] worldPositions = ConveyorController.PositionsLocalToWorld(orientedPoints.positions, _conveyorTransform);
-        Quaternion[] worldRotations = ConveyorController.RotationsLocalToWorld(orientedPoints.rotations, _conveyorTransform);
-        Vector3 initialEffectPosition = isConveyorDirectionReversed ? worldPositions[orientedPoints.positions.Length - 1] : worldPositions[0];
-        Quaternion initialEffectRotation = isConveyorDirectionReversed ? worldRotations[orientedPoints.positions.Length - 1] : worldRotations[0];
-        _revealEffectTransform.SetPositionAndRotation(initialEffectPosition,initialEffectRotation);
-        _revealEffectTransmission = new ItemTransmission(_revealEffectTransform, 0, isConveyorDirectionReversed, _revealSpeed, worldPositions);
-
+        
+        _revealEffectTransmission.CreatePath(isConveyorDirectionReversed, _revealSpeed, worldPositions,orientedPoints.segmentDistanceForward,orientedPoints.totalDistance);
+        _revealEffectTransmission.SetItemProgress(0, isConveyorDirectionReversed ? orientedPoints.totalDistance : 0);
     }
     void UpdateRevealEffect()
     {

@@ -14,13 +14,10 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     private bool _isEndOccupied;
     [SerializeField] private bool _isDirectionReversed;
   
-    private IConveyorItemGate _consecutiveFactoryOrConveyor;
+    private IConveyorItemGate _consecutiveFactoryOrConveyor;  
 
-    [SerializeField] private Vector3[] _positions;
-    [SerializeField] private Quaternion[] _rotations;
-    private List<Transform> _items;
     private List<int> _itemType;
-    private List<float> _itemProgress;
+    private ItemTransmission _itemTransmission;
 
     #endregion
 
@@ -52,11 +49,11 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     {
      
     }
-    public void Setup(bool isDirectionReversed, Vector3[] positions, Quaternion[] rotations)
+    public void Setup(bool isDirectionReversed, OrientedPoint orientedPoints)
     {
         _isDirectionReversed = isDirectionReversed;
-        _positions = PositionsLocalToWorld(positions,transform);
-        _rotations = RotationsLocalToWorld(rotations,transform);
+        Vector3[] positions = PositionsLocalToWorld(orientedPoints.positions,transform);
+        //_itemTransmission.Create();
     }
     #endregion
 
