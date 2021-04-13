@@ -46,16 +46,28 @@ public class Pillar : MonoBehaviour
             // Can't destroy
         }
     }
-    public void Setup(ConveyorConnectionData.ConveyorSide conveyorSide, ConveyorConnectionData.PillarSide occupiedPillarSide)
+    public void Setup(ConveyorConnectionData.ConveyorSide conveyorSide, ConveyorConnectionData.PillarSide occupiedPillarSide, IConveyorItemGate conveyorItemGate)
     {
         this.conveyorSide = conveyorSide;
         if(occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
         {
             _isOccupiedFront = true;
+            frontSideConveyor = conveyorItemGate;
+
+            if(backSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+            {
+                backSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+            }
         }
         if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Back)
         {
             _isOccupiedBack = true;
+            backSideConveyor = conveyorItemGate;
+
+            if (frontSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+            {
+                frontSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+            }
         }
     }
     #endregion

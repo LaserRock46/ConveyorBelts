@@ -6,17 +6,14 @@ public class ConveyorInstantiator : MonoBehaviour
 {
     #region Temp
     //[Header("Temporary Things", order = 0)]
-    public Vector2[] uvs3;
     #endregion
 
     #region Fields
-    [Header("Fields", order = 1)]    
+    [Header("Fields", order = 1)]
+    private ConveyorConstructorConditions _conditions;
     [SerializeField] private Transform _buildingsRoot;
-    [SerializeField] private GameObject _conveyorPrefab;
-    [SerializeField] private GameObject _pipelinePrefab;
-    [SerializeField] private GameObject _pillarPrefab;
-    [SerializeField] private GlobalBoolAsset _isConveyorSelected;
-    [SerializeField] private GlobalBoolAsset _isPipelineSelected;
+  
+    
 
     public ConveyorConnectionData connectionDataStart;
     public ConveyorConnectionData connectionDataEnd;
@@ -25,18 +22,16 @@ public class ConveyorInstantiator : MonoBehaviour
     #endregion
 
     #region Functions
-    Mesh GetMeshCopy(Mesh original)
+    Mesh GetMeshCopy(Mesh original, bool setUvs3 = true)
     {
         Mesh copy = new Mesh();
         copy.SetVertices(original.vertices);
         copy.SetUVs(0,original.uv);
-        if (original.vertices.Length == uvs3.Length)
-        {
-            //copy.SetUVs(3, uvs3);
-            List<Vector2> uvs33 = new List<Vector2>();
-            original.GetUVs(3,uvs33);
-            copy.SetUVs(3, uvs33);
-       
+        if (setUvs3)
+        {         
+            List<Vector2> uvs3 = new List<Vector2>();
+            original.GetUVs(3,uvs3);
+            copy.SetUVs(3, uvs3);     
         }
         copy.SetTriangles(original.triangles,0);
         copy.SetColors(original.colors32);
@@ -46,41 +41,33 @@ public class ConveyorInstantiator : MonoBehaviour
 
         return copy;
     }
-    public GameObject SpawnPillar(GameObject previewPillar)
+    public GameObject SpawnPillar(GameObject previewPillar, GameObject pillarPrefab)
     {
-        return Instantiate(_pillarPrefab,previewPillar.transform.position,previewPillar.transform.rotation,_buildingsRoot);      
+        return Instantiate(pillarPrefab,previewPillar.transform.position,previewPillar.transform.rotation,_buildingsRoot);      
     }
-    public GameObject SpawnConveyor(Transform previewTransform)
+    public GameObject SpawnConveyor(Transform previewTransform, GameObject conveyorPrefab)
     {
-        return Instantiate(_conveyorPrefab, previewTransform.position, previewTransform.rotation, _buildingsRoot);
+        return Instantiate(conveyorPrefab, previewTransform.position, previewTransform.rotation, _buildingsRoot);
     }
-    public GameObject SpawnPipeline(Transform previewTransform)
-    {
-        return Instantiate(_pipelinePrefab, previewTransform.position, previewTransform.rotation, _buildingsRoot);
-    }
-    GameObject GetConveyor(Transform previewTransform)
+   
+    GameObject GetConveyor(Transform previewTransform, GameObject conveyorPrefab)
     {
         GameObject newConveyor = null;
-        if (_isConveyorSelected.value)
-        {
-            newConveyor = SpawnConveyor(previewTransform);
-        }
-        if (_isPipelineSelected.value)
-        {
-            newConveyor = SpawnPipeline(previewTransform);
-        }
+
+        newConveyor = SpawnConveyor(previewTransform,conveyorPrefab);
+      
         lastCreatedMesh = GetMeshCopy(previewTransform.GetComponent<MeshFilter>().mesh);
         newConveyor.GetComponent<MeshFilter>().mesh = lastCreatedMesh;
         MeshCollider meshCollider = newConveyor.GetComponent<MeshCollider>();
-        meshCollider.sharedMesh = GetMeshCopy(previewTransform.GetComponent<MeshCollider>().sharedMesh);
+        meshCollider.sharedMesh = GetMeshCopy(previewTransform.GetComponent<MeshCollider>().sharedMesh,false);
         return newConveyor;
     }
-    GameObject GetPillar(GameObject previewPillar, int index)
+    GameObject GetPillar(GameObject previewPillar, GameObject pillarPrefab, int index)
     {
         GameObject newPillar = null;
         if (previewPillar.activeSelf)
         {
-            newPillar = SpawnPillar(previewPillar);       
+            newPillar = SpawnPillar(previewPillar,pillarPrefab);       
             newPillar.GetComponent<Pillar>().indexInPillarStack = previewPillar.GetComponent<Pillar>().indexInPillarStack;          
         }
         return newPillar;
@@ -93,31 +80,59 @@ public class ConveyorInstantiator : MonoBehaviour
     {
         return previewStartPillars[0].activeSelf || previewEndPillars[0].activeSelf;
     }
+    IConveyorItemGate GetConsecutiveItemGate(Pillar start, Pillar end)
+    {
+        if(connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
+        {
+            if(connectionDataStart.occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
+            {
+              return start.frontSideConveyor;
+            }
+            else
+            {
+                return start.backSideConveyor;
+            }
+        }
+        else if (connectionDataEnd.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
+        {
+            if (connectionDataEnd.occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
+            {
+                return end.frontSideConveyor;
+            }
+            else
+            {
+                return end.backSideConveyor;
+            }
+        }
+        return null;
+    }
     #endregion
 
 
 
     #region Methods
-    public void Instantiate(OrientedPoint orientedPoints,Transform previewTransform,GameObject[] previewStartPillars, GameObject[] previewEndPillars, Vector2[] uvs3)
+    public void Initialize(ConveyorConstructorConditions conditions)
     {
-        this.uvs3 = uvs3;
-        GameObject newConveyor = GetConveyor(previewTransform);
+        _conditions = conditions;
+    }
+    public void Instantiate(OrientedPoint orientedPoints, Transform previewTransform, GameObject[] previewStartPillars, GameObject[] previewEndPillars,ConveyorAsset conveyorAsset)
+    {
+        GameObject newConveyor = GetConveyor(previewTransform,conveyorAsset.conveyorPrefab);
         ConveyorController conveyorController = newConveyor.GetComponent<ConveyorController>();
-        SetupConveyor(conveyorController, orientedPoints);
 
         Pillar topPillarStart = null;
         Pillar topPillarEnd = null;
 
-        if (NeedNewPillars(previewStartPillars,previewEndPillars))
+        if (NeedNewPillars(previewStartPillars, previewEndPillars))
         {
             for (int i = 0; i < previewStartPillars.Length; i++)
             {
-                GameObject startPillar = GetPillar(previewStartPillars[i], i);
-                GameObject endPillar = GetPillar(previewEndPillars[i], i);
-                         
+                GameObject startPillar = GetPillar(previewStartPillars[i],conveyorAsset.pillarPrefab, i);
+                GameObject endPillar = GetPillar(previewEndPillars[i],conveyorAsset.pillarPrefab, i);
+
                 if (startPillar && IsThisTopPillar(i))
                 {
-                    topPillarStart = startPillar.GetComponent<Pillar>();                    
+                    topPillarStart = startPillar.GetComponent<Pillar>();
                 }
                 if (endPillar && IsThisTopPillar(i))
                 {
@@ -128,23 +143,28 @@ public class ConveyorInstantiator : MonoBehaviour
 
         if (connectionDataStart.isAlignedToExistingPillar)
         {
-            topPillarStart = connectionDataStart.alignedToPillar;         
+            topPillarStart = connectionDataStart.alignedToPillar;
         }
         if (connectionDataEnd.isAlignedToExistingPillar)
         {
             topPillarEnd = connectionDataEnd.alignedToPillar;
         }
-        SetupAlignedPillar(topPillarStart,connectionDataStart);
-        SetupAlignedPillar(topPillarEnd,connectionDataEnd);
+
+        IConveyorItemGate conveyorItemGate = conveyorController.GetComponent<IConveyorItemGate>();
+        SetupAlignedPillar(topPillarStart, connectionDataStart, conveyorItemGate);
+        SetupAlignedPillar(topPillarEnd, connectionDataEnd, conveyorItemGate);
+        SetupConveyor(conveyorController, orientedPoints, topPillarStart, topPillarEnd,conveyorAsset.conveyorSpeed);
     }
-    void SetupConveyor(ConveyorController conveyorController,OrientedPoint orientedPoints)
+    void SetupConveyor(ConveyorController conveyorController,OrientedPoint orientedPoints, Pillar start, Pillar end,float speed)
     {
-        bool isDirectionReversed = connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.End;      
-        conveyorController.Setup(isDirectionReversed,orientedPoints);
+        bool isDirectionReversed = connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.Output;
+
+        IConveyorItemGate consecutiveFactoryOrConveyor = GetConsecutiveItemGate(start,end); 
+        conveyorController.Setup(isDirectionReversed,orientedPoints,consecutiveFactoryOrConveyor,speed);
     }
-    void SetupAlignedPillar(Pillar pillar, ConveyorConnectionData connectionData)
+    void SetupAlignedPillar(Pillar pillar, ConveyorConnectionData connectionData,IConveyorItemGate conveyorItemGate)
     {
-        pillar.Setup(connectionData.conveyorSide,connectionData.occupiedPillarSide);
+        pillar.Setup(connectionData.conveyorSide,connectionData.occupiedPillarSide,conveyorItemGate);
     }
     #endregion
 

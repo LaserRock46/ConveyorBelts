@@ -18,6 +18,11 @@ public class ItemTransmission
     public List<Transform> itemsTransforms = new List<Transform>();
 
     public float totalDistance;
+
+    public ItemTransmission()
+    {
+    }
+
     (AnimationCurve componentX, AnimationCurve componentY, AnimationCurve componentZ) GetCurvePathComponents(float[] segmentDistanceForward, Vector3[] positions)
     {
         Keyframe[] x = new Keyframe[positions.Length];
@@ -89,19 +94,17 @@ public class ItemTransmission
             itemsTransforms[i].position = GetPositionOnPath(itemsProgress[i]);
             Vector3 lookAtPosition = GetLookAtPosition(itemsProgress[i]);
             itemsTransforms[i].forward = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
-        }
-
-        if (_drawDebug)
-        {
-            DebugTransmission();
-        }
+        }      
     }
-    void DebugTransmission()
+    public void DebugTransmission()
     {
         for (int i = 1; i < positions.Length; i++)
         {
             Debug.DrawLine(positions[i - 1], positions[i], Color.red);
         }
+        Vector3 firstItemPos = GetPositionOnPath(itemsProgress[0]);
+        Vector3 lookAtPosition = GetLookAtPosition(itemsProgress[0]);
+        Debug.DrawLine(firstItemPos, lookAtPosition, Color.green);
     }
 
 }

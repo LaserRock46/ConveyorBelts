@@ -9,7 +9,7 @@ public class ConveyorConnectionData
     public bool isAlignedToExistingPillar;
     public enum PillarSide {Front,Back }
     public PillarSide occupiedPillarSide;
-    public enum ConveyorSide {None, Start, End}
+    public enum ConveyorSide {None, Input, Output}
     public ConveyorSide conveyorSide;
 
     public ConveyorConnectionData(Pillar alignedToPillar, bool isAlignedToExistingPillar, PillarSide occupiedPillarSide, ConveyorSide conveyorSide)

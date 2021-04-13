@@ -5,4 +5,5 @@ using UnityEngine;
 public interface IConveyorItemGate
 {
     public void PassItem();
+    public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate);
 }

@@ -17,7 +17,7 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     private IConveyorItemGate _consecutiveFactoryOrConveyor;  
 
     private List<int> _itemType;
-    private ItemTransmission _itemTransmission;
+    public ItemTransmission itemTransmission = new ItemTransmission();
 
     #endregion
 
@@ -49,11 +49,16 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     {
      
     }
-    public void Setup(bool isDirectionReversed, OrientedPoint orientedPoints)
+    public void Setup(bool isDirectionReversed, OrientedPoint orientedPoints, IConveyorItemGate consecutiveFactoryOrConveyor,float speed)
     {
         _isDirectionReversed = isDirectionReversed;
         Vector3[] positions = PositionsLocalToWorld(orientedPoints.positions,transform);
-        //_itemTransmission.Create();
+        _consecutiveFactoryOrConveyor = consecutiveFactoryOrConveyor;      
+        itemTransmission.CreatePath(isDirectionReversed,speed,positions,orientedPoints.segmentDistanceForward,orientedPoints.totalDistance);
+    }
+    public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
+    {
+        _consecutiveFactoryOrConveyor = conveyorItemGate;
     }
     #endregion
 

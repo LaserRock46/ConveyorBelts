@@ -29,18 +29,6 @@ public class ConveyorMesh
     #endregion
 
     #region Functions
-    MeshAsset GetSelectedMeshAsset()
-    {
-        if (_isConveyorSelected.value)
-        {         
-            return _conveyorMeshAsset;
-        }
-        else if (_isPipelineSelected.value)
-        {
-            return _pipelineMeshAsset;
-        }
-        return null;
-    }
     public Mesh GetMesh(Mesh newMesh, Vector3[] vertices, Vector2[] uvs, Vector2[] uvs3, int[] triangles, Color32[] vertexColors)
     {
 
@@ -178,7 +166,7 @@ public class ConveyorMesh
     {
         _orientedPoints = orientedPoints;
     }
-    public void MeshUpdate(bool reversedUV)
+    public void MeshUpdate(bool reversedUV, ConveyorAsset conveyorAsset)
     {
         if (!_drawMesh) return;
         this.reversedUV = reversedUV;
@@ -188,16 +176,16 @@ public class ConveyorMesh
             return;
         }
         int targetEdgeLoopCount = _orientedPoints.positions.Length;
-        MeshAsset selectedMeshAsset = GetSelectedMeshAsset();
-        var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, selectedMeshAsset.edgeLoop, reversedUV, selectedMeshAsset.uvMapOrientation, conveyorSpeed, selectedMeshAsset.compensateForwardStretch);
+        MeshAsset selectedMeshAsset = conveyorAsset.conveyorMeshAsset;
+        var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, selectedMeshAsset.edgeLoop, reversedUV, selectedMeshAsset.uvMapOrientation, conveyorAsset.conveyorSpeed, selectedMeshAsset.compensateForwardStretch);
         int[] precomputedTriangles = GetTrimmedPrecomputedTriangles(targetEdgeLoopCount, selectedMeshAsset.edgeLoop, selectedMeshAsset.precomputedTriangles);
         uvs3 = vertexDataArrays.uvs3;
         _previewMeshFilter.mesh = GetMesh(_previewMeshFilter.mesh, vertexDataArrays.vertices, vertexDataArrays.uvs, vertexDataArrays.uvs3, precomputedTriangles, vertexDataArrays.vertexColors);
     }
-    public void BakeCollider()
+    public void BakeCollider(ConveyorAsset conveyorAsset)
     {
         int targetEdgeLoopCount = _orientedPoints.positions.Length;
-        MeshAsset selectedMeshAsset = GetSelectedMeshAsset();
+        MeshAsset selectedMeshAsset = conveyorAsset.conveyorMeshAsset;
         var vertexDataArrays = GetVertexDataArrays(targetEdgeLoopCount, _orientedPoints, selectedMeshAsset.edgeLoopCollider);
         int[] precomputedTriangles = GetTrimmedPrecomputedTriangles(targetEdgeLoopCount, selectedMeshAsset.edgeLoopCollider, selectedMeshAsset.precomputedTrianglesCollider);
         _previewMeshCollider.sharedMesh = GetMeshCollider(_previewMeshCollider.sharedMesh,vertexDataArrays.vertices,precomputedTriangles);
