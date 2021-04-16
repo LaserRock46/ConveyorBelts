@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 924a32787b3e0c546863caeabec1ae8b, type: 3}
+  m_Name: Oildrum Item Asset
+  m_EditorClassIdentifier: 
+  itemName: Oil
+  icon: {fileID: 0}
+  maxStackCount: 100
+  productionTime: 3
+  prefab: {fileID: 4687343053029463711, guid: 73201fbdfbd81c94ea89de3038b4c68e, type: 3}

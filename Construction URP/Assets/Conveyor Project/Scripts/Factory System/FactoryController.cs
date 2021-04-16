@@ -13,33 +13,67 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
     public ItemRecipeAsset[] itemRecipeAssets;
     public ItemRecipeAsset selected;
 
-    public Pillar[] inputs;
-    public Pillar output;
+    public FactoryItemGate[] inputItemGates;
+    public FactoryItemGate[] outputItemGates;
+    public int[] inputItemCount;
+    public int[] outputItemCount;
     #endregion
 
     #region Functions
-    
+   
+    public bool CanReceiveItem(ItemAsset itemAsset)
+    {
+        for (int i = 0; i < selected.input.Length; i++)
+        {
+            if(itemAsset == selected.input[i].item && inputItemCount[i] <= selected.input[i].resourceCount)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     #endregion
 
-    
+
 
     #region Methods
     void Start()
     {
-        SetupInputsAndOutputs();
+        SetupGates();
     }
    void Update()
     {
         
     }
-    void SetupInputsAndOutputs()
+    void SetupGates()
     {
-
+        for (int i = 0; i < inputItemGates.Length; i++)
+        {
+            inputItemGates[i].Setup(this,ConveyorConnectionData.ConveyorSide.Input);
+        }
+        for (int i = 0; i < outputItemGates.Length; i++)
+        {
+            outputItemGates[i].Setup(this, ConveyorConnectionData.ConveyorSide.Output);
+        }
+       
+    }
+    public void SetRecipe(ItemRecipeAsset itemRecipeAsset)
+    {
+        selected = itemRecipeAsset;
+        inputItemCount = new int[itemRecipeAsset.input.Length];
+        outputItemCount = new int[itemRecipeAsset.output.Length];
     }
 
-    public void PassItem()
+    public void ReceiveItem(ItemAsset itemAsset,Transform itemTransform)
     {
-       
+        for (int i = 0; i < selected.input.Length; i++)
+        {
+            if (itemAsset == selected.input[i].item)
+            {
+              inputItemCount[i]++;
+            }
+        }
+        Destroy(itemTransform.gameObject);
     }
 
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)

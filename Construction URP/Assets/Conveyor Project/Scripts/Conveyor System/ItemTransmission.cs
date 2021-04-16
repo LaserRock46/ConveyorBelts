@@ -5,6 +5,11 @@ using UnityEngine;
 [System.Serializable]
 public class ItemTransmission
 {
+    public bool consecutiveExist;
+    public bool canMoveToEnd;
+    public bool enoughSpace;
+    public bool canPass;
+
     [SerializeField] private bool _drawDebug;
     public bool reversedTransmission;
     public float speed;
@@ -16,8 +21,15 @@ public class ItemTransmission
 
     public List<float> itemsProgress = new List<float>();
     public List<Transform> itemsTransforms = new List<Transform>();
+    public List<ItemAsset> itemAssets = new List<ItemAsset>();
+
 
     public float totalDistance;
+   
+
+    private IConveyorItemGate _consecutiveFactoryOrConveyor;
+
+    public float itemHalfwayLength;
 
     public ItemTransmission()
     {
@@ -44,7 +56,7 @@ public class ItemTransmission
     }
     float GetStep()
     {
-        return Time.deltaTime * (reversedTransmission? -speed:speed);
+        return Time.deltaTime * (reversedTransmission? -speed:speed)/10;
     }
     Vector3 GetPositionOnPath(float progress)
     {
@@ -56,37 +68,117 @@ public class ItemTransmission
     }
     Vector3 GetLookAtPosition(float progress)
     {
-        return GetPositionOnPath(progress + (reversedTransmission? -0.5f:0.5f));
+        return GetPositionOnPath(progress + (reversedTransmission ? -0.5f : 0.5f));
     }
 
-    public void CreatePath(bool reversedTransmission, float speed,Vector3[] positions, float[] segmentDistanceForward,float totalDistance)
+    float GetProgressWithMargin(int index)
+    {
+        float margin = 0;
+        if (reversedTransmission)
+        {
+            margin = itemsProgress[index] - itemHalfwayLength;
+        }
+        else
+        {
+            margin = itemsProgress[index] + totalDistance - itemHalfwayLength;
+        }    
+        return margin;
+    }
+    bool IsEnaughSpaceToMove(int index)
+    {
+        if(itemsProgress.Count <= 1)
+        {
+            return true;
+        }
+        return itemsProgress[index + 1] - itemsProgress[index] >= itemHalfwayLength;
+    }
+
+    bool CanMoveToEnd(int index)
+    {
+        if (_consecutiveFactoryOrConveyor == null)
+        {
+            return false;
+        }
+        else
+        {
+            return _consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index]);
+        }
+    }
+    bool CanMoveItem(int index)
+    {              
+        return IsEnaughSpaceToMove(index) && CanMoveToEnd(index);
+    }
+    bool CanPassItem(int index)
+    {
+        if (reversedTransmission)
+        {
+            return itemsProgress[index] <= 0;
+        }
+        else
+        {
+            return itemsProgress[index] >= totalDistance;
+        }
+    }
+    public void CreatePath(bool reversedTransmission, float speed,Vector3[] positions, float[] segmentDistanceForward,float totalDistance, float itemHalfwayLength = 0.5f)
     {       
         this.reversedTransmission = reversedTransmission;
         this.speed = speed;
         this.positions = positions;
         this.totalDistance = totalDistance;
+        this.itemHalfwayLength = itemHalfwayLength;
 
         var curvePathComponents = GetCurvePathComponents(segmentDistanceForward,positions);
         componentX = curvePathComponents.componentX;
         componentY = curvePathComponents.componentY;
         componentZ = curvePathComponents.componentZ;
+
+    }
+    public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
+    {
+        _consecutiveFactoryOrConveyor = conveyorItemGate;
+        consecutiveExist = true;
     }
     public void SetItemProgress(int index, float progress)
     {
         itemsProgress[index] = progress;
     }
-    public void AddItem(Transform itemTransform)
+    public void AddItem(Transform itemTransform,ItemAsset itemAsset = null)
     {
         itemsTransforms.Add(itemTransform);
-        itemsProgress.Add(new float());
+        itemsProgress.Add(reversedTransmission ? totalDistance : 0f);
+        itemAssets.Add(itemAsset);
     }
     public void RemoveItem(int index = 0)
     {
         itemsTransforms.RemoveAt(index);
         itemsProgress.RemoveAt(index);
+        itemAssets.RemoveAt(index);
     }
 
     public void Update()
+    {
+        for (int i = 0; i < itemsProgress.Count; i++)
+        {
+            canMoveToEnd = CanMoveToEnd(i);
+            canPass = CanPassItem(i);
+            enoughSpace = IsEnaughSpaceToMove(i);
+            if (CanMoveItem(i))
+            {
+                itemsProgress[i] += GetStep();
+                itemsTransforms[i].position = GetPositionOnPath(itemsProgress[i]);
+                Vector3 lookAtPosition = GetLookAtPosition(itemsProgress[i]);
+                itemsTransforms[i].forward = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
+
+
+                if (CanPassItem(i))
+                {
+                    _consecutiveFactoryOrConveyor.ReceiveItem(itemAssets[i], itemsTransforms[i]);
+                    RemoveItem(i);
+                }
+            }
+        }      
+    }
+    public void UpdateForRevealEffect()
     {
         for (int i = 0; i < itemsProgress.Count; i++)
         {
@@ -94,7 +186,7 @@ public class ItemTransmission
             itemsTransforms[i].position = GetPositionOnPath(itemsProgress[i]);
             Vector3 lookAtPosition = GetLookAtPosition(itemsProgress[i]);
             itemsTransforms[i].forward = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
-        }      
+        }
     }
     public void DebugTransmission()
     {

@@ -90,7 +90,7 @@ public class ConveyorConstructorVisuals : MonoBehaviour
 
         _revealProgress += Time.deltaTime * _revealSpeed;
            
-        _revealEffectTransmission.Update();
+        _revealEffectTransmission.UpdateForRevealEffect();
         _revealMaterial.SetFloat(_shaderRevealPropertyID,_revealProgress);     
 
         if(_revealProgress >= _revealTarget)

@@ -8,7 +8,7 @@ using UnityEngine;
 public class ItemRecipeAsset : ScriptableObject
 {
     public RecipeComponent[] input;
-    public RecipeComponent output;
+    public RecipeComponent[] output;
 }
 [System.Serializable]
 public class RecipeComponent

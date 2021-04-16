@@ -4,6 +4,7 @@ using UnityEngine;
 
 public interface IConveyorItemGate
 {
-    public void PassItem();
+    public bool CanReceiveItem(ItemAsset itemAsset);
+    public void ReceiveItem(ItemAsset itemAsset, Transform itemTransform);
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate);
 }
