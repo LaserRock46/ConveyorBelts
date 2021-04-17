@@ -57,6 +57,8 @@ public class Pillar : MonoBehaviour
             if(backSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
             {
                 backSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+              
+                Debug.Log("setup in " + backSideConveyor + "consecutive " + conveyorItemGate);
             }
         }
         if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Back)
@@ -67,6 +69,8 @@ public class Pillar : MonoBehaviour
             if (frontSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
             {
                 frontSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+              
+                Debug.Log("setup in " + frontSideConveyor + "consecutive " + conveyorItemGate);
             }
         }
     }

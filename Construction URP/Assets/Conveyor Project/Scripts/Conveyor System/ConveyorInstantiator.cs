@@ -5,7 +5,8 @@ using UnityEngine;
 public class ConveyorInstantiator : MonoBehaviour
 {
     #region Temp
-    //[Header("Temporary Things", order = 0)]
+    [Header("Temporary Things", order = 0)]
+    int conIndex;
     #endregion
 
     #region Fields
@@ -82,29 +83,31 @@ public class ConveyorInstantiator : MonoBehaviour
     }
     IConveyorItemGate GetConsecutiveItemGate(Pillar start, Pillar end)
     {
-        if(connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
+        IConveyorItemGate conveyorItemGate = null;
+        if (connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
         {
             if(connectionDataStart.occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
             {
-              return start.frontSideConveyor;
+                conveyorItemGate = start.backSideConveyor;
             }
             else
             {
-                return start.backSideConveyor;
+                conveyorItemGate = start.frontSideConveyor;
             }
         }
         else if (connectionDataEnd.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
         {
             if (connectionDataEnd.occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
             {
-                return end.frontSideConveyor;
+                conveyorItemGate = end.backSideConveyor;
             }
             else
             {
-                return end.backSideConveyor;
+                conveyorItemGate = end.frontSideConveyor;
             }
         }
-        return null;
+
+        return conveyorItemGate;
     }
     #endregion
 
@@ -115,9 +118,11 @@ public class ConveyorInstantiator : MonoBehaviour
     {
         _conditions = conditions;
     }
-    public void Instantiate(OrientedPoint orientedPoints, Transform previewTransform, GameObject[] previewStartPillars, GameObject[] previewEndPillars,ConveyorAsset conveyorAsset)
+    public void Instantiate(OrientedPoint orientedPoints, Transform previewTransform, GameObject[] previewStartPillars, GameObject[] previewEndPillars, ConveyorAsset conveyorAsset)
     {
-        GameObject newConveyor = GetConveyor(previewTransform,conveyorAsset.conveyorPrefab);
+        GameObject newConveyor = GetConveyor(previewTransform, conveyorAsset.conveyorPrefab);
+        conIndex++;
+        newConveyor.name = conIndex.ToString();
         ConveyorController conveyorController = newConveyor.GetComponent<ConveyorController>();
 
         Pillar topPillarStart = null;
@@ -127,8 +132,8 @@ public class ConveyorInstantiator : MonoBehaviour
         {
             for (int i = 0; i < previewStartPillars.Length; i++)
             {
-                GameObject startPillar = GetPillar(previewStartPillars[i],conveyorAsset.pillarPrefab, i);
-                GameObject endPillar = GetPillar(previewEndPillars[i],conveyorAsset.pillarPrefab, i);
+                GameObject startPillar = GetPillar(previewStartPillars[i], conveyorAsset.pillarPrefab, i);
+                GameObject endPillar = GetPillar(previewEndPillars[i], conveyorAsset.pillarPrefab, i);
 
                 if (startPillar && IsThisTopPillar(i))
                 {
@@ -153,7 +158,7 @@ public class ConveyorInstantiator : MonoBehaviour
         IConveyorItemGate conveyorItemGate = conveyorController.GetComponent<IConveyorItemGate>();
         SetupAlignedPillar(topPillarStart, connectionDataStart, conveyorItemGate);
         SetupAlignedPillar(topPillarEnd, connectionDataEnd, conveyorItemGate);
-        SetupConveyor(conveyorController, orientedPoints, topPillarStart, topPillarEnd,conveyorAsset.conveyorSpeed);
+        SetupConveyor(conveyorController, orientedPoints, topPillarStart, topPillarEnd, conveyorAsset.conveyorSpeed);
     }
     void SetupConveyor(ConveyorController conveyorController,OrientedPoint orientedPoints, Pillar start, Pillar end,float speed)
     {

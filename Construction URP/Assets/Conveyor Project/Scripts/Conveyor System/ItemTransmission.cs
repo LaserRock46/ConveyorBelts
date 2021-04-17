@@ -27,7 +27,7 @@ public class ItemTransmission
     public float totalDistance;
    
 
-    private IConveyorItemGate _consecutiveFactoryOrConveyor;
+    public IConveyorItemGate consecutiveFactoryOrConveyor;
 
     public float itemHalfwayLength;
 
@@ -56,7 +56,7 @@ public class ItemTransmission
     }
     float GetStep()
     {
-        return Time.deltaTime * (reversedTransmission? -speed:speed)/10;
+        return Time.deltaTime * (reversedTransmission? -speed:speed);
     }
     Vector3 GetPositionOnPath(float progress)
     {
@@ -95,13 +95,13 @@ public class ItemTransmission
 
     bool CanMoveToEnd(int index)
     {
-        if (_consecutiveFactoryOrConveyor == null)
+        if (consecutiveFactoryOrConveyor == null)
         {
             return false;
         }
         else
         {
-            return _consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index]);
+            return consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index]);
         }
     }
     bool CanMoveItem(int index)
@@ -135,7 +135,7 @@ public class ItemTransmission
     }
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
     {
-        _consecutiveFactoryOrConveyor = conveyorItemGate;
+        consecutiveFactoryOrConveyor = conveyorItemGate;
         consecutiveExist = true;
     }
     public void SetItemProgress(int index, float progress)
@@ -167,12 +167,13 @@ public class ItemTransmission
                 itemsProgress[i] += GetStep();
                 itemsTransforms[i].position = GetPositionOnPath(itemsProgress[i]);
                 Vector3 lookAtPosition = GetLookAtPosition(itemsProgress[i]);
-                itemsTransforms[i].forward = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
+                Vector3 direction = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
+                itemsTransforms[i].forward = direction == Vector3.zero ? itemsTransforms[i].forward:direction;
 
 
                 if (CanPassItem(i))
                 {
-                    _consecutiveFactoryOrConveyor.ReceiveItem(itemAssets[i], itemsTransforms[i]);
+                    consecutiveFactoryOrConveyor.ReceiveItem(itemAssets[i], itemsTransforms[i]);
                     RemoveItem(i);
                 }
             }
@@ -185,7 +186,8 @@ public class ItemTransmission
             itemsProgress[i] += GetStep();
             itemsTransforms[i].position = GetPositionOnPath(itemsProgress[i]);
             Vector3 lookAtPosition = GetLookAtPosition(itemsProgress[i]);
-            itemsTransforms[i].forward = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
+            Vector3 direction = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
+            itemsTransforms[i].forward = direction == Vector3.zero ? itemsTransforms[i].forward : direction;
         }
     }
     public void DebugTransmission()

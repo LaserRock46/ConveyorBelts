@@ -7,7 +7,6 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     #region Temp
     [Header("Temporary Things", order = 0)]
     public ItemAsset testItem;
-   
     #endregion
 
     #region Fields
@@ -73,15 +72,25 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     }
     public void Setup(bool isDirectionReversed, OrientedPoint orientedPoints, IConveyorItemGate consecutiveFactoryOrConveyor,float speed)
     {
+        bool isNull = consecutiveFactoryOrConveyor != null;
+        Debug.Log("setup in CC " + gameObject.name + "consecutive " + isNull + " " + consecutiveFactoryOrConveyor);
         _isDirectionReversed = isDirectionReversed;
         Vector3[] positions = PositionsLocalToWorld(orientedPoints.positions,transform);
-        _consecutiveFactoryOrConveyor = consecutiveFactoryOrConveyor;      
+        AssignConsecutiveItemGate(consecutiveFactoryOrConveyor);
         itemTransmission.CreatePath(isDirectionReversed,speed,positions,orientedPoints.segmentDistanceForward,orientedPoints.totalDistance,_itemHalfwayLength);
     }
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
     {
         _consecutiveFactoryOrConveyor = conveyorItemGate;
-        itemTransmission.AssignConsecutiveItemGate(conveyorItemGate);
+        itemTransmission.consecutiveFactoryOrConveyor = conveyorItemGate;
+        if (conveyorItemGate != null)
+        {
+            itemTransmission.consecutiveExist = true;
+        }
+        else
+        {
+            itemTransmission.consecutiveExist = false;
+        }
     }
     [ContextMenu("TestSpawnItem")]
     void TestSpawnItem()
