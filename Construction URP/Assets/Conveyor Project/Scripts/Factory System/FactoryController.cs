@@ -21,7 +21,7 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
 
     #region Functions
    
-    public bool CanReceiveItem(ItemAsset itemAsset)
+    public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd, ref float dist)
     {
         for (int i = 0; i < selected.input.Length; i++)
         {

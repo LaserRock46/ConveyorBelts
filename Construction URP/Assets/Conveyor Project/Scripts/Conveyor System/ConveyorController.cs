@@ -7,6 +7,10 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     #region Temp
     [Header("Temporary Things", order = 0)]
     public ItemAsset testItem;
+    public float distBetween;
+    public float distToEnd;
+    public float distToStart;
+    public bool canReceive;
     #endregion
 
     #region Fields
@@ -19,24 +23,32 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
 
     private List<int> _itemType;
     public ItemTransmission itemTransmission = new ItemTransmission();
-    private float _itemHalfwayLength = 0.5f;
+    [SerializeField] private float _itemHalfwayLength = 0.6f;
 
     #endregion
 
     #region Functions
-    public bool CanReceiveItem(ItemAsset itemAsset)
+    public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd, ref float dist)
     {
         if(itemTransmission.itemsProgress.Count > 0)
         {
+            float distanceBetweenThisLastAndStart = 0;
             if (!_isDirectionReversed)
-            {
-                return itemTransmission.itemsProgress[itemTransmission.itemsProgress.Count - 1] - _itemHalfwayLength > _itemHalfwayLength;
+            {               
+                distanceBetweenThisLastAndStart = itemTransmission.itemsProgress[itemTransmission.itemsProgress.Count - 1];
             }
             else
-            {
-                return itemTransmission.itemsProgress[itemTransmission.itemsProgress.Count - 1] + _itemHalfwayLength < itemTransmission.totalDistance - _itemHalfwayLength;
+            {              
+                distanceBetweenThisLastAndStart = itemTransmission.totalDistance - (itemTransmission.totalDistance - itemTransmission.itemsProgress[itemTransmission.itemsProgress.Count - 1]);
             }
+            distBetween = distanceBetweenThisLastAndStart + distanceToEnd;
+            this.distToEnd = distanceToEnd;
+            distToStart = distanceBetweenThisLastAndStart;
+            canReceive = distanceBetweenThisLastAndStart - distanceToEnd >= _itemHalfwayLength;
+          
+            return distanceBetweenThisLastAndStart + distanceToEnd >= _itemHalfwayLength;
         }
+        canReceive = true;
         return true;
     }
     public static Vector3[] PositionsLocalToWorld(Vector3[] local, Transform self)
@@ -93,7 +105,7 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
         }
     }
     [ContextMenu("TestSpawnItem")]
-    void TestSpawnItem()
+    public void TestSpawnItem()
     {
         GameObject test = Instantiate(testItem.prefab);
         itemTransmission.AddItem(test.transform,testItem);

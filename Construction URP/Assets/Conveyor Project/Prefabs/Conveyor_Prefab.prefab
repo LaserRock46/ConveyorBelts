@@ -112,6 +112,11 @@ MonoBehaviour:
   testItem: {fileID: 11400000, guid: bfa1f0c7d5d7c2e4f9cc699f82f3e203, type: 2}
   _isDirectionReversed: 0
   itemTransmission:
+    consecutiveExist: 0
+    canMoveToEnd: 0
+    enoughSpace: 0
+    canPass: 0
+    isProgressBeforeTheEnd: 0
     _drawDebug: 0
     reversedTransmission: 0
     speed: 0
@@ -138,4 +143,6 @@ MonoBehaviour:
     itemsTransforms: []
     itemAssets: []
     totalDistance: 0
-    itemHalfwayLength: 0
+    _itemHalfwayLength: 0
+    _lookAtDistance: 0.2
+  _itemHalfwayLength: 0.75

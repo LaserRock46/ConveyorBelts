@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isSelected: {fileID: 11400000, guid: d65ba93d26707764dbd4be2746d69ec4, type: 2}
   conveyorMeshAsset: {fileID: 11400000, guid: 8c1ff6afba5967144bc2863e9234e41a, type: 2}
-  conveyorSpeed: 5
+  conveyorSpeed: 2
   conveyorPrefab: {fileID: 6581151243432342786, guid: 1f5f6b7f4ad39d74b800b882f4448211, type: 3}
   pillarPrefab: {fileID: 3194944452033174758, guid: d4d98efc4dd15f44993877933372205a, type: 3}
   pillarHeight: {x: 0, y: 1.625, z: 0}

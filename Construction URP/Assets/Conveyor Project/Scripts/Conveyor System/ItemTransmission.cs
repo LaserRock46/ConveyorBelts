@@ -6,9 +6,9 @@ using UnityEngine;
 public class ItemTransmission
 {
     public bool consecutiveExist;
-    public bool canMoveToEnd;
-    public bool enoughSpace;
-    public bool canPass;
+   
+  
+    public List<ItemDebug> itemDebugs = new List<ItemDebug>();
 
     [SerializeField] private bool _drawDebug;
     public bool reversedTransmission;
@@ -29,7 +29,8 @@ public class ItemTransmission
 
     public IConveyorItemGate consecutiveFactoryOrConveyor;
 
-    public float itemHalfwayLength;
+    [SerializeField] private float _itemHalfwayLength;
+    [SerializeField] private float _lookAtDistance = 0.2f;
 
     public ItemTransmission()
     {
@@ -68,41 +69,41 @@ public class ItemTransmission
     }
     Vector3 GetLookAtPosition(float progress)
     {
-        return GetPositionOnPath(progress + (reversedTransmission ? -0.5f : 0.5f));
-    }
-
-    float GetProgressWithMargin(int index)
-    {
-        float margin = 0;
-        if (reversedTransmission)
-        {
-            margin = itemsProgress[index] - itemHalfwayLength;
-        }
-        else
-        {
-            margin = itemsProgress[index] + totalDistance - itemHalfwayLength;
-        }    
-        return margin;
+        return GetPositionOnPath(progress + (reversedTransmission ? -_lookAtDistance : _lookAtDistance));
     }
     bool IsEnaughSpaceToMove(int index)
     {
-        if(itemsProgress.Count <= 1)
+        bool move = false;
+        if (index == 0)
         {
-            return true;
+            move = true;
         }
-        return itemsProgress[index + 1] - itemsProgress[index] >= itemHalfwayLength;
+        else
+        {
+            move = itemsProgress[index - 1] - itemsProgress[index] >= _itemHalfwayLength;
+        }
+        return move;
     }
 
     bool CanMoveToEnd(int index)
     {
-        if (consecutiveFactoryOrConveyor == null)
+        bool isProgressBeforeTheEnd = reversedTransmission ? itemsProgress[index] >= _itemHalfwayLength : totalDistance - itemsProgress[index] > _itemHalfwayLength;
+        itemDebugs[index].isProgressBeforeTheEnd = isProgressBeforeTheEnd;
+        bool move = false;
+        if (isProgressBeforeTheEnd)
         {
-            return false;
+            itemDebugs[index].progressBeforeTheEnd = reversedTransmission ? itemsProgress[index] : (totalDistance - itemsProgress[index]);
+            move = true;
         }
-        else
+        else if (consecutiveFactoryOrConveyor != null)
         {
-            return consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index]);
+            float distanceToEnd = reversedTransmission ? totalDistance - (totalDistance - itemsProgress[index]) : totalDistance - itemsProgress[index];
+            itemDebugs[index].distanceToEnd = distanceToEnd;
+            itemDebugs[index].canReceive = consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index], distanceToEnd,ref itemDebugs[index].dist);
+            move = consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index], distanceToEnd, ref itemDebugs[index].dist);
+
         }
+        return move;
     }
     bool CanMoveItem(int index)
     {              
@@ -125,7 +126,7 @@ public class ItemTransmission
         this.speed = speed;
         this.positions = positions;
         this.totalDistance = totalDistance;
-        this.itemHalfwayLength = itemHalfwayLength;
+        this._itemHalfwayLength = itemHalfwayLength;
 
         var curvePathComponents = GetCurvePathComponents(segmentDistanceForward,positions);
         componentX = curvePathComponents.componentX;
@@ -147,28 +148,31 @@ public class ItemTransmission
         itemsTransforms.Add(itemTransform);
         itemsProgress.Add(reversedTransmission ? totalDistance : 0f);
         itemAssets.Add(itemAsset);
+        itemDebugs.Add(new ItemDebug());
     }
     public void RemoveItem(int index = 0)
     {
         itemsTransforms.RemoveAt(index);
         itemsProgress.RemoveAt(index);
         itemAssets.RemoveAt(index);
+        itemDebugs.RemoveAt(index);
     }
 
     public void Update()
-    {
+    {      
         for (int i = 0; i < itemsProgress.Count; i++)
         {
-            canMoveToEnd = CanMoveToEnd(i);
-            canPass = CanPassItem(i);
-            enoughSpace = IsEnaughSpaceToMove(i);
+            itemDebugs[i].canMoveToEnd = CanMoveToEnd(i);
+            itemDebugs[i].canPass = CanPassItem(i);
+            itemDebugs[i].enoughSpace = IsEnaughSpaceToMove(i);
+            itemDebugs[i].canMoveItem = CanMoveItem(i);
             if (CanMoveItem(i))
             {
                 itemsProgress[i] += GetStep();
                 itemsTransforms[i].position = GetPositionOnPath(itemsProgress[i]);
                 Vector3 lookAtPosition = GetLookAtPosition(itemsProgress[i]);
                 Vector3 direction = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
-                itemsTransforms[i].forward = direction == Vector3.zero ? itemsTransforms[i].forward:direction;
+                itemsTransforms[i].forward = direction == Vector3.zero ? itemsTransforms[i].forward : direction;
 
 
                 if (CanPassItem(i))
@@ -177,7 +181,11 @@ public class ItemTransmission
                     RemoveItem(i);
                 }
             }
-        }      
+        }
+        if (_drawDebug)
+        {
+            DebugTransmission();
+        }
     }
     public void UpdateForRevealEffect()
     {
@@ -192,6 +200,7 @@ public class ItemTransmission
     }
     public void DebugTransmission()
     {
+        if (itemsTransforms.Count == 0) return;
         for (int i = 1; i < positions.Length; i++)
         {
             Debug.DrawLine(positions[i - 1], positions[i], Color.red);
@@ -201,4 +210,17 @@ public class ItemTransmission
         Debug.DrawLine(firstItemPos, lookAtPosition, Color.green);
     }
 
+}
+[System.Serializable]
+public class ItemDebug
+{
+    public bool canMoveItem;
+    public bool canMoveToEnd;
+    public bool enoughSpace;
+    public bool canReceive;
+    public bool canPass;
+    public bool isProgressBeforeTheEnd;
+    public float progressBeforeTheEnd;
+    public float distanceToEnd;
+    public float dist;
 }

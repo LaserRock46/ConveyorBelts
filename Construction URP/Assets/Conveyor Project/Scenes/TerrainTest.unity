@@ -645,9 +645,29 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1879885825}
     - target: {fileID: 5334269913848314516, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
+      propertyPath: inputItemGates.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5334269913848314516, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
+      propertyPath: outputItemGates.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5334269913848314516, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
       propertyPath: factoryItemGates.Array.size
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 5334269913848314516, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
+      propertyPath: itemRecipeAssets.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5334269913848314516, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
+      propertyPath: inputItemGates.Array.data[0].pillar
+      value: 
+      objectReference: {fileID: 1879885825}
+    - target: {fileID: 5334269913848314516, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
+      propertyPath: outputItemGates.Array.data[0].pillar
+      value: 
+      objectReference: {fileID: 1634210673}
     - target: {fileID: 5334269913848314516, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
       propertyPath: factoryItemGates.Array.data[0].pillar
       value: 
@@ -6225,6 +6245,10 @@ MonoBehaviour:
   _conveyorTransform: {fileID: 239169678}
   _revealEffectTransform: {fileID: 1346779217}
   _revealEffectTransmission:
+    consecutiveExist: 0
+    canMoveToEnd: 0
+    enoughSpace: 0
+    canPass: 0
     _drawDebug: 0
     reversedTransmission: 0
     speed: 0
@@ -10123,7 +10147,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd6043bde05a7fc4cba197d06915c1e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damping: {x: 0.1, y: 0.5, z: 0.3}
+  Damping: {x: 0.6, y: 0.6, z: 0.6}
   ShoulderOffset: {x: 0, y: 0, z: 0}
   VerticalArmLength: 0
   CameraSide: 0
