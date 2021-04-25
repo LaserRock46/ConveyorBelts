@@ -5,7 +5,7 @@ using UnityEngine;
 public class FactoryController : MonoBehaviour, IConveyorItemGate
 {
     #region Temp
-    //[Header("Temporary Things", order = 0)]
+    [Header("Temporary Things", order = 0)]
     #endregion
 
     #region Fields
@@ -20,12 +20,11 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
     #endregion
 
     #region Functions
-   
-    public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd, ref float dist)
+    public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd)
     {
         for (int i = 0; i < selected.input.Length; i++)
         {
-            if(itemAsset == selected.input[i].item && inputItemCount[i] <= selected.input[i].resourceCount)
+            if(itemAsset == selected.input[i].item && inputItemCount[i] <= selected.input[i].item.maxStackCount)
             {
                 return true;
             }
@@ -40,6 +39,7 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
     void Start()
     {
         SetupGates();
+        SetRecipe(itemRecipeAssets[0]);
     }
    void Update()
     {

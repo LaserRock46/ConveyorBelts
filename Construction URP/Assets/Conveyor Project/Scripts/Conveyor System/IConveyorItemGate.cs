@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IConveyorItemGate
 {
-    public bool CanReceiveItem(ItemAsset itemAsset, float distanceToEnd, ref float dist);
+    public bool CanReceiveItem(ItemAsset itemAsset, float distanceToEnd);
     public void ReceiveItem(ItemAsset itemAsset, Transform itemTransform);
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate);
 }

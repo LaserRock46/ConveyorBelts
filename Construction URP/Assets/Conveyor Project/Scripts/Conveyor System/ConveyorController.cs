@@ -7,48 +7,29 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     #region Temp
     [Header("Temporary Things", order = 0)]
     public ItemAsset testItem;
-    public float distBetween;
-    public float distToEnd;
-    public float distToStart;
-    public bool canReceive;
+    public string consecutiveFactoryOrConveyorName;
     #endregion
 
     #region Fields
-    [Header("Fields", order = 1)]
-    private bool _isStartOccupied;
-    private bool _isEndOccupied;
-    [SerializeField] private bool _isDirectionReversed;
+    [Header("Fields", order = 1)]    
+
   
     private IConveyorItemGate _consecutiveFactoryOrConveyor;  
 
-    private List<int> _itemType;
     public ItemTransmission itemTransmission = new ItemTransmission();
     [SerializeField] private float _itemHalfwayLength = 0.6f;
 
     #endregion
 
     #region Functions
-    public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd, ref float dist)
+    public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd)
     {
         if(itemTransmission.itemsProgress.Count > 0)
-        {
-            float distanceBetweenThisLastAndStart = 0;
-            if (!_isDirectionReversed)
-            {               
-                distanceBetweenThisLastAndStart = itemTransmission.itemsProgress[itemTransmission.itemsProgress.Count - 1];
-            }
-            else
-            {              
-                distanceBetweenThisLastAndStart = itemTransmission.totalDistance - (itemTransmission.totalDistance - itemTransmission.itemsProgress[itemTransmission.itemsProgress.Count - 1]);
-            }
-            distBetween = distanceBetweenThisLastAndStart + distanceToEnd;
-            this.distToEnd = distanceToEnd;
-            distToStart = distanceBetweenThisLastAndStart;
-            canReceive = distanceBetweenThisLastAndStart - distanceToEnd >= _itemHalfwayLength;
-          
+        {         
+            float distanceBetweenThisLastAndStart = itemTransmission.totalDistance - (itemTransmission.totalDistance - itemTransmission.itemsProgress[itemTransmission.itemsProgress.Count - 1]);
+                     
             return distanceBetweenThisLastAndStart + distanceToEnd >= _itemHalfwayLength;
         }
-        canReceive = true;
         return true;
     }
     public static Vector3[] PositionsLocalToWorld(Vector3[] local, Transform self)
@@ -84,31 +65,31 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     }
     public void Setup(bool isDirectionReversed, OrientedPoint orientedPoints, IConveyorItemGate consecutiveFactoryOrConveyor,float speed)
     {
-        bool isNull = consecutiveFactoryOrConveyor != null;
-        Debug.Log("setup in CC " + gameObject.name + "consecutive " + isNull + " " + consecutiveFactoryOrConveyor);
-        _isDirectionReversed = isDirectionReversed;
+        //_isDirectionReversed = isDirectionReversed;
         Vector3[] positions = PositionsLocalToWorld(orientedPoints.positions,transform);
         AssignConsecutiveItemGate(consecutiveFactoryOrConveyor);
-        itemTransmission.CreatePath(isDirectionReversed,speed,positions,orientedPoints.segmentDistanceForward,orientedPoints.totalDistance,_itemHalfwayLength);
+        itemTransmission.CreatePath(isDirectionReversed,speed,positions,orientedPoints,orientedPoints.totalDistance,_itemHalfwayLength);
     }
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
     {
         _consecutiveFactoryOrConveyor = conveyorItemGate;
-        itemTransmission.consecutiveFactoryOrConveyor = conveyorItemGate;
-        if (conveyorItemGate != null)
+        if (_consecutiveFactoryOrConveyor != null)
         {
-            itemTransmission.consecutiveExist = true;
+            consecutiveFactoryOrConveyorName = conveyorItemGate.ToString();
         }
-        else
-        {
-            itemTransmission.consecutiveExist = false;
-        }
+        itemTransmission.consecutiveFactoryOrConveyor = conveyorItemGate;      
     }
     [ContextMenu("TestSpawnItem")]
     public void TestSpawnItem()
     {
         GameObject test = Instantiate(testItem.prefab);
         itemTransmission.AddItem(test.transform,testItem);
+    }
+    [ContextMenu("Test Destroy")]
+    public void TestDestroy()
+    {
+     
+        Destroy(gameObject);
     }
     #endregion
 

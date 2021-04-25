@@ -81,8 +81,8 @@ public class ConveyorConstructorVisuals : MonoBehaviour
 
         Vector3[] worldPositions = ConveyorController.PositionsLocalToWorld(orientedPoints.positions, _conveyorTransform);
         
-        _revealEffectTransmission.CreatePath(isConveyorDirectionReversed, _revealSpeed, worldPositions,orientedPoints.segmentDistanceForward,orientedPoints.totalDistance);
-        _revealEffectTransmission.SetItemProgress(0, isConveyorDirectionReversed ? orientedPoints.totalDistance : 0);
+        _revealEffectTransmission.CreatePath(isConveyorDirectionReversed, _revealSpeed, worldPositions,orientedPoints,orientedPoints.totalDistance);
+        _revealEffectTransmission.SetItemProgress(0, 0);
     }
     void UpdateRevealEffect()
     {

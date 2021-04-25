@@ -1,17 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 [System.Serializable]
 public class ItemTransmission
-{
-    public bool consecutiveExist;
-   
-  
-    public List<ItemDebug> itemDebugs = new List<ItemDebug>();
-
+{  
     [SerializeField] private bool _drawDebug;
-    public bool reversedTransmission;
+    public float dist;
+    public bool move;
     public float speed;
 
     public Vector3[] positions;
@@ -36,7 +33,7 @@ public class ItemTransmission
     {
     }
 
-    (AnimationCurve componentX, AnimationCurve componentY, AnimationCurve componentZ) GetCurvePathComponents(float[] segmentDistanceForward, Vector3[] positions)
+    (AnimationCurve componentX, AnimationCurve componentY, AnimationCurve componentZ) GetCurvePathComponents(float[] segmentDistance, Vector3[] positions)
     {
         Keyframe[] x = new Keyframe[positions.Length];
         Keyframe[] y = new Keyframe[positions.Length];
@@ -44,9 +41,9 @@ public class ItemTransmission
 
         for (int i = 0; i < positions.Length; i++)
         {
-            x[i] = new Keyframe(segmentDistanceForward[i], positions[i].x, 0, 0, 0, 0);
-            y[i] = new Keyframe(segmentDistanceForward[i], positions[i].y, 0, 0, 0, 0);
-            z[i] = new Keyframe(segmentDistanceForward[i], positions[i].z, 0, 0, 0, 0);
+            x[i] = new Keyframe(segmentDistance[i], positions[i].x, 0, 0, 0, 0);
+            y[i] = new Keyframe(segmentDistance[i], positions[i].y, 0, 0, 0, 0);
+            z[i] = new Keyframe(segmentDistance[i], positions[i].z, 0, 0, 0, 0);
         }
 
         AnimationCurve componentX = new AnimationCurve(x);
@@ -57,7 +54,7 @@ public class ItemTransmission
     }
     float GetStep()
     {
-        return Time.deltaTime * (reversedTransmission? -speed:speed);
+        return Time.deltaTime * speed;
     }
     Vector3 GetPositionOnPath(float progress)
     {
@@ -65,11 +62,11 @@ public class ItemTransmission
     }
     Vector3 GetTransformDirection(Vector3 positionOnPath, Vector3 lookAt)
     {
-        return (reversedTransmission ? lookAt - positionOnPath : positionOnPath - lookAt).normalized;
+        return (positionOnPath - lookAt).normalized;
     }
     Vector3 GetLookAtPosition(float progress)
     {
-        return GetPositionOnPath(progress + (reversedTransmission ? -_lookAtDistance : _lookAtDistance));
+        return GetPositionOnPath(progress + _lookAtDistance);
     }
     bool IsEnaughSpaceToMove(int index)
     {
@@ -82,25 +79,24 @@ public class ItemTransmission
         {
             move = itemsProgress[index - 1] - itemsProgress[index] >= _itemHalfwayLength;
         }
+        itemsTransforms[index].name = move.ToString();
         return move;
     }
 
     bool CanMoveToEnd(int index)
     {
-        bool isProgressBeforeTheEnd = reversedTransmission ? itemsProgress[index] >= _itemHalfwayLength : totalDistance - itemsProgress[index] > _itemHalfwayLength;
-        itemDebugs[index].isProgressBeforeTheEnd = isProgressBeforeTheEnd;
+        bool isProgressBeforeTheEnd = totalDistance - itemsProgress[index] > _itemHalfwayLength;
+        dist = totalDistance - itemsProgress[index];
+        this.move = isProgressBeforeTheEnd;
         bool move = false;
         if (isProgressBeforeTheEnd)
-        {
-            itemDebugs[index].progressBeforeTheEnd = reversedTransmission ? itemsProgress[index] : (totalDistance - itemsProgress[index]);
+        {      
             move = true;
         }
         else if (consecutiveFactoryOrConveyor != null)
         {
-            float distanceToEnd = reversedTransmission ? totalDistance - (totalDistance - itemsProgress[index]) : totalDistance - itemsProgress[index];
-            itemDebugs[index].distanceToEnd = distanceToEnd;
-            itemDebugs[index].canReceive = consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index], distanceToEnd,ref itemDebugs[index].dist);
-            move = consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index], distanceToEnd, ref itemDebugs[index].dist);
+            float distanceToEnd = totalDistance - itemsProgress[index];
+            move = consecutiveFactoryOrConveyor.CanReceiveItem(itemAssets[index], distanceToEnd);
 
         }
         return move;
@@ -111,24 +107,18 @@ public class ItemTransmission
     }
     bool CanPassItem(int index)
     {
-        if (reversedTransmission)
-        {
-            return itemsProgress[index] <= 0;
-        }
-        else
-        {
-            return itemsProgress[index] >= totalDistance;
-        }
+        return itemsProgress[index] >= totalDistance;
     }
-    public void CreatePath(bool reversedTransmission, float speed,Vector3[] positions, float[] segmentDistanceForward,float totalDistance, float itemHalfwayLength = 0.5f)
-    {       
-        this.reversedTransmission = reversedTransmission;
+    public void CreatePath(bool reversedTransmission, float speed,Vector3[] positions,  OrientedPoint orientedPoints,float totalDistance, float itemHalfwayLength = 0.5f)
+    {             
         this.speed = speed;
-        this.positions = positions;
+        this.positions = positions;          
         this.totalDistance = totalDistance;
         this._itemHalfwayLength = itemHalfwayLength;
 
-        var curvePathComponents = GetCurvePathComponents(segmentDistanceForward,positions);
+
+        float[] segmentDistance = reversedTransmission ? orientedPoints.segmentDistanceBackward : orientedPoints.segmentDistanceForward;
+        var curvePathComponents = GetCurvePathComponents(segmentDistance,positions);
         componentX = curvePathComponents.componentX;
         componentY = curvePathComponents.componentY;
         componentZ = curvePathComponents.componentZ;
@@ -136,8 +126,7 @@ public class ItemTransmission
     }
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
     {
-        consecutiveFactoryOrConveyor = conveyorItemGate;
-        consecutiveExist = true;
+        consecutiveFactoryOrConveyor = conveyorItemGate;    
     }
     public void SetItemProgress(int index, float progress)
     {
@@ -146,26 +135,19 @@ public class ItemTransmission
     public void AddItem(Transform itemTransform,ItemAsset itemAsset = null)
     {
         itemsTransforms.Add(itemTransform);
-        itemsProgress.Add(reversedTransmission ? totalDistance : 0f);
+        itemsProgress.Add(0f);
         itemAssets.Add(itemAsset);
-        itemDebugs.Add(new ItemDebug());
     }
     public void RemoveItem(int index = 0)
     {
         itemsTransforms.RemoveAt(index);
         itemsProgress.RemoveAt(index);
         itemAssets.RemoveAt(index);
-        itemDebugs.RemoveAt(index);
     }
-
     public void Update()
     {      
         for (int i = 0; i < itemsProgress.Count; i++)
         {
-            itemDebugs[i].canMoveToEnd = CanMoveToEnd(i);
-            itemDebugs[i].canPass = CanPassItem(i);
-            itemDebugs[i].enoughSpace = IsEnaughSpaceToMove(i);
-            itemDebugs[i].canMoveItem = CanMoveItem(i);
             if (CanMoveItem(i))
             {
                 itemsProgress[i] += GetStep();
@@ -210,17 +192,4 @@ public class ItemTransmission
         Debug.DrawLine(firstItemPos, lookAtPosition, Color.green);
     }
 
-}
-[System.Serializable]
-public class ItemDebug
-{
-    public bool canMoveItem;
-    public bool canMoveToEnd;
-    public bool enoughSpace;
-    public bool canReceive;
-    public bool canPass;
-    public bool isProgressBeforeTheEnd;
-    public float progressBeforeTheEnd;
-    public float distanceToEnd;
-    public float dist;
 }

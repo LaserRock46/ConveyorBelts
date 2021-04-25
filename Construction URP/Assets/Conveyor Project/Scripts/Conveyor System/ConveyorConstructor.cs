@@ -401,6 +401,7 @@ public class ConveyorConstructor : MonoBehaviour
         {    
             AlignToPillar();
         }
+        
     }
     void AlignToGround()
     {

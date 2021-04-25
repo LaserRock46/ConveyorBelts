@@ -44,7 +44,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - RevealSegment: 17.965727
+    - RevealSegment: 12.702396
     - Vector1_07eb4c1fc6874cefb7e2dbde48fa0cf8: 1
     - Vector1_1b4c5dea943a4732ac9fa589b35eed7a: 2
     - Vector1_56be323ac4a24467ac50b0ecf42c2de6: 7

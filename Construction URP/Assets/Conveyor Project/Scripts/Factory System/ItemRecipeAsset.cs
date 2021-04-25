@@ -14,5 +14,5 @@ public class ItemRecipeAsset : ScriptableObject
 public class RecipeComponent
 {
     public ItemAsset item;
-    public int resourceCount;
+    public int amount;
 }

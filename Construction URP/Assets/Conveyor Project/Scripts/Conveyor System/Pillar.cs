@@ -9,12 +9,12 @@ public class Pillar : MonoBehaviour
     #endregion
 
     #region Fields
-    [Header("Fields", order = 1)]
-    [SerializeField] private bool _isOccupiedFront = false;
-    [SerializeField] private bool _isOccupiedBack = false;
+    [Header("Fields", order = 1)]   
     public IConveyorItemGate frontSideConveyor;
     public IConveyorItemGate backSideConveyor;
     public ConveyorConnectionData.ConveyorSide conveyorSide;
+    public ConveyorConnectionData.ConveyorSide frontConveyorSide;
+    public ConveyorConnectionData.ConveyorSide backConveyorSide;
     public Transform self;
     public Transform tipAnchor;
     public int indexInPillarStack = 1;
@@ -24,17 +24,18 @@ public class Pillar : MonoBehaviour
     #region Functions
     public bool IsOccupiedFront()
     {
-        return _isOccupiedFront;
+        return frontSideConveyor != null;
     }
     public bool IsOccupiedBack()
     {
-        return _isOccupiedBack;
+        return backSideConveyor != null;
     }
     #endregion
 
 
 
-    #region Methods    
+    #region Methods  
+   
     public void TryDestroy()
     {
         if(dependsOn.Count != 0)
@@ -50,29 +51,31 @@ public class Pillar : MonoBehaviour
     {
         this.conveyorSide = conveyorSide;
         if(occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
-        {
-            _isOccupiedFront = true;
+        {         
             frontSideConveyor = conveyorItemGate;
-
             if(backSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
             {
-                backSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
-              
-                Debug.Log("setup in " + backSideConveyor + "consecutive " + conveyorItemGate);
+                backSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);         
             }
         }
         if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Back)
-        {
-            _isOccupiedBack = true;
+        {         
             backSideConveyor = conveyorItemGate;
-
             if (frontSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
             {
                 frontSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
-              
-                Debug.Log("setup in " + frontSideConveyor + "consecutive " + conveyorItemGate);
             }
         }
+    }
+    [ContextMenu("Remove Gate Front")]
+    void RemoveItemGateFront()
+    {
+        frontSideConveyor = null;
+    }
+    [ContextMenu("Remove Gate Back")]
+    void RemoveItemGateBack()
+    {
+        backSideConveyor = null;
     }
     #endregion
 

@@ -234,21 +234,17 @@ public class ConveyorConstructorConditions
     public bool CanAlignToPillar()
     {
         if(_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
-        {
-            if(IsThisSidePillarFront() && !pillar.IsOccupiedFront())
-            {
+        {       
+            if (IsThisSidePillarFront() && !pillar.IsOccupiedFront())
+            {             
                 return true;
             }
             if (IsThisSidePillarBack() && !pillar.IsOccupiedBack())
-            {
+            {         
                 return true;
             }
-        }
+        }       
         return false;
-    }
-    public bool CanMatchDirection(ConveyorConnectionData connectionDataStart, ConveyorConnectionData connectionDataEnd)
-    {
-        return true;
     }
     public bool IsThisSidePillarFront()
     {
