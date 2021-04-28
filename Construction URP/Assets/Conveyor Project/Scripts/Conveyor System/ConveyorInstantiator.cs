@@ -155,10 +155,10 @@ public class ConveyorInstantiator : MonoBehaviour
             topPillarEnd = connectionDataEnd.alignedToPillar;
         }
 
+        SetupConveyor(conveyorController, orientedPoints, topPillarStart, topPillarEnd, conveyorAsset.conveyorSpeed);
         IConveyorItemGate conveyorItemGate = conveyorController.GetComponent<IConveyorItemGate>();
         SetupAlignedPillar(topPillarStart, connectionDataStart, conveyorItemGate);
         SetupAlignedPillar(topPillarEnd, connectionDataEnd, conveyorItemGate);
-        SetupConveyor(conveyorController, orientedPoints, topPillarStart, topPillarEnd, conveyorAsset.conveyorSpeed);
     }
     void SetupConveyor(ConveyorController conveyorController,OrientedPoint orientedPoints, Pillar start, Pillar end,float speed)
     {

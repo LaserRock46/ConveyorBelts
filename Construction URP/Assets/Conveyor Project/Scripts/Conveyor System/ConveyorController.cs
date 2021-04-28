@@ -22,6 +22,10 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     #endregion
 
     #region Functions
+    public ConveyorController GetConveyor()
+    {
+        return this;
+    }
     public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd)
     {
         if(itemTransmission.itemsProgress.Count > 0)
@@ -65,19 +69,22 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
     }
     public void Setup(bool isDirectionReversed, OrientedPoint orientedPoints, IConveyorItemGate consecutiveFactoryOrConveyor,float speed)
     {
-        //_isDirectionReversed = isDirectionReversed;
         Vector3[] positions = PositionsLocalToWorld(orientedPoints.positions,transform);
-        AssignConsecutiveItemGate(consecutiveFactoryOrConveyor);
         itemTransmission.CreatePath(isDirectionReversed,speed,positions,orientedPoints,orientedPoints.totalDistance,_itemHalfwayLength);
+        AssignConsecutiveItemGate(consecutiveFactoryOrConveyor);
     }
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
     {
         _consecutiveFactoryOrConveyor = conveyorItemGate;
+        itemTransmission.consecutiveFactoryOrConveyor = conveyorItemGate;
+        if (conveyorItemGate != null)
+        {
+            itemTransmission.ExtentPathForConsecutive(conveyorItemGate.GetConveyor());
+        }
         if (_consecutiveFactoryOrConveyor != null)
         {
             consecutiveFactoryOrConveyorName = conveyorItemGate.ToString();
         }
-        itemTransmission.consecutiveFactoryOrConveyor = conveyorItemGate;      
     }
     [ContextMenu("TestSpawnItem")]
     public void TestSpawnItem()

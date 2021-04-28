@@ -80,8 +80,8 @@ public class ConveyorConstructorVisuals : MonoBehaviour
         _conveyorMeshFilter.sharedMesh = lastCreatedMesh;
 
         Vector3[] worldPositions = ConveyorController.PositionsLocalToWorld(orientedPoints.positions, _conveyorTransform);
-        
-        _revealEffectTransmission.CreatePath(isConveyorDirectionReversed, _revealSpeed, worldPositions,orientedPoints,orientedPoints.totalDistance);
+
+        _revealEffectTransmission.CreatePath(isConveyorDirectionReversed, _revealSpeed, worldPositions, orientedPoints, orientedPoints.totalDistance, clearPath: true);
         _revealEffectTransmission.SetItemProgress(0, 0);
     }
     void UpdateRevealEffect()

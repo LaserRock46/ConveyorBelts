@@ -20,6 +20,10 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
     #endregion
 
     #region Functions
+    public ConveyorController GetConveyor()
+    {
+        return null;
+    }
     public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd)
     {
         for (int i = 0; i < selected.input.Length; i++)
