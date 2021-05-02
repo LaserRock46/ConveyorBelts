@@ -79,7 +79,7 @@ public class ConveyorController : MonoBehaviour, IConveyorItemGate
         itemTransmission.consecutiveFactoryOrConveyor = conveyorItemGate;
         if (conveyorItemGate != null)
         {
-            itemTransmission.ExtentPathForConsecutive(conveyorItemGate.GetConveyor());
+            itemTransmission.SmoothPathTransitionToConsecutive(conveyorItemGate.GetConveyor());
         }
         if (_consecutiveFactoryOrConveyor != null)
         {

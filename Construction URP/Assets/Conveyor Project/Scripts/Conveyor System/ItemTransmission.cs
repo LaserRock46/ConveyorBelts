@@ -8,6 +8,7 @@ public class ItemTransmission
     [SerializeField] private bool _drawDebug;
 
     public float speed;
+    public float totalDistance;
     public bool reversedTransmission;
     public Vector3[] positions;
     public AnimationCurve pathComponentX;
@@ -18,18 +19,10 @@ public class ItemTransmission
     public List<Transform> itemsTransforms = new List<Transform>();
     public List<ItemAsset> itemAssets = new List<ItemAsset>();
 
-
-    public float totalDistance;
-
-
     public IConveyorItemGate consecutiveFactoryOrConveyor;
 
     [SerializeField] private float _itemHalfwayLength;
     [SerializeField] private float _lookAtDistance = 0.2f;
-
-    public ItemTransmission()
-    {
-    }
 
     (Keyframe[] componentX, Keyframe[] componentY, Keyframe[] componentZ) GetCurvePathComponents(float[] segmentDistance, Vector3[] positions)
     {
@@ -73,7 +66,6 @@ public class ItemTransmission
         {
             move = itemsProgress[index - 1] - itemsProgress[index] >= _itemHalfwayLength;
         }
-        itemsTransforms[index].name = move.ToString();
         return move;
     }
 
@@ -100,76 +92,40 @@ public class ItemTransmission
     {
         return itemsProgress[index] >= totalDistance;
     }
-    float[] GetSegmentDistanceForExtent(bool isThisReversed, bool isConsecutiveReversed, Vector3[] positions, float totalDistance)
+    float[] GetSegmentDistanceForExtent(Vector3[] positions, float totalDistance)
     {
         List<float> distances = new List<float>();
         distances.Add(totalDistance);
 
         float segmentDistance = 0;
-       
-        switch (isThisReversed, isConsecutiveReversed)
+
+        for (int i = 1; i < positions.Length; i++)
         {
-            case (false, false):
-                for (int i = 1; i < positions.Length; i++)
-                {
-                    segmentDistance = Vector3.Distance(positions[i], positions[i - 1]) + distances[distances.Count - 1];
-                    distances.Add(segmentDistance);           
-                }
-                break;
-            case (true, true):
-                for (int i = 1; i < positions.Length; i++)
-                {
-                    segmentDistance = Vector3.Distance(positions[i], positions[i - 1]) + distances[distances.Count - 1];
-                    distances.Add(segmentDistance);
-                }
-
-                break;
-            case (false, true):
-                for (int i = 1; i < positions.Length; i++)
-                {
-                    segmentDistance = Vector3.Distance(positions[i], positions[i - 1]) + distances[distances.Count - 1];
-                    distances.Add(segmentDistance);
-                }
-                break;
-            case (true, false):
-                for (int i = 1; i < positions.Length; i++)
-                {
-                    segmentDistance = Vector3.Distance(positions[i], positions[i - 1]) + distances[distances.Count - 1];
-                    distances.Add(segmentDistance);
-                }
-                break;
-        }
-
-        for (int i = 0; i < positions.Length; i++)
-        {          
-            GameObject test = new GameObject(distances[i].ToString());
-            test.transform.position = positions[i];
+            segmentDistance = Vector3.Distance(positions[i], positions[i - 1]) + distances[distances.Count - 1];
+            distances.Add(segmentDistance);
         }
         return distances.ToArray();
     }
 
     Vector3[] GetPositionsForExtent(bool isThisReversed, bool isConsecutiveReversed, Vector3[] consecutivePositions)
     {
-        int extentPositionsCount = consecutivePositions.Length <= 5 ? consecutivePositions.Length : 5;
+        int maxPositions = 5;
+        int extentPositionsCount = consecutivePositions.Length <= maxPositions ? consecutivePositions.Length : maxPositions;
         Vector3[] positions = new Vector3[extentPositionsCount];
      
         switch (isThisReversed, isConsecutiveReversed)
         {
-            case (false, false): //ok
+            case (false, false): 
                 for (int i = 0; i < positions.Length; i++)
                 {
                     positions[i] = consecutivePositions[i];
-                    GameObject test = new GameObject(i.ToString());
-                    test.transform.position = positions[i];
                 }
                 break;
-            case (true, true): //ok
+            case (true, true): 
                 System.Array.Reverse(consecutivePositions);
                 for (int i = 0; i < positions.Length; i++)
                 {
                     positions[i] = consecutivePositions[i];
-                    GameObject test = new GameObject(i.ToString());
-                    test.transform.position = positions[i];
                 }
                 break;
             case (false, true):
@@ -177,16 +133,12 @@ public class ItemTransmission
                 for (int i = 0; i < positions.Length; i++)
                 {
                     positions[i] = consecutivePositions[i];
-                    GameObject test = new GameObject(i.ToString());
-                    test.transform.position = positions[i];
                 }
                 break;
-            case (true, false)://ok
+            case (true, false):
                 for (int i = positions.Length - 1; i >= 0; i--)
                 {
-                    positions[i] = consecutivePositions[i];
-                    GameObject test = new GameObject(i.ToString());
-                    test.transform.position = positions[i];
+                    positions[i] = consecutivePositions[i];               
                 }
                 break;
         }
@@ -217,7 +169,7 @@ public class ItemTransmission
             pathComponentZ.AddKey(curvePathComponents.componentZ[i]);
         }
     }
-    public void ExtentPathForConsecutive(ConveyorController consecutiveConveyor)
+    public void SmoothPathTransitionToConsecutive(ConveyorController consecutiveConveyor)
     {
         if (consecutiveConveyor == null) return;
 
@@ -225,7 +177,7 @@ public class ItemTransmission
         bool isConsecutiveReversed = consecutiveConveyor.itemTransmission.reversedTransmission;
 
         Vector3[] positionsForExtent = GetPositionsForExtent(isThisReversed, isConsecutiveReversed, consecutiveConveyor.itemTransmission.positions);
-        float[] segmentDistanceForExtent = GetSegmentDistanceForExtent(isThisReversed, isConsecutiveReversed, positionsForExtent,totalDistance);
+        float[] segmentDistanceForExtent = GetSegmentDistanceForExtent(positionsForExtent,totalDistance);
       
         var curveExtentPathComponents = GetCurvePathComponents(segmentDistanceForExtent, positionsForExtent);
 
@@ -236,10 +188,7 @@ public class ItemTransmission
             pathComponentZ.AddKey(curveExtentPathComponents.componentZ[i]);
         }
     }
-    public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
-    {
-        consecutiveFactoryOrConveyor = conveyorItemGate;    
-    }
+
     public void SetItemProgress(int index, float progress)
     {
         itemsProgress[index] = progress;
@@ -267,7 +216,6 @@ public class ItemTransmission
                 Vector3 lookAtPosition = GetLookAtPosition(itemsProgress[i]);
                 Vector3 direction = GetTransformDirection(itemsTransforms[i].position, lookAtPosition);
                 itemsTransforms[i].forward = direction == Vector3.zero ? itemsTransforms[i].forward : direction;
-
 
                 if (CanPassItem(i))
                 {
