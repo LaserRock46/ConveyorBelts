@@ -2,81 +2,84 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Pillar : MonoBehaviour
+namespace ConveyorSystem
 {
-    #region Temp
-    //[Header("Temporary Things", order = 0)]
-    #endregion
-
-    #region Fields
-    [Header("Fields", order = 1)]   
-    public IConveyorItemGate frontSideConveyor;
-    public IConveyorItemGate backSideConveyor;
-    public ConveyorConnectionData.ConveyorSide conveyorSide;
-    public ConveyorConnectionData.ConveyorSide frontConveyorSide;
-    public ConveyorConnectionData.ConveyorSide backConveyorSide;
-    public Transform self;
-    public Transform tipAnchor;
-    public int indexInPillarStack = 1;
-    public List<GameObject> dependsOn = new List<GameObject>();
-    #endregion
-
-    #region Functions
-    public bool IsOccupiedFront()
+    public class Pillar : MonoBehaviour
     {
-        return frontSideConveyor != null;
-    }
-    public bool IsOccupiedBack()
-    {
-        return backSideConveyor != null;
-    }
-    #endregion
+        #region Temp
+        //[Header("Temporary Things", order = 0)]
+        #endregion
 
+        #region Fields
+        [Header("Fields", order = 1)]
+        public IConveyorItemGate frontSideConveyor;
+        public IConveyorItemGate backSideConveyor;
+        public ConveyorConnectionData.ConveyorSide conveyorSide;
+        public ConveyorConnectionData.ConveyorSide frontConveyorSide;
+        public ConveyorConnectionData.ConveyorSide backConveyorSide;
+        public Transform self;
+        public Transform tipAnchor;
+        public int indexInPillarStack = 1;
+        public List<GameObject> dependsOn = new List<GameObject>();
+        #endregion
 
-
-    #region Methods  
-   
-    public void TryDestroy()
-    {
-        if(dependsOn.Count != 0)
+        #region Functions
+        public bool IsOccupiedFront()
         {
-            // Can destroy
+            return frontSideConveyor != null;
         }
-        else
+        public bool IsOccupiedBack()
         {
-            // Can't destroy
+            return backSideConveyor != null;
         }
-    }
-    public void Setup(ConveyorConnectionData.ConveyorSide conveyorSide, ConveyorConnectionData.PillarSide occupiedPillarSide, IConveyorItemGate conveyorItemGate)
-    {
-        this.conveyorSide = conveyorSide;
-        if(occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
-        {         
-            frontSideConveyor = conveyorItemGate;
-            if(backSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+        #endregion
+
+
+
+        #region Methods  
+
+        public void TryDestroy()
+        {
+            if (dependsOn.Count != 0)
             {
-                backSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);         
+                // Can destroy
+            }
+            else
+            {
+                // Can't destroy
             }
         }
-        if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Back)
-        {         
-            backSideConveyor = conveyorItemGate;
-            if (frontSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+        public void Setup(ConveyorConnectionData.ConveyorSide conveyorSide, ConveyorConnectionData.PillarSide occupiedPillarSide, IConveyorItemGate conveyorItemGate)
+        {
+            this.conveyorSide = conveyorSide;
+            if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
             {
-                frontSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+                frontSideConveyor = conveyorItemGate;
+                if (backSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+                {
+                    backSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+                }
+            }
+            if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Back)
+            {
+                backSideConveyor = conveyorItemGate;
+                if (frontSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+                {
+                    frontSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+                }
             }
         }
-    }
-    [ContextMenu("Remove Gate Front")]
-    void RemoveItemGateFront()
-    {
-        frontSideConveyor = null;
-    }
-    [ContextMenu("Remove Gate Back")]
-    void RemoveItemGateBack()
-    {
-        backSideConveyor = null;
-    }
-    #endregion
+        [ContextMenu("Remove Gate Front")]
+        void RemoveItemGateFront()
+        {
+            frontSideConveyor = null;
+        }
+        [ContextMenu("Remove Gate Back")]
+        void RemoveItemGateBack()
+        {
+            backSideConveyor = null;
+        }
+        #endregion
 
+    }
 }

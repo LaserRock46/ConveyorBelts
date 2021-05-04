@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(ConveyorController))]
-public class ConveyorControllerEditor : Editor
+namespace ConveyorSystem
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(ConveyorController))]
+    public class ConveyorControllerEditor : Editor
     {
-        DrawDefaultInspector();
-        ConveyorController conveyorController = (ConveyorController)target;
-        if(GUILayout.Button("Test Spawn Item"))
+        public override void OnInspectorGUI()
         {
-            conveyorController.TestSpawnItem();
+            DrawDefaultInspector();
+            ConveyorController conveyorController = (ConveyorController)target;
+            if (GUILayout.Button("Test Spawn Item"))
+            {
+                conveyorController.TestSpawnItem();
+            }
         }
     }
 }

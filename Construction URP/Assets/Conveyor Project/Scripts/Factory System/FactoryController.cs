@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using ConveyorSystem;
 public class FactoryController : MonoBehaviour, IConveyorItemGate
 {
     #region Temp

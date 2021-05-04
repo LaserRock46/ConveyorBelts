@@ -12,7 +12,7 @@ public class BuildingManager : MonoBehaviour
 
     #region Fields
     [Header("Fields", order = 1)]
-    public ConveyorConstructor conveyorConstructor;
+    public ConveyorSystem.ConveyorConstructor conveyorConstructor;
     public Toggle conveyorConstructorToggle;
     public Toggle[] toggleGroup;
     #endregion

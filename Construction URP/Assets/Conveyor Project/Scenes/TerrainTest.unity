@@ -1327,7 +1327,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: ad426c9eb1cb21944938d1efc76189ef, type: 2}
+  - {fileID: 2100000, guid: ebbb2df0695d2fc4b84586181252baf6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6840,7 +6840,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 172dfaa97c32f0647ae52196e8c7fe47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateCurveManual: 0
   isConveyorConstructorEnabled: {fileID: 11400000, guid: 791645f9b94487c4b9d8ac0b4c0cb61a, type: 2}
   _conveyorPath:
     _drawPathDebug: 0
@@ -7157,31 +7156,32 @@ MonoBehaviour:
   _revealSpeed: 7
   _revealProgress: 0
   _revealTarget: 0
-  _conveyorRenderer: {fileID: 239169679}
-  _conveyorMeshFilter: {fileID: 239169680}
-  _revealMaterial: {fileID: 2100000, guid: ad426c9eb1cb21944938d1efc76189ef, type: 2}
+  _conveyorRenderer: {fileID: 1407808978}
+  _conveyorRevealRenderer: {fileID: 239169679}
+  _conveyorRevealMeshFilter: {fileID: 239169680}
+  _buildModeMaterial: {fileID: 2100000, guid: ebbb2df0695d2fc4b84586181252baf6, type: 2}
+  _errorMaterial: {fileID: 2100000, guid: e38477940584e2a45bd7c8e77b114cd5, type: 2}
   _conveyorTransform: {fileID: 239169678}
   _revealEffectTransform: {fileID: 1346779217}
   _revealEffectTransmission:
     _drawDebug: 0
-    dist: 0
-    move: 0
-    reversedTransmission: 0
     speed: 0
+    totalDistance: 0
+    reversedTransmission: 0
     positions: []
-    componentX:
+    pathComponentX:
       serializedVersion: 2
       m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    componentY:
+    pathComponentY:
       serializedVersion: 2
       m_Curve: []
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    componentZ:
+    pathComponentZ:
       serializedVersion: 2
       m_Curve: []
       m_PreInfinity: 2
@@ -7190,7 +7190,6 @@ MonoBehaviour:
     itemsProgress: []
     itemsTransforms: []
     itemAssets: []
-    totalDistance: 0
     _itemHalfwayLength: 0
     _lookAtDistance: 0.2
   _shaderRevealPropertyString: RevealSegment

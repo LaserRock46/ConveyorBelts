@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using ConveyorSystem;
 [System.Serializable]
 public class FactoryItemGate
 {
