@@ -16,7 +16,8 @@ namespace ConveyorSystem
         [SerializeField] private float _maxLength;
         [SerializeField] private float _minMaxSteepness;
         [SerializeField] private Vector3 _checkBoxSize;
-        [SerializeField] private Vector3 _planeIntersectionSize;
+        [SerializeField] private Vector3 _checkBoxOffset;
+        [SerializeField] private float _edgeIntersectionSize;
 
         #endregion
 
@@ -49,11 +50,45 @@ namespace ConveyorSystem
             }
             return false;
         }
-        bool TestForInvalidShape()
+        Vector3 InverseTransformPoint(Vector3 currentPoint, Quaternion currentPointRotation, Vector3 nextPoint)
+        {
+            Vector3 difference = nextPoint - currentPoint;
+            return Quaternion.Inverse(currentPointRotation) * difference;
+        }
+        Vector3 GetPointForIntersectionTest(Vector3 direction, Quaternion pointRotation, Vector3 pointPosition)
+        {
+            Vector3 worldSpaceDirection = pointRotation * direction;
+            Vector3 edgeExtent = worldSpaceDirection * _edgeIntersectionSize;
+            return pointPosition + edgeExtent;
+        }
+        bool TestForInvalidShape(OrientedPoints orientedPoints)
+        {
+            for (int i = 0; i < orientedPoints.positions.Length - 1; i++)
+            {
+                Vector3 currentPoint = orientedPoints.positions[i];
+                Vector3 nextPoint = orientedPoints.positions[i+1];
+                Quaternion currentRotation = orientedPoints.rotations[i];
+                Quaternion nextRotation = orientedPoints.rotations[i +1];
+
+                Vector3 nextPointLeft = GetPointForIntersectionTest(-Vector3.right, nextRotation, nextPoint);
+                Vector3 nextPointRight = GetPointForIntersectionTest(Vector3.right, nextRotation, nextPoint);
+
+                if (InverseTransformPoint(currentPoint, currentRotation, nextPointLeft).z < 0)
+                {
+                    return true;
+                }
+                if (InverseTransformPoint(currentPoint, currentRotation, nextPointRight).z < 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool TestForDirectionOfAttachedConveyor(ConveyorConnectionData connectionDataStart, ConveyorConnectionData connectionDataEnd)
         {
             return false;
         }
-        bool TestForDirectionOfAttachedConveyor()
+        bool TestForOverlappingOthers()
         {
             return false;
         }
@@ -66,7 +101,7 @@ namespace ConveyorSystem
 
 
         #region Methods   
-        public void Test(out RequirementsTestResult requirementsTestResult, OrientedPoint orientedPoints, ConveyorConnectionData connectionDataStart, ConveyorConnectionData connectionDataEnd)
+        public void Test(out RequirementsTestResult requirementsTestResult, OrientedPoints orientedPoints, ConveyorConnectionData connectionDataStart, ConveyorConnectionData connectionDataEnd)
         {
             requirementsTestResult = new RequirementsTestResult();
             

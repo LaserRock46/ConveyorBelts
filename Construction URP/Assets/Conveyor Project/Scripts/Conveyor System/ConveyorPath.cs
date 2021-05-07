@@ -14,7 +14,7 @@ public class ConveyorPath
 
     #region Fields
     [Header("Fields", order = 1)]
-    public OrientedPoint orientedPoints;
+    public OrientedPoints orientedPoints;
     public Transform previewTransform;
    
     public CircularArc circularArcStart;

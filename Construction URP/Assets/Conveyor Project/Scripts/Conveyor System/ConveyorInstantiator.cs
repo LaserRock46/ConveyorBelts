@@ -120,7 +120,7 @@ namespace ConveyorSystem
         {
             _conditions = conditions;
         }
-        public void Instantiate(OrientedPoint orientedPoints, Transform previewTransform, GameObject[] previewStartPillars, GameObject[] previewEndPillars, ConveyorAsset conveyorAsset)
+        public void Instantiate(OrientedPoints orientedPoints, Transform previewTransform, GameObject[] previewStartPillars, GameObject[] previewEndPillars, ConveyorAsset conveyorAsset)
         {
             GameObject newConveyor = GetConveyor(previewTransform, conveyorAsset.conveyorPrefab);
             conIndex++;
@@ -162,7 +162,7 @@ namespace ConveyorSystem
             SetupAlignedPillar(topPillarStart, connectionDataStart, conveyorItemGate);
             SetupAlignedPillar(topPillarEnd, connectionDataEnd, conveyorItemGate);
         }
-        void SetupConveyor(ConveyorController conveyorController, OrientedPoint orientedPoints, Pillar start, Pillar end, float speed)
+        void SetupConveyor(ConveyorController conveyorController, OrientedPoints orientedPoints, Pillar start, Pillar end, float speed)
         {
             bool isDirectionReversed = connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.Output;
 

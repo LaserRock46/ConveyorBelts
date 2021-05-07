@@ -22,7 +22,7 @@ namespace ConveyorSystem
         [SerializeField] private GlobalBoolAsset _isConveyorSelected;
         [SerializeField] private GlobalBoolAsset _isPipelineSelected;
 
-        private OrientedPoint _orientedPoints;
+        private OrientedPoints _orientedPoints;
         [SerializeField] private Transform _previewTransform;
         [SerializeField] private MeshFilter _previewMeshFilter;
         [SerializeField] private MeshRenderer _previewMeshRenderer;
@@ -73,7 +73,7 @@ namespace ConveyorSystem
             }
             return trimmedPrecomputedTriangles;
         }
-        (Vector3[] vertices, Vector2[] uvs, Vector2[] uvs3, Color32[] vertexColors) GetVertexDataArrays(int edgeLoopCount, OrientedPoint orientedPoints, EdgeLoop edgeLoop, bool reversedUV = false, MeshAsset.UvMapOrientation uvMapOrientation = MeshAsset.UvMapOrientation.ForwardX, byte newConveyorSpeed = 0, float compansateForwardStretch = 1)
+        (Vector3[] vertices, Vector2[] uvs, Vector2[] uvs3, Color32[] vertexColors) GetVertexDataArrays(int edgeLoopCount, OrientedPoints orientedPoints, EdgeLoop edgeLoop, bool reversedUV = false, MeshAsset.UvMapOrientation uvMapOrientation = MeshAsset.UvMapOrientation.ForwardX, byte newConveyorSpeed = 0, float compansateForwardStretch = 1)
         {
             int newVertexDataArrayLength = edgeLoopCount * edgeLoop.vertexDatas.Length;
             Vector3[] vertices = new Vector3[newVertexDataArrayLength];
@@ -98,11 +98,11 @@ namespace ConveyorSystem
             }
             return (vertices, uvs, uvs3, vertexColors);
         }
-        Vector3 GetVertex(int currentEdgeLoop, VertexData vertexData, OrientedPoint orientedPoints)
+        Vector3 GetVertex(int currentEdgeLoop, VertexData vertexData, OrientedPoints orientedPoints)
         {
             return orientedPoints.GetPointInLocalSpace(vertexData.vertexPosition, currentEdgeLoop);
         }
-        Vector2 GetUV(int currentEdgeLoop, VertexData vertexData, bool reversedUV, OrientedPoint orientedPoints, MeshAsset.UvMapOrientation uvMapOrientation, float compansateForwardStretch)
+        Vector2 GetUV(int currentEdgeLoop, VertexData vertexData, bool reversedUV, OrientedPoints orientedPoints, MeshAsset.UvMapOrientation uvMapOrientation, float compansateForwardStretch)
         {
             float verticalLength = 0;
             float horizontalLength = 0;
@@ -130,7 +130,7 @@ namespace ConveyorSystem
             }
             return uv;
         }
-        Vector2 GetUV3ForRevealEffect(int currentEdgeLoop, bool reversedUV, OrientedPoint orientedPoints)
+        Vector2 GetUV3ForRevealEffect(int currentEdgeLoop, bool reversedUV, OrientedPoints orientedPoints)
         {
             float length = reversedUV ? orientedPoints.segmentDistanceBackward[currentEdgeLoop] : orientedPoints.segmentDistanceForward[currentEdgeLoop];
             Vector2 uv3 = new Vector2(length, 0);
@@ -164,7 +164,7 @@ namespace ConveyorSystem
         #endregion
 
         #region Methods
-        public void AssignOrientedPoints(OrientedPoint orientedPoints)
+        public void AssignOrientedPoints(OrientedPoints orientedPoints)
         {
             _orientedPoints = orientedPoints;
         }

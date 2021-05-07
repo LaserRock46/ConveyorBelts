@@ -69,7 +69,7 @@ namespace ConveyorSystem
         {
             itemTransmission.AddItem(itemTransform, itemAsset);
         }
-        public void Setup(bool isDirectionReversed, OrientedPoint orientedPoints, IConveyorItemGate consecutiveFactoryOrConveyor, float speed)
+        public void Setup(bool isDirectionReversed, OrientedPoints orientedPoints, IConveyorItemGate consecutiveFactoryOrConveyor, float speed)
         {
             Vector3[] positions = PositionsLocalToWorld(orientedPoints.positions, transform);
             itemTransmission.CreatePath(isDirectionReversed, speed, positions, orientedPoints, orientedPoints.totalDistance, _itemHalfwayLength);

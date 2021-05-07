@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class OrientedPoint
+public class OrientedPoints
 {
     public Vector3[] positions;
     public Quaternion[] rotations;

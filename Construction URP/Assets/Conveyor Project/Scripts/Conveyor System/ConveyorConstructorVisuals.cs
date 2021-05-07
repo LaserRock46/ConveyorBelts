@@ -70,7 +70,7 @@ namespace ConveyorSystem
                 _arrowEnd.localScale = _arrowScale;
             }
         }
-        public void PlayRevealEffect(OrientedPoint orientedPoints, Transform previewTransform, Mesh lastCreatedMesh, bool isConveyorDirectionReversed)
+        public void PlayRevealEffect(OrientedPoints orientedPoints, Transform previewTransform, Mesh lastCreatedMesh, bool isConveyorDirectionReversed)
         {
             _isPlaying = true;          
             _revealProgress = 0;

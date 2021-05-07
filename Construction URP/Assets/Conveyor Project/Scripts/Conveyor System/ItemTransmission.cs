@@ -146,7 +146,7 @@ namespace ConveyorSystem
 
             return positions;
         }
-        public void CreatePath(bool reversedTransmission, float speed, Vector3[] positions, OrientedPoint orientedPoints, float totalDistance, float itemHalfwayLength = 0.5f, bool clearPath = false)
+        public void CreatePath(bool reversedTransmission, float speed, Vector3[] positions, OrientedPoints orientedPoints, float totalDistance, float itemHalfwayLength = 0.5f, bool clearPath = false)
         {
             if (clearPath)
             {

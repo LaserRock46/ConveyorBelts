@@ -14,7 +14,7 @@ public class Bezier
     public int pointCount = 8;
     [SerializeField] private Transform _previewTransform; 
     public Transform[] controlPoints;
-    [HideInInspector] public OrientedPoint orientedPoints;
+    [HideInInspector] public OrientedPoints orientedPoints;
 
     public Vector3 GetPoint(float t, Transform[] controlPoint)
     {
