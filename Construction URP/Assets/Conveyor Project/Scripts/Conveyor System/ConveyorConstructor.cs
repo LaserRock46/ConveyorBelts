@@ -8,20 +8,23 @@ namespace ConveyorSystem
     {
         #region Temp
         [Header("Temporary Things", order = 0)]
+        public Mesh meshCube;
         #endregion
 
         #region Fields
         [Header("Fields", order = 1)]
-        private ConveyorConstructorConditions _conditions;
         public GlobalBoolAsset isConveyorConstructorEnabled;
-        [Header("____________________")]
+        private ConveyorConstructorConditions _conditions;
+        [Header("ConveyorPath")]
         [SerializeField] private ConveyorPath _conveyorPath;
-        [Header("____________________")]
+        [Header("ConveyorMesh")]
         [SerializeField] private ConveyorMesh _conveyorMesh;
-        [Header("____________________")]
+        [Header("ConveyorInstantiator")]
         [SerializeField] private ConveyorInstantiator _conveyorInstantiator;
-        [Header("____________________")]
+        [Header("ConveyorConstructorVisuals")]
         [SerializeField] private ConveyorConstructorVisuals _conveyorConstructorVisuals;
+        [Header("ConveyorRequirements")]
+        [SerializeField] public ConveyorRequirements conveyorRequirements;
         [Header("____________________")]
         [SerializeField] private LayerMask _raycastTarget = new LayerMask();
 
@@ -300,6 +303,7 @@ namespace ConveyorSystem
                 _conveyorEndTransform.forward = _conveyorStartTransform.forward;
                 previewTransform.position = new Vector3(0, -1000, 0);
                 _conveyorConstructorVisuals.UpdateArrowsDirection(false);
+                conveyorRequirements.Reset();
             }
             if (_conditions.CanHidePreview())
             {
@@ -389,6 +393,8 @@ namespace ConveyorSystem
                 {
                     _conveyorPath.ConstructPath();
                     _conveyorMesh.MeshUpdate(IsConveyorDirectionReversed(), _selectedConveyorAsset);
+                    conveyorRequirements.Test(_conveyorPath.orientedPoints,_conveyorInstantiator.connectionDataStart,_conveyorInstantiator.connectionDataEnd);
+                    _conveyorConstructorVisuals.MarkError(conveyorRequirements.result.meetAllRequirements);
                 }
             }
         }
@@ -496,6 +502,30 @@ namespace ConveyorSystem
             }
         }
         #endregion
-
+        private void OnDrawGizmos()
+        {
+            if (conveyorRequirements.debugIntersection)
+            {
+                for (int i = 0; i < conveyorRequirements.segmentIntersectionCurrent.Count; i++)
+                {
+                    Gizmos.DrawSphere(conveyorRequirements.segmentIntersectionCurrent[i],0.01f);
+                    Gizmos.DrawLine(conveyorRequirements.segmentIntersectionNextA[i], conveyorRequirements.segmentIntersectionNextB[i]);
+                }
+            }
+            if (conveyorRequirements.debugOverlapping)
+            {
+                for (int i = 0; i < conveyorRequirements.overlappingCenter.Count; i++)
+                {
+                    Gizmos.DrawWireMesh(meshCube, conveyorRequirements.overlappingCenter[i], conveyorRequirements.overlappingOrientation[i], conveyorRequirements.overlappingExtents[i] * 2);
+                }
+            }
+            if (conveyorRequirements.debugSteepness)
+            {
+                for (int i = 0; i < conveyorRequirements.tooStepPoints.Count; i++)
+                {
+                    Gizmos.DrawSphere(conveyorRequirements.tooStepPoints[i],0.01f);
+                }
+            }
+        }
     }
 }

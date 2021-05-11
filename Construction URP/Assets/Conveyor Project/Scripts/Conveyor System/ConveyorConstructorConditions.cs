@@ -81,12 +81,8 @@ namespace ConveyorSystem
             return false;
         }
         public bool CanUpdatePath()
-        {
-            if (_conveyorConstructor.buildingStage != ConveyorConstructor.BuildingStage.None)
-            {
-                return true;
-            }
-            return false;
+        {      
+            return _conveyorConstructor.buildingStage != ConveyorConstructor.BuildingStage.None;
         }
         public bool IsEndPointRotationAuto()
         {
@@ -270,23 +266,14 @@ namespace ConveyorSystem
                 }
             }
             return false;
-        }
-        public bool IsExistingConveyorSideSame(ConveyorConnectionData.ConveyorSide newConveyorSide)
-        {
-            if (_conveyorConstructor.raycastGameObject != null && _conveyorConstructor.raycastGameObject.TryGetComponent(out Pillar pillar))
-            {
-                return pillar.conveyorSide == newConveyorSide;
-            }
-            return false;
-        }
+        }    
         public bool ConstructionMeetsRequirements()
         {
-            return true;
+            return _conveyorConstructor.conveyorRequirements.result.meetAllRequirements;
         }
         #endregion
         #region Methods
 
         #endregion
-
     }
 }

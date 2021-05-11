@@ -6840,6 +6840,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 172dfaa97c32f0647ae52196e8c7fe47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  meshCube: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   isConveyorConstructorEnabled: {fileID: 11400000, guid: 791645f9b94487c4b9d8ac0b4c0cb61a, type: 2}
   _conveyorPath:
     _drawPathDebug: 0
@@ -7063,6 +7064,34 @@ MonoBehaviour:
     conveyorSpeed: 35
   _conveyorInstantiator: {fileID: 1349179437}
   _conveyorConstructorVisuals: {fileID: 1349179438}
+  conveyorRequirements:
+    debugOverlapping: 0
+    debugIntersection: 0
+    debugSteepness: 0
+    overlappingCenter: []
+    overlappingExtents: []
+    overlappingOrientation: []
+    segmentIntersectionCurrent: []
+    segmentIntersectionNextA: []
+    segmentIntersectionNextB: []
+    tooStepPoints: []
+    _previewTransform: {fileID: 1407808980}
+    _minLength: 2
+    _maxLength: 20
+    _minMaxSteepness: 25
+    _checkBoxHalfExtents: {x: 0.6, y: 1, z: 0}
+    _checkBoxOffset: {x: 0, y: 0, z: 0}
+    _edgeIntersectionSize: 0.5
+    result:
+      meetAllRequirements: 0
+      isConnectionDataNotInitialized: 0
+      isTooShort: 0
+      isTooLong: 0
+      isTooSteep: 0
+      isOverlappingOthers: 0
+      isInvalidShape: 0
+      directionNotMatch: 0
+      isNotEnoughResources: 0
   _raycastTarget:
     serializedVersion: 2
     m_Bits: 192
@@ -7128,11 +7157,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _buildingsRoot: {fileID: 1528335918}
   connectionDataStart:
+    isInitialized: 0
     alignedToPillar: {fileID: 0}
     isAlignedToExistingPillar: 0
     occupiedPillarSide: 0
     conveyorSide: 0
   connectionDataEnd:
+    isInitialized: 0
     alignedToPillar: {fileID: 0}
     isAlignedToExistingPillar: 0
     occupiedPillarSide: 0

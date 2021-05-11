@@ -37,25 +37,7 @@ namespace ConveyorSystem
                 return distanceBetweenThisLastAndStart + distanceToEnd >= _itemHalfwayLength;
             }
             return true;
-        }
-        public static Vector3[] PositionsLocalToWorld(Vector3[] local, Transform self)
-        {
-            Vector3[] world = new Vector3[local.Length];
-            for (int i = 0; i < world.Length; i++)
-            {
-                world[i] = self.TransformPoint(local[i]);
-            }
-            return world;
-        }
-        public static Quaternion[] RotationsLocalToWorld(Quaternion[] local, Transform self)
-        {
-            Quaternion[] world = new Quaternion[local.Length];
-            for (int i = 0; i < world.Length; i++)
-            {
-                world[i] = self.rotation * local[i];
-            }
-            return world;
-        }
+        }      
         #endregion
 
 
@@ -71,7 +53,7 @@ namespace ConveyorSystem
         }
         public void Setup(bool isDirectionReversed, OrientedPoints orientedPoints, IConveyorItemGate consecutiveFactoryOrConveyor, float speed)
         {
-            Vector3[] positions = PositionsLocalToWorld(orientedPoints.positions, transform);
+            Vector3[] positions = OrientedPoints.PositionsLocalToWorld(orientedPoints.positions, transform);
             itemTransmission.CreatePath(isDirectionReversed, speed, positions, orientedPoints, orientedPoints.totalDistance, _itemHalfwayLength);
             AssignConsecutiveItemGate(consecutiveFactoryOrConveyor);
         }
