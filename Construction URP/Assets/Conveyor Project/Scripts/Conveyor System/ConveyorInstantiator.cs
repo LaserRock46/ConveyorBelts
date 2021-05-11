@@ -21,7 +21,7 @@ namespace ConveyorSystem
         public ConveyorConnectionData connectionDataStart;
         public ConveyorConnectionData connectionDataEnd;
 
-        public Mesh lastCreatedMesh;
+        [HideInInspector] public Mesh lastCreatedMesh;
         #endregion
 
         #region Functions
@@ -119,6 +119,11 @@ namespace ConveyorSystem
         public void Initialize(ConveyorConstructorConditions conditions)
         {
             _conditions = conditions;
+        }
+        public void ResetData()
+        {
+            connectionDataEnd = new ConveyorConnectionData(ConveyorConnectionData.ConveyorSide.Input);
+            connectionDataEnd = new ConveyorConnectionData(ConveyorConnectionData.ConveyorSide.Output);
         }
         public void Instantiate(OrientedPoints orientedPoints, Transform previewTransform, GameObject[] previewStartPillars, GameObject[] previewEndPillars, ConveyorAsset conveyorAsset)
         {

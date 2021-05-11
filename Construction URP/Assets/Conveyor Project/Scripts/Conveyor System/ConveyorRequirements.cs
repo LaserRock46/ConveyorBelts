@@ -31,6 +31,7 @@ namespace ConveyorSystem
         [SerializeField] private float _minMaxSteepness;
         [SerializeField] private Vector3 _checkBoxHalfExtents;
         [SerializeField] private Vector3 _checkBoxOffset;
+        [SerializeField] private LayerMask _checkBoxLayers;
         [SerializeField] private float _edgeIntersectionSize;
         public RequirementsTestResult result;
 
@@ -131,6 +132,17 @@ namespace ConveyorSystem
             overlappingExtents.Clear();
             overlappingOrientation.Clear();
 
+            int pillarLayer = 7;
+            int ignoreLayer = 2;
+            if (connectionDataStart.isAlignedToExistingPillar)
+            {
+                connectionDataStart.alignedToPillar.gameObject.layer = ignoreLayer;
+            }
+            if (connectionDataEnd.isAlignedToExistingPillar)
+            {
+                connectionDataEnd.alignedToPillar.gameObject.layer = ignoreLayer;
+            }
+
             Vector3[] worldPositions = OrientedPoints.PositionsLocalToWorld(orientedPoints.positions, _previewTransform);
 
             for (int i = 1; i < orientedPoints.positions.Length; i++)
@@ -145,7 +157,7 @@ namespace ConveyorSystem
                 Quaternion orientation =Quaternion.LookRotation(worldPositions[i] - worldPositions[i - 1]);
 
                 bool discardTest = false;
-                int boxOverlappingExistingPillarsCount = 3;
+                int boxOverlappingExistingPillarsCount = 1;
                 if (connectionDataStart.isAlignedToExistingPillar && i <= boxOverlappingExistingPillarsCount)
                 {
                     discardTest = true;
@@ -155,13 +167,21 @@ namespace ConveyorSystem
                     discardTest = true;
                 }
 
-                if (Physics.CheckBox(center, extents, orientation) && discardTest == false)
+                if (Physics.CheckBox(center, extents, orientation, _checkBoxLayers) && discardTest == false)
                 {
                     result = true;
                     overlappingCenter.Add(center);
                     overlappingExtents.Add(extents);
                     overlappingOrientation.Add(orientation);
                 }
+            }
+            if (connectionDataStart.isAlignedToExistingPillar)
+            {
+                connectionDataStart.alignedToPillar.gameObject.layer = pillarLayer;
+            }
+            if (connectionDataEnd.isAlignedToExistingPillar)
+            {
+                connectionDataEnd.alignedToPillar.gameObject.layer = pillarLayer;
             }
             return result;
         }
@@ -189,9 +209,9 @@ namespace ConveyorSystem
                 isNotEnoughResources = TestForNotEnoughResources(),
                 isTooLong = TestForMaxLength(orientedPoints.totalDistance),
                 isTooShort = TestForMinLength(orientedPoints.totalDistance),
-                isTooSteep = TestForSteepnes(orientedPoints.rotations, orientedPoints.positions),
-                meetAllRequirements = TestForAllRequirements(result.isConnectionDataNotInitialized, result.isTooShort, result.isTooLong, result.isTooSteep, result.isOverlappingOthers, result.isInvalidShape, result.directionNotMatch, result.isNotEnoughResources)
+                isTooSteep = TestForSteepnes(orientedPoints.rotations, orientedPoints.positions)
             };
+            result.meetAllRequirements = TestForAllRequirements(result.isConnectionDataNotInitialized, result.isTooShort, result.isTooLong, result.isTooSteep, result.isOverlappingOthers, result.isInvalidShape, result.directionNotMatch, result.isNotEnoughResources);
 
         }
         #endregion

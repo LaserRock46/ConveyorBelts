@@ -303,6 +303,7 @@ namespace ConveyorSystem
                 _conveyorEndTransform.forward = _conveyorStartTransform.forward;
                 previewTransform.position = new Vector3(0, -1000, 0);
                 _conveyorConstructorVisuals.UpdateArrowsDirection(false);
+                _conveyorInstantiator.ResetData();
                 conveyorRequirements.Reset();
             }
             if (_conditions.CanHidePreview())
@@ -422,6 +423,7 @@ namespace ConveyorSystem
                 }
 
                 _conveyorInstantiator.connectionDataStart = new ConveyorConnectionData(true, null, false, ConveyorConnectionData.PillarSide.Front, ConveyorConnectionData.ConveyorSide.Input);
+                _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(false, null, false, ConveyorConnectionData.PillarSide.Back, ConveyorConnectionData.ConveyorSide.Output);
             }
             if (_conditions.CanMoveConveyorEnd())
             {
@@ -465,7 +467,6 @@ namespace ConveyorSystem
 
                 _conveyorInstantiator.connectionDataStart = new ConveyorConnectionData(true, pillar, true, pillarSide, conveyorSide);
                 _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(GetReversedConveyorSide(conveyorSide));
-
             }
 
             if (_conditions.CanMoveConveyorEnd())
