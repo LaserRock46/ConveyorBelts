@@ -6,6 +6,8 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
 {
     #region Temp
     [Header("Temporary Things", order = 0)]
+    bool space;
+    bool res;
     #endregion
 
     #region Fields
@@ -17,6 +19,11 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
     public FactoryItemGate[] outputItemGates;
     public int[] inputItemCount;
     public int[] outputItemCount;
+
+    private bool _isWorking = false;
+
+    private IConveyorItemGate _consecutiveConveyor;
+
     #endregion
 
     #region Functions
@@ -35,6 +42,30 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
         }
         return false;
     }
+    bool IsEnoughResourcesForProduction()
+    {
+        int enoughInThisInput = 0;
+        for (int i = 0; i < selected.input.Length; i++)
+        {
+            if(inputItemCount[i] >= selected.input[i].amount)
+            {
+                enoughInThisInput++;
+            }
+        }       
+        return selected.input.Length == 0 || enoughInThisInput == selected.input.Length;
+    }
+    bool IsEnoughSpaceInStack()
+    {
+        int enoughInThisOutput = 0;
+        for (int i = 0; i < selected.output.Length; i++)
+        {
+            if (outputItemCount[i] + selected.output[i].amount <= selected.output[i].item.maxStackCount)
+            {
+                enoughInThisOutput++;
+            }
+        }
+        return enoughInThisOutput == selected.output.Length;
+    }
     #endregion
 
 
@@ -47,7 +78,8 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
     }
    void Update()
     {
-        
+        ProductionUpdate();
+        ItemReleaseUpdate();
     }
     void SetupGates()
     {
@@ -79,10 +111,52 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
         }
         Destroy(itemTransform.gameObject);
     }
-
+    void ProductionUpdate()
+    {
+        if (_isWorking == false)
+        {
+            if (IsEnoughSpaceInStack() && IsEnoughResourcesForProduction())
+            {
+                _isWorking = true;
+                StartCoroutine(ItemProduction(selected.productionTime));
+            }
+        }
+    }
+    private IEnumerator ItemProduction(float productionTime)
+    {
+        yield return new WaitForSeconds(productionTime);
+        ItemProductionFinished();
+    }
+    void ItemProductionFinished()
+    {
+        for (int i = 0; i < inputItemCount.Length; i++)
+        {
+            inputItemCount[i] -= selected.input[i].amount;
+        }
+        for (int i = 0; i < outputItemCount.Length; i++)
+        {
+            outputItemCount[i] += selected.output[i].amount;
+        }
+        _isWorking = false;
+    }
+    void ItemReleaseUpdate()
+    {
+        if (_consecutiveConveyor != null)
+        {
+            for (int i = 0; i < outputItemCount.Length; i++)
+            {
+                if (outputItemCount[i] > 0 && _consecutiveConveyor.CanReceiveItem(selected.output[i].item, 0))
+                {;
+                    outputItemCount[i]--;
+                    GameObject newItem = Instantiate(selected.output[i].item.prefab);
+                    _consecutiveConveyor.ReceiveItem(selected.output[i].item, newItem.transform);
+                }
+            }
+        }
+    }
     public void AssignConsecutiveItemGate(IConveyorItemGate conveyorItemGate)
     {
-
+        _consecutiveConveyor = conveyorItemGate;
     }
     #endregion
 

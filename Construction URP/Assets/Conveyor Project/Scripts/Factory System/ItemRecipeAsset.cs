@@ -10,6 +10,7 @@ namespace ConveyorSystem
     {
         public RecipeComponent[] input;
         public RecipeComponent[] output;
+        public float productionTime;
     }
     [System.Serializable]
     public class RecipeComponent

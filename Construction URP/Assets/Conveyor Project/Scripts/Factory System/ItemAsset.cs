@@ -9,6 +9,5 @@ public class ItemAsset : ScriptableObject
     public string itemName;
     public Sprite icon;
     public int maxStackCount;
-    public float productionTime;
     public GameObject prefab;
 }

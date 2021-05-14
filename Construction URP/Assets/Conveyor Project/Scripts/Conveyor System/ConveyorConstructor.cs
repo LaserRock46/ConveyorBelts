@@ -310,6 +310,7 @@ namespace ConveyorSystem
             {
                 previewGameObject.SetActive(false);
                 previewTransform.position = new Vector3(0, -1000, 0);
+                conveyorRequirements.HideMessages();
             }
             if (_conditions.CanEnablePreview())
             {

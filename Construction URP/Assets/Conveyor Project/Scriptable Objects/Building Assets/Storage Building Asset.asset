@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5757a4083cc79b34dbecfb07c24ca295, type: 3}
-  m_Name: Pillar Building Asset
+  m_Name: Storage Building Asset
   m_EditorClassIdentifier: 
   buildingName: 
   globalBools:
   - {fileID: 11400000, guid: 500dbfac4f3609248b252eb6ca0608a2, type: 2}
-  - {fileID: 11400000, guid: 8866a14d3152c5144842ebbfb23898bf, type: 2}
-  buildingIcon: {fileID: 21300000, guid: 062dc187327aabc43aa6f52fc236d5d9, type: 3}
+  - {fileID: 11400000, guid: 42eb006fe1e95834b80942dc4a5814f0, type: 2}
+  buildingIcon: {fileID: 21300000, guid: 82da236788bd1d4449c6294b9af860b7, type: 3}
   buildingAssetResources: []

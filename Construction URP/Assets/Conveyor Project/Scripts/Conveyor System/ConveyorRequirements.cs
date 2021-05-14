@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 namespace ConveyorSystem
 {
     [System.Serializable]
@@ -26,15 +27,26 @@ namespace ConveyorSystem
         #region Fields
         [Header("Fields", order = 1)]
         [SerializeField] private Transform _previewTransform;
+        [SerializeField] private Transform _conveyorStartTransform = null;
+        [SerializeField] private Transform _conveyorEndTransform = null;
         [SerializeField] private float _minLength;
         [SerializeField] private float _maxLength;
         [SerializeField] private float _minMaxSteepness;
         [SerializeField] private Vector3 _checkBoxHalfExtents;
-        [SerializeField] private Vector3 _checkBoxOffset;
+        [SerializeField] private float _checkBoxUpwardOffset;
         [SerializeField] private LayerMask _checkBoxLayers;
         [SerializeField] private float _edgeIntersectionSize;
         public RequirementsTestResult result;
 
+        [SerializeField] private GameObject[] _errorMessageGO;
+        [SerializeField] private TMPro.TMP_Text[] _errorMessageText;
+        [SerializeField] private string _msgTooShort;
+        [SerializeField] private string _msgTooLong;
+        [SerializeField] private string _msgTooSteep;
+        [SerializeField] private string _msgOverlappingOthers;
+        [SerializeField] private string _msgInvalidShape;
+        [SerializeField] private string _msgNotEnoughResources;
+        [SerializeField] private string _msgDirectionNotMatch;
         #endregion
 
         #region Functions
@@ -124,7 +136,25 @@ namespace ConveyorSystem
         {
             return connectionDataStart.conveyorSide == connectionDataEnd.conveyorSide;
         }
-        bool TestForOverlappingOthers(OrientedPoints orientedPoints, ConveyorConnectionData connectionDataStart, ConveyorConnectionData connectionDataEnd)
+        bool CollidersArePillarsStack(Collider[] collidersInBox)
+        {
+            for (int i = 0; i < collidersInBox.Length; i++)
+            {
+                if (collidersInBox[i] != null)
+                {
+                    if (Mathf.Approximately(collidersInBox[i].transform.position.x, _conveyorStartTransform.position.x) && Mathf.Approximately(collidersInBox[i].transform.position.z, _conveyorStartTransform.position.z))
+                    {
+                        return true;
+                    }
+                    if (Mathf.Approximately(collidersInBox[i].transform.position.x, _conveyorEndTransform.position.x) && Mathf.Approximately(collidersInBox[i].transform.position.z, _conveyorEndTransform.position.z))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        bool TestForOverlappingOthers(OrientedPoints orientedPoints)
         {
             bool result = false;
 
@@ -132,57 +162,33 @@ namespace ConveyorSystem
             overlappingExtents.Clear();
             overlappingOrientation.Clear();
 
-            int pillarLayer = 7;
-            int ignoreLayer = 2;
-            if (connectionDataStart.isAlignedToExistingPillar)
-            {
-                connectionDataStart.alignedToPillar.gameObject.layer = ignoreLayer;
-            }
-            if (connectionDataEnd.isAlignedToExistingPillar)
-            {
-                connectionDataEnd.alignedToPillar.gameObject.layer = ignoreLayer;
-            }
-
             Vector3[] worldPositions = OrientedPoints.PositionsLocalToWorld(orientedPoints.positions, _previewTransform);
 
             for (int i = 1; i < orientedPoints.positions.Length; i++)
             {
-                Vector3 center = Vector3.Lerp(worldPositions[i], worldPositions[i - 1], 0.5f);
-                Vector3 extents = _checkBoxHalfExtents;
-                float distanceBetweeenPoints = Vector3.Distance(worldPositions[i], worldPositions[i - 1]);
-                float offset = 0.1f;
-                float minimalExtentZ = 0.1f;
-                float extentZ = Mathf.Clamp((distanceBetweeenPoints/2) - offset, minimalExtentZ, Mathf.Infinity);
-                extents.z = extentZ;
                 Quaternion orientation =Quaternion.LookRotation(worldPositions[i] - worldPositions[i - 1]);
+                Vector3 midPoint = Vector3.Lerp(worldPositions[i], worldPositions[i - 1], 0.5f);
+                Vector3 upwardOffset = (orientation * Vector3.up) * _checkBoxUpwardOffset;
+                Vector3 center = midPoint + upwardOffset;
+                Vector3 extents = _checkBoxHalfExtents;
+                float distanceBetweeenPoints = Vector3.Distance(worldPositions[i], worldPositions[i - 1]);                           
+                float extentZ = distanceBetweeenPoints / 2;
+                extents.z = extentZ;
 
-                bool discardTest = false;
-                int boxOverlappingExistingPillarsCount = 1;
-                if (connectionDataStart.isAlignedToExistingPillar && i <= boxOverlappingExistingPillarsCount)
+                Collider[] collidersInBox = new Collider[3];
+                int amountOfColliders = Physics.OverlapBoxNonAlloc(center, extents, collidersInBox, orientation);
+      
+                if (amountOfColliders > 0)
                 {
-                    discardTest = true;
+;                    if (CollidersArePillarsStack(collidersInBox) == false)
+                    {
+                        result = true;
+                        overlappingCenter.Add(center);
+                        overlappingExtents.Add(extents);
+                        overlappingOrientation.Add(orientation);
+                    }
                 }
-                if (connectionDataEnd.isAlignedToExistingPillar && i >= orientedPoints.positions.Length - 1 - boxOverlappingExistingPillarsCount)
-                {
-                    discardTest = true;
-                }
-
-                if (Physics.CheckBox(center, extents, orientation, _checkBoxLayers) && discardTest == false)
-                {
-                    result = true;
-                    overlappingCenter.Add(center);
-                    overlappingExtents.Add(extents);
-                    overlappingOrientation.Add(orientation);
-                }
-            }
-            if (connectionDataStart.isAlignedToExistingPillar)
-            {
-                connectionDataStart.alignedToPillar.gameObject.layer = pillarLayer;
-            }
-            if (connectionDataEnd.isAlignedToExistingPillar)
-            {
-                connectionDataEnd.alignedToPillar.gameObject.layer = pillarLayer;
-            }
+            } 
             return result;
         }
         bool TestForNotEnoughResources()
@@ -205,7 +211,7 @@ namespace ConveyorSystem
                 directionNotMatch = TestForDirectionOfAttachedConveyor(connectionDataStart, connectionDataEnd),
                 isConnectionDataNotInitialized = TestForConnectionDataInitialization(connectionDataStart, connectionDataEnd),
                 isInvalidShape = TestForInvalidShape(orientedPoints),
-                isOverlappingOthers = TestForOverlappingOthers(orientedPoints, connectionDataStart, connectionDataEnd),
+                isOverlappingOthers = TestForOverlappingOthers(orientedPoints),
                 isNotEnoughResources = TestForNotEnoughResources(),
                 isTooLong = TestForMaxLength(orientedPoints.totalDistance),
                 isTooShort = TestForMinLength(orientedPoints.totalDistance),
@@ -213,6 +219,70 @@ namespace ConveyorSystem
             };
             result.meetAllRequirements = TestForAllRequirements(result.isConnectionDataNotInitialized, result.isTooShort, result.isTooLong, result.isTooSteep, result.isOverlappingOthers, result.isInvalidShape, result.directionNotMatch, result.isNotEnoughResources);
 
+            ShowResultMessage();
+        }
+        void ShowResultMessage()
+        {
+            int messageCount = -1;
+            if (result.directionNotMatch)
+            {
+                messageCount++;
+                _errorMessageText[messageCount].text = _msgDirectionNotMatch;
+                if (!_errorMessageGO[messageCount].activeSelf)
+                    _errorMessageGO[messageCount].SetActive(true);
+            }
+            if (result.isTooLong)
+            {
+                messageCount++;
+                _errorMessageText[messageCount].text = _msgTooLong;
+                if (!_errorMessageGO[messageCount].activeSelf)
+                    _errorMessageGO[messageCount].SetActive(true);
+            }
+            if (result.isTooShort)
+            {
+                messageCount++;
+                _errorMessageText[messageCount].text = _msgTooShort;
+                if (!_errorMessageGO[messageCount].activeSelf)
+                    _errorMessageGO[messageCount].SetActive(true);
+            }
+            if (result.isTooSteep)
+            {
+                messageCount++;
+                _errorMessageText[messageCount].text = _msgTooSteep;
+                if (!_errorMessageGO[messageCount].activeSelf)
+                    _errorMessageGO[messageCount].SetActive(true);
+            }
+            if (result.isOverlappingOthers)
+            {
+                messageCount++;
+                _errorMessageText[messageCount].text = _msgOverlappingOthers;
+                if (!_errorMessageGO[messageCount].activeSelf)
+                    _errorMessageGO[messageCount].SetActive(true);
+            }
+            if (result.isInvalidShape)
+            {
+                messageCount++;
+                _errorMessageText[messageCount].text = _msgInvalidShape;
+                if (!_errorMessageGO[messageCount].activeSelf)
+                    _errorMessageGO[messageCount].SetActive(true);
+            }
+            if (result.isNotEnoughResources)
+            {
+                messageCount++;
+                _errorMessageText[messageCount].text = _msgNotEnoughResources;
+                if (!_errorMessageGO[messageCount].activeSelf)
+                    _errorMessageGO[messageCount].SetActive(true);
+            }
+
+            HideMessages(messageCount + 1);
+        }
+        public void HideMessages(int startFrom = 0)
+        {         
+            for (int i = startFrom; i < _errorMessageGO.Length; i++)
+            {
+                if (_errorMessageGO[i].activeSelf)
+                    _errorMessageGO[i].SetActive(false);
+            }
         }
         #endregion
 

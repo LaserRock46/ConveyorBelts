@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: Driller Building Asset
   m_EditorClassIdentifier: 
   buildingName: 
-  globalBools: []
+  globalBools:
+  - {fileID: 11400000, guid: 500dbfac4f3609248b252eb6ca0608a2, type: 2}
+  - {fileID: 11400000, guid: 34a3c633fa66bf440ab836339453e213, type: 2}
   buildingIcon: {fileID: 21300000, guid: e7206d73f664bbe4aa1b0571bd22be70, type: 3}
   buildingAssetResources: []

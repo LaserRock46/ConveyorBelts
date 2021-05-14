@@ -9,11 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 92e9dbc6908d42d49b76a6dd1cb6cc90, type: 3}
-  m_Name: Oildrum Item Recipe Asset
+  m_Script: {fileID: 11500000, guid: 0f209ac2a3848544b9311429b99dcc5f, type: 3}
+  m_Name: Enable Buildings Constructor Global Bool
   m_EditorClassIdentifier: 
-  input: []
-  output:
-  - item: {fileID: 11400000, guid: bfa1f0c7d5d7c2e4f9cc699f82f3e203, type: 2}
-    amount: 1
-  productionTime: 0.5
+  defaultValue: 0
+  value: 0
