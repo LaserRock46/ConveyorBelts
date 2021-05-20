@@ -28,6 +28,10 @@ namespace ConveyorSystem
         {
             return this;
         }
+        public Collider GetCollider()
+        {
+            return gameObject.GetComponent<Collider>();
+        }
         public bool CanReceiveItem(ItemAsset itemAsset, float distanceToEnd)
         {
             if (itemTransmission.itemsProgress.Count > 0)

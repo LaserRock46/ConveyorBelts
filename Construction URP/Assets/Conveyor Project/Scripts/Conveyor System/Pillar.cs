@@ -12,11 +12,11 @@ namespace ConveyorSystem
 
         #region Fields
         [Header("Fields", order = 1)]
-        public IConveyorItemGate frontSideConveyor;
-        public IConveyorItemGate backSideConveyor;
-        public ConveyorConnectionData.ConveyorSide conveyorSide;
-        public ConveyorConnectionData.ConveyorSide frontConveyorSide;
-        public ConveyorConnectionData.ConveyorSide backConveyorSide;
+        public IConveyorItemGate frontConveyor;
+        public IConveyorItemGate backConveyor;
+        public ConveyorConnectionData.ConveyorDirection conveyorSide;
+        public ConveyorConnectionData.ConveyorDirection frontConveyorSide;
+        public ConveyorConnectionData.ConveyorDirection backConveyorSide;
         public Transform self;
         public Transform tipAnchor;
         public int indexInPillarStack = 1;
@@ -26,11 +26,11 @@ namespace ConveyorSystem
         #region Functions
         public bool IsOccupiedFront()
         {
-            return frontSideConveyor != null;
+            return frontConveyor != null;
         }
         public bool IsOccupiedBack()
         {
-            return backSideConveyor != null;
+            return backConveyor != null;
         }
         #endregion
 
@@ -49,35 +49,35 @@ namespace ConveyorSystem
                 // Can't destroy
             }
         }
-        public void Setup(ConveyorConnectionData.ConveyorSide conveyorSide, ConveyorConnectionData.PillarSide occupiedPillarSide, IConveyorItemGate conveyorItemGate)
+        public void Setup(ConveyorConnectionData.ConveyorDirection conveyorSide, ConveyorConnectionData.PillarSide occupiedPillarSide, IConveyorItemGate conveyorItemGate)
         {
             this.conveyorSide = conveyorSide;
             if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
             {
-                frontSideConveyor = conveyorItemGate;
-                if (backSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+                frontConveyor = conveyorItemGate;
+                if (backConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorDirection.Input)
                 {
-                    backSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+                    backConveyor.AssignConsecutiveItemGate(conveyorItemGate);
                 }
             }
             if (occupiedPillarSide == ConveyorConnectionData.PillarSide.Back)
             {
-                backSideConveyor = conveyorItemGate;
-                if (frontSideConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+                backConveyor = conveyorItemGate;
+                if (frontConveyor != null && conveyorSide == ConveyorConnectionData.ConveyorDirection.Input)
                 {
-                    frontSideConveyor.AssignConsecutiveItemGate(conveyorItemGate);
+                    frontConveyor.AssignConsecutiveItemGate(conveyorItemGate);
                 }
             }
         }
         [ContextMenu("Remove Gate Front")]
         void RemoveItemGateFront()
         {
-            frontSideConveyor = null;
+            frontConveyor = null;
         }
         [ContextMenu("Remove Gate Back")]
         void RemoveItemGateBack()
         {
-            backSideConveyor = null;
+            backConveyor = null;
         }
         #endregion
 

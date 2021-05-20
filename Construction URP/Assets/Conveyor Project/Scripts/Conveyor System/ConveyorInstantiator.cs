@@ -86,26 +86,26 @@ namespace ConveyorSystem
         IConveyorItemGate GetConsecutiveItemGate(Pillar start, Pillar end)
         {
             IConveyorItemGate conveyorItemGate = null;
-            if (connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
+            if (connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorDirection.Output)
             {
                 if (connectionDataStart.occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
                 {
-                    conveyorItemGate = start.backSideConveyor;
+                    conveyorItemGate = start.backConveyor;
                 }
                 else
                 {
-                    conveyorItemGate = start.frontSideConveyor;
+                    conveyorItemGate = start.frontConveyor;
                 }
             }
-            else if (connectionDataEnd.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
+            else if (connectionDataEnd.conveyorSide == ConveyorConnectionData.ConveyorDirection.Output)
             {
                 if (connectionDataEnd.occupiedPillarSide == ConveyorConnectionData.PillarSide.Front)
                 {
-                    conveyorItemGate = end.backSideConveyor;
+                    conveyorItemGate = end.backConveyor;
                 }
                 else
                 {
-                    conveyorItemGate = end.frontSideConveyor;
+                    conveyorItemGate = end.frontConveyor;
                 }
             }
 
@@ -122,8 +122,8 @@ namespace ConveyorSystem
         }
         public void ResetData()
         {
-            connectionDataEnd = new ConveyorConnectionData(ConveyorConnectionData.ConveyorSide.Input);
-            connectionDataEnd = new ConveyorConnectionData(ConveyorConnectionData.ConveyorSide.Output);
+            connectionDataEnd = new ConveyorConnectionData(ConveyorConnectionData.ConveyorDirection.Input);
+            connectionDataEnd = new ConveyorConnectionData(ConveyorConnectionData.ConveyorDirection.Output);
         }
         public void Instantiate(OrientedPoints orientedPoints, Transform previewTransform, GameObject[] previewStartPillars, GameObject[] previewEndPillars, ConveyorAsset conveyorAsset)
         {
@@ -169,7 +169,7 @@ namespace ConveyorSystem
         }
         void SetupConveyor(ConveyorController conveyorController, OrientedPoints orientedPoints, Pillar start, Pillar end, float speed)
         {
-            bool isDirectionReversed = connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.Output;
+            bool isDirectionReversed = connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorDirection.Output;
 
             IConveyorItemGate consecutiveFactoryOrConveyor = GetConsecutiveItemGate(start, end);
             conveyorController.Setup(isDirectionReversed, orientedPoints, consecutiveFactoryOrConveyor, speed);

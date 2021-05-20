@@ -9,13 +9,14 @@ namespace ConveyorSystem
     {
         public bool isInitialized;
         public Pillar alignedToPillar;
+        public Collider alignedToConveyorCollider;
         public bool isAlignedToExistingPillar;
         public enum PillarSide { Front, Back }
         public PillarSide occupiedPillarSide;
-        public enum ConveyorSide { None, Input, Output }
-        public ConveyorSide conveyorSide;
+        public enum ConveyorDirection { None, Input, Output }
+        public ConveyorDirection conveyorSide;
 
-        public ConveyorConnectionData(bool isInitialized, Pillar alignedToPillar, bool isAlignedToExistingPillar, PillarSide occupiedPillarSide, ConveyorSide conveyorSide)
+        public ConveyorConnectionData(bool isInitialized, Pillar alignedToPillar, bool isAlignedToExistingPillar, PillarSide occupiedPillarSide, ConveyorDirection conveyorSide)
         {
             this.isInitialized = isInitialized;
             this.alignedToPillar = alignedToPillar;
@@ -25,11 +26,11 @@ namespace ConveyorSystem
             this.conveyorSide = conveyorSide;
         }
 
-        public ConveyorConnectionData(ConveyorSide conveyorSide)
+        public ConveyorConnectionData(ConveyorDirection conveyorSide)
         {
             this.conveyorSide = conveyorSide;
         }
-        public void CorrectConveyorSide(ConveyorSide conveyorSide)
+        public void CorrectConveyorSide(ConveyorDirection conveyorSide)
         {
             this.conveyorSide = conveyorSide;
         }

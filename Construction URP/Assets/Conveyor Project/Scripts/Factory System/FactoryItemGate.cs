@@ -8,9 +8,9 @@ public class FactoryItemGate
   
     public Pillar pillar;
 
-    public void Setup(IConveyorItemGate thisFactoryItemGate, ConveyorConnectionData.ConveyorSide gateType)
+    public void Setup(IConveyorItemGate thisFactoryItemGate, ConveyorConnectionData.ConveyorDirection gateType)
     {
-        ConveyorConnectionData.PillarSide pillarSide = gateType == ConveyorConnectionData.ConveyorSide.Input ? ConveyorConnectionData.PillarSide.Front : ConveyorConnectionData.PillarSide.Back;
+        ConveyorConnectionData.PillarSide pillarSide = gateType == ConveyorConnectionData.ConveyorDirection.Input ? ConveyorConnectionData.PillarSide.Front : ConveyorConnectionData.PillarSide.Back;
         pillar.Setup(gateType,pillarSide,thisFactoryItemGate);
     }
    

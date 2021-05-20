@@ -6828,7 +6828,7 @@ MonoBehaviour:
   _conveyorInstantiator: {fileID: 1349179437}
   _conveyorConstructorVisuals: {fileID: 1349179438}
   conveyorRequirements:
-    debugOverlapping: 0
+    debugOverlapping: 1
     debugIntersection: 0
     debugSteepness: 0
     overlappingCenter: []

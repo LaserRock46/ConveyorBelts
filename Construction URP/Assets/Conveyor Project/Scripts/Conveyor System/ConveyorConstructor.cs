@@ -143,57 +143,57 @@ namespace ConveyorSystem
         }
         bool IsConveyorDirectionReversed()
         {
-            return _conveyorInstantiator.connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorSide.Output;
+            return _conveyorInstantiator.connectionDataStart.conveyorSide == ConveyorConnectionData.ConveyorDirection.Output;
         }
-        ConveyorConnectionData.ConveyorSide GetConveyorSideForExistingPillar(Pillar alignedPillar)
+        ConveyorConnectionData.ConveyorDirection GetConveyorSideForExistingPillar(Pillar alignedPillar)
         {
-            ConveyorConnectionData.ConveyorSide conveyorSide = ConveyorConnectionData.ConveyorSide.None;
+            ConveyorConnectionData.ConveyorDirection conveyorSide = ConveyorConnectionData.ConveyorDirection.None;
             if (_conditions.CanMoveConveyorStart())
             {
-                if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.None || alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
+                if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorDirection.None || alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorDirection.Output)
                 {
-                    conveyorSide = ConveyorConnectionData.ConveyorSide.Input;
+                    conveyorSide = ConveyorConnectionData.ConveyorDirection.Input;
                 }
-                else if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+                else if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorDirection.Input)
                 {
-                    conveyorSide = ConveyorConnectionData.ConveyorSide.Output;
+                    conveyorSide = ConveyorConnectionData.ConveyorDirection.Output;
                 }
             }
             else if (_conditions.CanMoveConveyorEnd())
             {
-                if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.None || alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.Input)
+                if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorDirection.None || alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorDirection.Input)
                 {
-                    conveyorSide = ConveyorConnectionData.ConveyorSide.Output;
+                    conveyorSide = ConveyorConnectionData.ConveyorDirection.Output;
                 }
-                else if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
+                else if (alignedPillar.conveyorSide == ConveyorConnectionData.ConveyorDirection.Output)
                 {
-                    conveyorSide = ConveyorConnectionData.ConveyorSide.Input;
+                    conveyorSide = ConveyorConnectionData.ConveyorDirection.Input;
                 }
             }
             return conveyorSide;
         }
-        ConveyorConnectionData.ConveyorSide GetReversedConveyorSide(ConveyorConnectionData.ConveyorSide conveyorSide)
+        ConveyorConnectionData.ConveyorDirection GetReversedConveyorSide(ConveyorConnectionData.ConveyorDirection conveyorSide)
         {
-            return conveyorSide == ConveyorConnectionData.ConveyorSide.Input ? ConveyorConnectionData.ConveyorSide.Output : ConveyorConnectionData.ConveyorSide.Input;
+            return conveyorSide == ConveyorConnectionData.ConveyorDirection.Input ? ConveyorConnectionData.ConveyorDirection.Output : ConveyorConnectionData.ConveyorDirection.Input;
         }
-        (ConveyorConnectionData.ConveyorSide conveyorSideStart, ConveyorConnectionData.ConveyorSide conveyorSideEnd) GetCorrectedConveyorSides(ConveyorConnectionData connectionDataStart, ConveyorConnectionData connectionDataEnd)
+        (ConveyorConnectionData.ConveyorDirection conveyorSideStart, ConveyorConnectionData.ConveyorDirection conveyorSideEnd) GetCorrectedConveyorSides(ConveyorConnectionData connectionDataStart, ConveyorConnectionData connectionDataEnd)
         {
-            ConveyorConnectionData.ConveyorSide conveyorSideStart = ConveyorConnectionData.ConveyorSide.None;
-            ConveyorConnectionData.ConveyorSide conveyorSideEnd = ConveyorConnectionData.ConveyorSide.None;
+            ConveyorConnectionData.ConveyorDirection conveyorSideStart = ConveyorConnectionData.ConveyorDirection.None;
+            ConveyorConnectionData.ConveyorDirection conveyorSideEnd = ConveyorConnectionData.ConveyorDirection.None;
 
-            bool sideStartIsUnpreferred = connectionDataStart.isAlignedToExistingPillar == false || (connectionDataStart.isAlignedToExistingPillar == true && connectionDataStart.alignedToPillar.conveyorSide == ConveyorConnectionData.ConveyorSide.None);
+            bool sideStartIsUnpreferred = connectionDataStart.isAlignedToExistingPillar == false || (connectionDataStart.isAlignedToExistingPillar == true && connectionDataStart.alignedToPillar.conveyorSide == ConveyorConnectionData.ConveyorDirection.None);
 
             if (sideStartIsUnpreferred)
             {
-                if (connectionDataEnd.conveyorSide == ConveyorConnectionData.ConveyorSide.Output)
+                if (connectionDataEnd.conveyorSide == ConveyorConnectionData.ConveyorDirection.Output)
                 {
-                    conveyorSideStart = ConveyorConnectionData.ConveyorSide.Input;
-                    conveyorSideEnd = ConveyorConnectionData.ConveyorSide.Output;
+                    conveyorSideStart = ConveyorConnectionData.ConveyorDirection.Input;
+                    conveyorSideEnd = ConveyorConnectionData.ConveyorDirection.Output;
                 }
                 else
                 {
-                    conveyorSideStart = ConveyorConnectionData.ConveyorSide.Output;
-                    conveyorSideEnd = ConveyorConnectionData.ConveyorSide.Input;
+                    conveyorSideStart = ConveyorConnectionData.ConveyorDirection.Output;
+                    conveyorSideEnd = ConveyorConnectionData.ConveyorDirection.Input;
                 }
             }
             else
@@ -423,8 +423,8 @@ namespace ConveyorSystem
                     EnableNeededPreviewPillars(true, true);
                 }
 
-                _conveyorInstantiator.connectionDataStart = new ConveyorConnectionData(true, null, false, ConveyorConnectionData.PillarSide.Front, ConveyorConnectionData.ConveyorSide.Input);
-                _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(false, null, false, ConveyorConnectionData.PillarSide.Back, ConveyorConnectionData.ConveyorSide.Output);
+                _conveyorInstantiator.connectionDataStart = new ConveyorConnectionData(true, null, false, ConveyorConnectionData.PillarSide.Front, ConveyorConnectionData.ConveyorDirection.Input);
+                _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(false, null, false, ConveyorConnectionData.PillarSide.Back, ConveyorConnectionData.ConveyorDirection.Output);
             }
             if (_conditions.CanMoveConveyorEnd())
             {
@@ -444,7 +444,7 @@ namespace ConveyorSystem
                     EnableNeededPreviewPillars(_conditions.IsStartPillarsEnabled(), true);
                 }
 
-                ConveyorConnectionData.ConveyorSide conveyorSide = GetReversedConveyorSide(_conveyorInstantiator.connectionDataStart.conveyorSide);
+                ConveyorConnectionData.ConveyorDirection conveyorSide = GetReversedConveyorSide(_conveyorInstantiator.connectionDataStart.conveyorSide);
                 _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(true, null, false, ConveyorConnectionData.PillarSide.Back, conveyorSide);
 
 
@@ -464,9 +464,10 @@ namespace ConveyorSystem
 
                 Pillar pillar = raycastGameObject.GetComponent<Pillar>();
                 ConveyorConnectionData.PillarSide pillarSide = _conditions.IsThisSidePillarFront() ? ConveyorConnectionData.PillarSide.Front : ConveyorConnectionData.PillarSide.Back;
-                ConveyorConnectionData.ConveyorSide conveyorSide = GetConveyorSideForExistingPillar(pillar);
+                ConveyorConnectionData.ConveyorDirection conveyorSide = GetConveyorSideForExistingPillar(pillar);
 
                 _conveyorInstantiator.connectionDataStart = new ConveyorConnectionData(true, pillar, true, pillarSide, conveyorSide);
+                _conveyorInstantiator.connectionDataStart.alignedToConveyorCollider = pillar.frontConveyor != null ? pillar.frontConveyor.GetCollider() : pillar.backConveyor.GetCollider();
                 _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(GetReversedConveyorSide(conveyorSide));
             }
 
@@ -481,9 +482,10 @@ namespace ConveyorSystem
 
                 Pillar pillar = raycastGameObject.GetComponent<Pillar>();
                 ConveyorConnectionData.PillarSide pillarSide = _conditions.IsThisSidePillarFront() ? ConveyorConnectionData.PillarSide.Front : ConveyorConnectionData.PillarSide.Back;
-                ConveyorConnectionData.ConveyorSide conveyorSide = GetConveyorSideForExistingPillar(pillar);
+                ConveyorConnectionData.ConveyorDirection conveyorSide = GetConveyorSideForExistingPillar(pillar);
 
                 _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(true, pillar, true, pillarSide, conveyorSide);
+                _conveyorInstantiator.connectionDataEnd.alignedToConveyorCollider = pillar.frontConveyor != null ? pillar.frontConveyor.GetCollider() : pillar.backConveyor.GetCollider();
 
                 var corrected = GetCorrectedConveyorSides(_conveyorInstantiator.connectionDataStart, _conveyorInstantiator.connectionDataEnd);
                 _conveyorInstantiator.connectionDataStart.CorrectConveyorSide(corrected.conveyorSideStart);

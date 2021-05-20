@@ -137,7 +137,7 @@ namespace ConveyorSystem
             return connectionDataStart.conveyorSide == connectionDataEnd.conveyorSide;
         }
         bool CollidersArePillarsStack(Collider[] collidersInBox)
-        {
+        {         
             for (int i = 0; i < collidersInBox.Length; i++)
             {
                 if (collidersInBox[i] != null)
@@ -151,6 +151,7 @@ namespace ConveyorSystem
                         return true;
                     }
                 }
+              
             }
             return false;
         }

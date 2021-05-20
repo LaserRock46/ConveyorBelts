@@ -31,6 +31,10 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
     {
         return null;
     }
+    public Collider GetCollider()
+    {
+        return gameObject.GetComponent<Collider>();
+    }
     public bool CanReceiveItem(ItemAsset itemAsset,float distanceToEnd)
     {
         for (int i = 0; i < selected.input.Length; i++)
@@ -85,11 +89,11 @@ public class FactoryController : MonoBehaviour, IConveyorItemGate
     {
         for (int i = 0; i < inputItemGates.Length; i++)
         {
-            inputItemGates[i].Setup(this,ConveyorConnectionData.ConveyorSide.Input);
+            inputItemGates[i].Setup(this,ConveyorConnectionData.ConveyorDirection.Input);
         }
         for (int i = 0; i < outputItemGates.Length; i++)
         {
-            outputItemGates[i].Setup(this, ConveyorConnectionData.ConveyorSide.Output);
+            outputItemGates[i].Setup(this, ConveyorConnectionData.ConveyorDirection.Output);
         }
        
     }
