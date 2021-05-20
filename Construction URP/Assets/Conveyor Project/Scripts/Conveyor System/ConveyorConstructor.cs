@@ -467,7 +467,6 @@ namespace ConveyorSystem
                 ConveyorConnectionData.ConveyorDirection conveyorSide = GetConveyorSideForExistingPillar(pillar);
 
                 _conveyorInstantiator.connectionDataStart = new ConveyorConnectionData(true, pillar, true, pillarSide, conveyorSide);
-                _conveyorInstantiator.connectionDataStart.alignedToConveyorCollider = pillar.frontConveyor != null ? pillar.frontConveyor.GetCollider() : pillar.backConveyor.GetCollider();
                 _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(GetReversedConveyorSide(conveyorSide));
             }
 
@@ -485,7 +484,6 @@ namespace ConveyorSystem
                 ConveyorConnectionData.ConveyorDirection conveyorSide = GetConveyorSideForExistingPillar(pillar);
 
                 _conveyorInstantiator.connectionDataEnd = new ConveyorConnectionData(true, pillar, true, pillarSide, conveyorSide);
-                _conveyorInstantiator.connectionDataEnd.alignedToConveyorCollider = pillar.frontConveyor != null ? pillar.frontConveyor.GetCollider() : pillar.backConveyor.GetCollider();
 
                 var corrected = GetCorrectedConveyorSides(_conveyorInstantiator.connectionDataStart, _conveyorInstantiator.connectionDataEnd);
                 _conveyorInstantiator.connectionDataStart.CorrectConveyorSide(corrected.conveyorSideStart);

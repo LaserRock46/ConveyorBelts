@@ -1812,6 +1812,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Factory_Prefab (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 1815164459330269564, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4795915206045426049, guid: 37698480d61b580448e1ef037cd3cabb, type: 3}
       propertyPath: m_RootOrder
       value: 9
@@ -6946,12 +6950,14 @@ MonoBehaviour:
   connectionDataStart:
     isInitialized: 0
     alignedToPillar: {fileID: 0}
+    alignedToConveyorCollider: {fileID: 0}
     isAlignedToExistingPillar: 0
     occupiedPillarSide: 0
     conveyorSide: 0
   connectionDataEnd:
     isInitialized: 0
     alignedToPillar: {fileID: 0}
+    alignedToConveyorCollider: {fileID: 0}
     isAlignedToExistingPillar: 0
     occupiedPillarSide: 0
     conveyorSide: 0
@@ -12212,4 +12218,4 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
