@@ -152,17 +152,28 @@ public class CircularArc
    
     public void DebugCircles(CircularArc oppositeCircularArc)
     {
+        Vector3 above = new Vector3(0,0.5f,0);
         if (_debugCircles)
         {
             for (int i = 1; i < pointsLeft.Length; i++)
             {
-                Debug.DrawLine(pointsLeft[i].position, pointsLeft[i - 1].position,Color.white);
-                Debug.DrawLine(pointsRight[i].position, pointsRight[i - 1].position, Color.white);
+                Debug.DrawLine(pointsLeft[i].position+ above, pointsLeft[i - 1].position + above, Color.white);
+                Debug.DrawLine(pointsRight[i].position + above, pointsRight[i - 1].position + above, Color.white);
+                Debug.DrawLine(oppositeCircularArc.pointsLeft[i].position + above, oppositeCircularArc.pointsLeft[i - 1].position + above, Color.white);
+                Debug.DrawLine(oppositeCircularArc.pointsRight[i].position + above, oppositeCircularArc.pointsRight[i - 1].position + above, Color.white);
+            }
+            for (int i = 1; i <= indexThisPoint; i++)
+            {
+                Debug.DrawLine(thisPoints[i].position + above, thisPoints[i - 1].position + above, Color.red);            
+            }
+            for (int i = 1; i <= indexOppositePoint; i++)
+            {
+                Debug.DrawLine(oppositePoints[i].position + above, oppositePoints[i - 1].position + above, Color.red);
             }
         }
         if (_debugDrawTestConnection && _found)
         {
-            Debug.DrawLine(thisPoints[indexThisPoint].position, oppositePoints[indexOppositePoint].position,Color.green);
+            Debug.DrawLine(thisPoints[indexThisPoint].position + above, oppositePoints[indexOppositePoint].position + above, Color.green);
         }
     }
     #endregion

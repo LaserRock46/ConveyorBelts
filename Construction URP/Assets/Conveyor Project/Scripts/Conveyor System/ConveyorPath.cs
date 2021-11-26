@@ -139,13 +139,13 @@ public class ConveyorPath
     {
         if (!_drawPathDebug) return;
 
-        circularArcStart.DebugCircles(circularArcEnd);
-        circularArcEnd.DebugCircles(circularArcStart);
-
+        Vector3 above = new Vector3(0, 0.5f, 0);
         for (int i = 1; i < orientedPoints.positions.Length; i++)
         {
-            Debug.DrawLine(orientedPoints.LocalToWorld(previewTransform, Vector3.zero, i - 1), orientedPoints.LocalToWorld(previewTransform, Vector3.zero, i), Color.green);
+            Debug.DrawLine(orientedPoints.LocalToWorld(previewTransform, Vector3.zero+above, i - 1), orientedPoints.LocalToWorld(previewTransform, Vector3.zero + above, i), Color.green);
         }
+        circularArcStart.DebugCircles(circularArcEnd);
+        circularArcEnd.DebugCircles(circularArcStart);
     }
     
     #endregion
